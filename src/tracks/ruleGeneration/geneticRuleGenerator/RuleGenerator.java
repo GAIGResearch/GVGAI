@@ -283,13 +283,13 @@ public class RuleGenerator extends AbstractRuleGenerator{
 
 
 		//some variables to make sure not getting out of time
-		double worstTime = SharedData.EVALUATION_TIME * SharedData.POPULATION_SIZE;
+		double worstTime = 4 * SharedData.EVALUATION_TIME * SharedData.POPULATION_SIZE;
 		double avgTime = worstTime;
 		double totalTime = 0;
 		int numberOfIterations = 0;
 		
 		// START EVO LOOP
-		while(time.remainingTimeMillis() > 2 * avgTime && time.remainingTimeMillis() > worstTime){
+		while(time.remainingTimeMillis() > 4 * avgTime && time.remainingTimeMillis() > worstTime){
 			ElapsedCpuTimer timer = new ElapsedCpuTimer();
 			System.out.println("Generation #" + (numberOfIterations + 1) + ": ");
 			fChromosomes.clear();
