@@ -482,7 +482,11 @@ public abstract class Game {
 				result.add(VGDLRegistry.GetInstance().getRegisteredSpriteKey(current));
 			} else {
 				SpriteContent sc = (SpriteContent) classConst[current];
-				queue.addAll(sc.subtypes);
+				for(int s:sc.subtypes){
+				    if(!sc.itypes.contains(s)){
+					queue.add(s);
+				    }
+				}
 			}
 			visited[current] = true;
 		}
