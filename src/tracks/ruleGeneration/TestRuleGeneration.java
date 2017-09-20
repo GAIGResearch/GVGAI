@@ -58,8 +58,8 @@ public class TestRuleGeneration {
 
         // 1. Generate rules (Interaction and Terminations) for a fixed level
         if(RuleGenMachine.generateRules(game, level1, randomRuleGenerator, recordGameFile, seed)){
-            // RuleGenMachine.playOneGame(game, recordGameFile, level1, recordActionsFile, seed);
-            RuleGenMachine.runOneGame(game, recordGameFile, level1, visuals, sampleMCTSController, recordActionsFile, seed, 0);
+             RuleGenMachine.playOneGame(game, recordGameFile, level1, recordActionsFile, seed);
+//            RuleGenMachine.runOneGame(game, recordGameFile, level1, visuals, sampleMCTSController, recordActionsFile, seed, 0);
         }
     }
 }

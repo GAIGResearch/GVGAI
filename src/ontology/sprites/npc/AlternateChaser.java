@@ -206,7 +206,7 @@ public class AlternateChaser extends RandomNPC
     public ArrayList<String> getDependentSprites(){
     	ArrayList<String> result = new ArrayList<String>();
         String[] stypes1 = stype1.split(",");
-        String[] stypes2 = stype1.split(",");
+        String[] stypes2 = stype2.split(",");
 
     	if(stypes1.length > 0) {
     	    for (String s : stypes1)
