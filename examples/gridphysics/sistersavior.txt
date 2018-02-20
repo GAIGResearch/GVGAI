@@ -1,0 +1,30 @@
+BasicGame square_size=30
+	SpriteSet
+    	floor > Immovable img=newset/floor5
+    	plas > Missile limit=5 singleton=False img=oryx/cspell3
+    	wall > Immovable autotiling=true img=oryx/wall3
+    	movable >
+      		avatar  > ShootAvatar stype=plas frameRate=8 img=newset/man1
+      		ally > 
+      			littleSister > Resource limit=3 img=newset/girl3
+      		enemy >   
+        		bigPop > Chaser stype=avatar cooldown=16 cons=12 img=oryx/scorpion1
+      
+	LevelMapping
+		w > wall
+		A > floor avatar
+		. > floor
+		s > floor littleSister
+		p > floor bigPop
+		
+	TerminationSet
+		SpriteCounter stype=bigPop limit=0 win=True
+		SpriteCounter stype=avatar limit=0 win=False
+		
+	InteractionSet
+		movable wall > stepBack
+		bigPop avatar > killIfOtherHasMore resource=littleSister limit=3 scoreChange=17
+		avatar bigPop > killSprite
+		littleSister avatar > collectResource scoreChange=1
+		littleSister plas > killSprite scoreChange=2
+		

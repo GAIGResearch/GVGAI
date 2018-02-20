@@ -1,0 +1,48 @@
+BasicGame
+  SpriteSet
+    floor > Immovable randomtiling=0.9 img=oryx/floor3 hidden=True
+    smallgoal  > Door color=GREEN img=oryx/doorclosed1
+    largegoal > Door color=GOLD img=oryx/door2
+    key   > Immovable color=ORANGE img=oryx/key2
+    vase > Immovable color=RED img=oryx/gold2
+    sword > OrientedFlicker limit=5 singleton=True img=oryx/slash1
+    movable >
+      avatar  > ShootAvatar   stype=sword frameRate=8
+        nokey   > img=oryx/swordman1
+        withkey > color=ORANGE img=oryx/swordmankey1
+      enemy >  
+        monsterQuick > RandomNPC cooldown=2 cons=6 img=oryx/bat1
+        monsterNormal > RandomNPC cooldown=4 cons=8 img=oryx/spider2
+        monsterSlow > RandomNPC cooldown=8 cons=12 img=oryx/scorpion1
+      wall > Immovable autotiling=true img=oryx/wall3
+      	
+
+  LevelMapping
+    g > floor smallgoal
+    l > floor largegoal
+    + > floor key        
+    A > floor nokey
+    1 > floor monsterQuick
+    2 > floor monsterNormal
+    3 > floor monsterSlow
+    v > floor vase
+    w > wall
+    . > floor
+    
+
+  InteractionSet
+    movable wall  > stepBack
+    nokey smallgoal    > stepBack
+    smallgoal withkey  > killSprite scoreChange=1
+    largegoal nokey > killSprite scoreChange=10
+    largegoal withkey > killSprite scoreChange=10
+    enemy sword > killSprite scoreChange=2
+    vase sword > killSprite scoreChange=1
+    enemy enemy > stepBack
+    avatar enemy > killSprite scoreChange=-1
+    nokey key     > transformTo stype=withkey scoreChange=1 killSecond=True
+
+  TerminationSet
+    SpriteCounter stype=smallgoal win=True
+    SpriteCounter stype=largegoal win=True
+    SpriteCounter stype=avatar win=False

@@ -1,0 +1,23 @@
+LevelMapping
+    a > tree 
+    b > fastRtruck 
+    c > slowRtruck 
+    d > moving 
+    e > slowLtruck 
+    f > fastLtruck 
+    g > dead 
+
+LevelDescription
+aaaaaaaaaaaaaa
+a      b   c a
+a      de    a
+a            a
+a     aaa    a
+a    f       a
+a            a
+a     b      a
+a   c   b  a a
+a   b   c cafa
+a         aa a
+a g    b  a  a
+aaaaaaaaaaaaaa

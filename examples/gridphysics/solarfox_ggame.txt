@@ -1,0 +1,37 @@
+BasicGame square_size=25
+    SpriteSet
+        downshot > Missile  orientation=DOWN img=oryx/firedown1 shrinkfactor=0.7 speed=0.15
+        res > Resource  img=oryx/diamond2 color=GREEN limit=4 value=0
+        upshot > Missile  orientation=UP img=oryx/fireup1 shrinkfactor=0.7 speed=0.15
+        top > Missile  img=oryx/necromancer1 orientation=RIGHT shrinkfactor=1 cooldown=3
+        enemyground > Immovable  img=newset/water
+        powerblibturning > Flicker  img=oryx/sparkle4 limit=8
+        btm > Missile  img=oryx/necromancer1 orientation=LEFT shrinkfactor=1 cooldown=3
+        avatar > OngoingAvatar  img=oryx/spaceship1 color=YELLOW speed=0.15
+        floor > Immovable  img=oryx/backGrey
+        wall > Immovable  img=oryx/wall3 autotiling=True
+        blib > Passive  img=oryx/diamond1
+        powerblib > Passive  img=oryx/diamond3
+    LevelMapping
+        b > floor blib
+        p > floor powerblib
+        2 > floor top enemyground
+        1 > floor btm enemyground
+        . > enemyground
+        w > wall
+        + > floor
+        A > floor avatar
+    TerminationSet
+    	SpriteCounter stype=avatar limit=0 win=False
+	    Timeout limit=800 win=True
+    InteractionSet
+	    top EOS > wrapAround
+	    avatar downshot > killSprite
+	    upshot EOS > wrapAround
+	    top avatar > killSprite scoreChange=1
+	    avatar EOS > stepBack
+	    blib avatar > killSprite scoreChange=1
+	    btm EOS > wrapAround
+	    avatar upshot > killSprite
+	    bottom avatar > killSprite scoreChange=1
+	    downshot EOS > wrapAround

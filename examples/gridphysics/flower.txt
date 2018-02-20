@@ -1,0 +1,35 @@
+BasicGame key_handler=Pulse square_size=40
+    SpriteSet
+        floor > Immovable img=newset/floor2
+        avatar > MovingAvatar img=newset/man1
+        wall > Immovable img=oryx/wall3 autotiling=True
+        seed  > SpawnPoint   stype=flower1  cooldown=20 total=200 img=oryx/dirtWall_12
+        flower1 > SpawnPoint stype=flower2 cooldown=40 total=200 img=oryx/mushroom2 shrinkfactor=0.2
+        flower2 > SpawnPoint stype=flower3 cooldown=60 total=200 img=oryx/mushroom2 shrinkfactor=0.4
+        flower3 > SpawnPoint stype=flower4 cooldown=100 total=200 img=oryx/mushroom2 shrinkfactor=0.6
+        flower4 > Immovable img=oryx/mushroom2 shrinkfactor=0.8
+    LevelMapping
+        w > floor wall
+        A > floor avatar
+        . > floor
+        c > floor coin
+        s > floor seed
+    InteractionSet
+        avatar wall > stepBack
+        flower1 avatar > killSprite scoreChange=0
+        flower2 avatar > killSprite scoreChange=1
+        flower3 avatar > killSprite scoreChange=3
+        flower4 avatar > killSprite scoreChange=10
+        
+        flower1 flower2 > killSprite
+        flower2 flower3 > killSprite
+        flower1 flower3 > killSprite
+        flower1 flower4 > killSprite
+        flower2 flower4 > killSprite
+        flower3 flower4 > killSprite
+        
+
+        
+    TerminationSet
+        Timeout limit=1500 win=True
+        SpriteCounter stype=avatar limit=0 win=False

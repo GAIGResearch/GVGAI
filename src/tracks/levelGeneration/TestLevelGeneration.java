@@ -35,7 +35,7 @@ public class TestLevelGeneration {
 				"sokoban", "solarfox", "superman", "surround", "survivezombies", // 75-79
 				"tercio", "thecitadel", "thesnowman", "waitforbreakfast", "watergame", // 80-84
 				"waves", "whackamole", "wildgunman", "witnessprotection", "wrapsokoban", // 85-89
-				"zelda", "zenpuzzle" }; // 90, 91
+				"zelda", "zenpuzzle"}; //90, 91
 
 
 		String recordActionsFile = null;// "actions_" + games[gameIdx] + "_lvl"
@@ -45,7 +45,7 @@ public class TestLevelGeneration {
 
 		// Other settings
 		int seed = new Random().nextInt();
-		int gameIdx = 58;
+		int gameIdx = 11;
 		String recordLevelFile = generateLevelPath + games[gameIdx] + "_glvl.txt";
 		String game = generateLevelPath + games[gameIdx] + ".txt";
 

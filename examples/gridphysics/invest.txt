@@ -1,0 +1,42 @@
+BasicGame key_handler=Pulse square_size=40
+    SpriteSet
+        floor > Immovable img=newset/floor2
+        avatar > MovingAvatar img=newset/man3
+        wall > Immovable img=oryx/wall3 autotiling=True
+        coin > Immovable img=oryx/gold1
+        switch1 > Immovable img=oryx/rogue
+        switch2 > Immovable img=oryx/knight1
+        switch3 > Immovable img=oryx/queen1
+        switch1n > Immovable img=newset/floor2
+        switch2n > Immovable img=newset/floor2
+        switch3n > Immovable img=newset/floor2
+    LevelMapping
+        w > floor wall
+        A > floor avatar
+        . > floor
+        c > floor coin
+        s > floor switch1
+        k > floor switch2
+        p > floor switch3
+    InteractionSet
+        avatar wall > stepBack
+        coin avatar > killSprite scoreChange=1
+        
+        avatar switch1 > addTimer timer=30 ftype=transformToAll stype=switch1n stypeTo=switch1 scoreChange=5
+        switch1 avatar > spawn stype=switch1n
+        switch1 avatar > killSprite scoreChange=-8
+               
+        avatar switch2 > addTimer timer=60 ftype=transformToAll stype=switch2n stypeTo=switch2 scoreChange=15
+        switch2 avatar > spawn stype=switch2n
+        switch2 avatar > killSprite scoreChange=-22
+        
+        avatar switch3 > addTimer timer=90 ftype=transformToAll stype=switch3n stypeTo=switch3 scoreChange=10
+        switch3 avatar > spawn stype=switch3n
+        switch3 avatar > killSprite scoreChange=-15
+        
+        avatar floor > killIfScoreNegative
+        
+        
+    TerminationSet
+        Timeout limit=1500 win=True
+        SpriteCounter stype=avatar limit=0 win=False
