@@ -556,6 +556,11 @@ public abstract class Game {
 		SpriteData data = new SpriteData(sc.parameters);
 		data.name = sc.identifier;
 		data.type = sc.referenceClass;
+		for(int pIndex:sc.itypes){
+		    if( VGDLRegistry.GetInstance().getRegisteredSpriteValue(data.name) != pIndex){
+			data.parents.add(VGDLRegistry.GetInstance().getRegisteredSpriteKey(pIndex));
+		    }
+		}
 
 		VGDLSprite sprite = VGDLFactory.GetInstance().createSprite(this, sc, new Vector2d(), new Dimension(1, 1));
 		switch (getSpriteCategory(sprite)) {
