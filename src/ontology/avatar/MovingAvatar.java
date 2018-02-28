@@ -9,6 +9,7 @@ import core.content.SpriteContent;
 import core.game.Game;
 import core.player.Player;
 import ontology.Types;
+import ontology.Types.ACTIONS;
 import tools.*;
 
 /**
@@ -132,6 +133,10 @@ public class MovingAvatar extends VGDLSprite {
             action = this.player.act(game.getObservationMulti(playerID), ect.copy());
         } else {
             action = this.player.act(game.getObservation(), ect.copy());
+        }
+        
+        if(action == null){
+            action = ACTIONS.ACTION_NIL;
         }
 
         if (CompetitionParameters.TIME_CONSTRAINED && ect.exceededMaxTime()) {
