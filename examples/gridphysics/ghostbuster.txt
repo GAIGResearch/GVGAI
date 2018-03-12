@@ -1,6 +1,6 @@
 BasicGame obs=wall
     SpriteSet
-        ground > Immovable img=oryx/floor3 autotiling=True hidden=True
+        ground > Immovable randomtiling=0.5 img=oryx/floor3 hidden=True
         ghostspawn > SpawnPoint stype=ghost img=newset/hole1 portal=True total=10
         moving > 
             avatar > ShootAvatar orientation=LEFT stype=missile img=newset/humanShotgun
@@ -10,7 +10,7 @@ BasicGame obs=wall
                 fleeing > PathChaser stype=escape img=newset/cursedman cooldown=2
 
         missile > Missile img=oryx/orb1 shrinkfactor=0.4 timeToLive=15
-        wall > Immovable img=oryx/wall3
+        wall > Immovable autotiling=True img=oryx/wall3
         escape > Door img=oryx/dooropen1
 
     LevelMapping
