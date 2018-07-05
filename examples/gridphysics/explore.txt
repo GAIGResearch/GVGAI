@@ -1,0 +1,34 @@
+BasicGame square_size=30 key_handler=Pulse
+
+    SpriteSet
+        land > Immovable hidden=True img=newset/chamber_floor
+        button > Immovable
+            button0 > img=newset/blockY
+            button1 > img=newset/blockY3
+        exit > Immovable hidden=True invisible=True hidden=True
+        exitDoor > Immovable hidden=False invisible=False img=newset/flag1
+        winner > Immovable invisible=True hidden=True
+        patrol > LOSChaser stype=avatar cons=2 cooldown=2 img=oryx/guard1 speed=0.5 shrinkfactor=0.7
+        wall > Immovable color=BLACK img=oryx/wall3 autotiling=true
+        avatar > ShootAvatar  img=newset/girl3 color=RED   stype=hit
+        hit > Flicker img=oryx/staff1 shrinkfactor=0.5 singleton=True
+
+    InteractionSet
+        patrol patrol EOS wall > stepBack
+        avatar wall > stepBack
+        avatar patrol > killSprite
+        hit button0 > transformToAll stype=exit stypeTo=exitDoor
+        button0 hit > transformTo stype=button1
+        exitDoor avatar > spawn stype=winner
+
+    TerminationSet
+        MultiSpriteCounter stype1=winner limit=1 win=True
+        SpriteCounter stype=avatar limit=0 win=False
+        Timeout limit=1000
+    
+    LevelMapping
+        _ > land
+        A > avatar land
+        p > land patrol
+        0 > land button0
+        a > land exit

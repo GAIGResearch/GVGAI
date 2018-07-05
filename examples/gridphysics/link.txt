@@ -1,0 +1,125 @@
+BasicGame square_size=30
+  SpriteSet
+    floor > Immovable img=oryx/backLBrown hidden=True
+    floor2 > Immovable img=oryx/backLBrown  hidden=True
+    goal  > Door color=GREEN img=oryx/stairsdown4
+
+    movable >
+      avatar  > ShootAvatar rotateInPlace=false ammo=pickaxe speed=1 frameRate=1.25 stype=pro img=oryx/swordman1
+      enemy > Chaser stype=avatar img=oryx/bat1 speed=0.1
+      tank > Missile speed=0.05
+        tankR > img=newset/tank_blueR orientation=RIGHT
+        tankU > img=newset/tank_blue orientation=UP
+        tankL > img=newset/tank_blueL orientation=LEFT
+        tankD > img=newset/tank_blueD orientation=DOWN
+
+    #Tick counter
+    #Quiescent tick counter
+    pcq > Immovable invisible=True
+    #Active tick counter
+    pca > SpawnPoint stype=pc invisible=True
+    #Tick count
+    pc > Immovable invisible=True
+    #Termination state
+    dead > Immovable invisible=True
+
+    pickaxe_penalty > Immovable invisible=true
+    pickaxe_penalty2 > Immovable invisible=true
+    pickaxe_penalty3 > Immovable invisible=true
+
+    timebonus > SpawnPoint stype=timebonus_tick invisible=true
+    timebonus_limit > SpawnPoint stype=timebonus_maxticks cooldown=700 invisible=true
+    timebonus_tick > Immovable invisible=true
+    timebonus_maxticks > Immovable invisible=true
+    timebonus_start > Immovable invisible=true
+
+    paspawn > SpawnPoint stype=pam prob=0.1 cooldown=20 invisible=True
+    pam > SpawnPoint stype=pickaxe prob=1 total=1 invisible=True
+    pickaxe > Resource value=1 limit=1 img=oryx/pickaxe
+
+    coin > Resource value=1 img=oryx/coin1
+    destroy > Immovable hidden=True invisible=True
+
+    wall > Immovable
+        breakableWall > img=oryx/dirtWall autotiling=True
+        unbreakableWall > img=oryx/tombstone1
+
+    pro > Missile speed=1 img=oryx/pickaxe singleton=True
+
+    gold > Passive img=oryx/gold3
+
+  LevelMapping
+    g > floor goal
+    A > floor avatar pcq pickaxe_penalty timebonus timebonus_limit timebonus_start
+    e > floor enemy
+    . > floor
+    * > floor2
+    w > floor breakableWall
+    b > floor unbreakableWall
+    r > floor tankR
+    u > floor tankU
+    l > floor tankL
+    d > floor tankD
+    p > floor pickaxe paspawn
+    $ > floor gold
+
+  InteractionSet
+    #if a pickaxe would respawn on a tile that already has one, prevent it
+    pam pickaxe > killSprite
+
+    timebonus_tick timebonus > killSprite scoreChange=-50
+    timebonus floor > transformIfCount stype=dead stypeCount=timebonus_maxticks geq=2
+    timebonus_limit floor > transformIfCount stype=dead stypeCount=timebonus_maxticks geq=2
+    timebonus_maxticks timebonus_maxticks > killBoth
+    timebonus_start timebonus > killSprite scoreChange=35000
+
+    pickaxe_penalty floor > transformIfCount stype=pickaxe_penalty2 stypeCount=pro geq=1
+    pickaxe_penalty2 floor > transformTo stype=pickaxe_penalty3 scoreChange=-101
+    pickaxe_penalty3 floor > transformIfCount stype=pickaxe_penalty stypeCount=pro leq=0
+
+    breakableWall pro > killBoth
+    pro unbreakableWall > killSprite
+    gold avatar > killSprite scoreChange=500
+
+    pro tank > killSprite
+
+    pickaxe avatar > collectResource scoreChange=100
+    pickaxe avatar > killSprite
+
+    pro EOS > wrapAround
+
+    pro enemy > transformTo stype=pickaxe
+    enemy pro > killSprite scoreChange=250
+
+    breakableWall tank > killSprite scoreChange=10
+    tank unbreakableWall > reverseDirection
+
+    movable wall > stepBack
+    movable EOS > wrapAround
+    goal avatar > killSprite scoreChange=2000
+    enemy enemy > stepBack
+    avatar enemy tank > killSprite scoreChange=-15
+
+    #pickaxe flight timer
+    pcq floor > transformIfCount stype=pca stypeCount=pro geq=1
+    pca floor > transformIfCount stype=pcq stypeCount=pc geq=2
+    pro floor > transformIfCount stype=pickaxe stypeCount=pc geq=2
+    pc floor > transformIfCount stype=dead stypeCount=pc geq=2
+
+    pca floor > transformIfCount stype=pcq stypeCount=pro leq=0
+    pc floor > transformIfCount stype=dead stypeCount=pro leq=0
+
+    dead floor > killSprite
+
+    coin avatar > transformIfCount stype=destroy stypeCount=coin leq=0
+    coin avatar > killSprite scoreChange=2
+
+    destroy floor > killAll stype=wall
+
+  TerminationSet
+    SpriteCounter stype=goal   win=True
+    #SpriteCounter stype=enemy  win=True
+    SpriteCounter stype=avatar win=False
+
+
+

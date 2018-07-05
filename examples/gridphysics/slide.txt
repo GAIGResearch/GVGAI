@@ -1,0 +1,64 @@
+BasicGame square_size=50 key_handler=Pulse
+    SpriteSet
+        floor > Immovable hidden=True img=oryx/backGrey
+        wall > Immovable img=oryx/wall1
+
+        aux > Immovable hidden=True invisible=True
+            up > color=RED
+            down > color=BLUE
+            left > color=GREEN
+            right > color=YELLOW
+
+        exit > Immovable img=newset/flag2
+        winner > Immovable hidden=True invisible=True
+
+        avatar1 > img=newset/blockB3
+            avatar > MovingAvatar
+            avatarM > MissileAvatar
+                avatarU > orientation=UP
+                avatarD > orientation=DOWN
+                avatarL > orientation=LEFT
+                avatarR > orientation=RIGHT
+
+        trap > Immovable img=oryx/spike3
+
+    LevelMapping
+        . > floor
+        A > avatar floor
+        u > up floor
+        d > down floor
+        l > left floor
+        r > right floor
+        e > exit floor
+        t > trap floor
+		
+    InteractionSet
+        avatarM wall > setSpeedForAll stype=avatar1 value=0
+        avatarM wall > transformTo stype=avatar
+        wall avatar > spawnRight stype=right stepBack=True
+        wall avatar > spawnAbove stype=up stepBack=True
+        wall avatar > spawnBelow stype=down stepBack=True
+        wall avatar > spawnLeft stype=left stepBack=True
+        avatar1 wall > stepBack
+
+        avatar up > transformTo stype=avatarU killSecond=True
+        avatar down > transformTo stype=avatarD killSecond=True
+        avatar left > transformTo stype=avatarL killSecond=True
+        avatar right > transformTo stype=avatarR killSecond=True
+
+        avatar1 aux > killAll stype=up
+        avatar1 aux > killAll stype=down
+        avatar1 aux > killAll stype=left
+        avatar1 aux > killAll stype=right
+
+        avatar1 eos > stepBack
+
+        avatar1 exit > spawn stype=winner
+        exit avatar1 > killSprite
+
+        avatar1 trap > killSprite
+
+    TerminationSet
+        MultiSpriteCounter stype1=winner limit=1 win=True
+        SpriteCounter stype=avatar1 limit=0 win=False
+        Timeout limit=1000 win=False

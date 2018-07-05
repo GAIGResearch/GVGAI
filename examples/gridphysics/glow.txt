@@ -1,0 +1,40 @@
+BasicGame key_handler=Pulse
+    SpriteSet
+        floor > Immovable img=newset/floor6 hidden=True
+        ground > Immovable img=oryx/space1 hidden=True
+        avatar > ShootAvatar img=newset/man3 frameRate=8 stype=spark
+
+        trap > Immovable img=oryx/space1
+        bridge > Immovable
+            bridgeHid > invisible=True hidden=True
+            bridgeVis > invisible=False hidden=False img=newset/dock2
+
+        exit > Immovable img=newset/exit2
+
+        lumi > img=oryx/sparkle3
+            spark  > Spreader color=ORANGE spreadprob=1 stype=light
+            light > Flicker
+
+        wall > Immovable color=BLACK img=oryx/wall3 autotiling=True
+
+
+    LevelMapping
+        . > floor
+        A > avatar floor
+        t > trap floor
+        b > bridgeHid trap ground
+        e > exit floor
+
+    InteractionSet
+        avatar wall EOS > stepBack
+
+        bridgeHid lumi > transformTo stype=bridgeVis
+        trap bridgeVis > killSprite
+
+        avatar trap > killSprite
+        exit avatar > killSprite
+
+    TerminationSet
+        SpriteCounter stype=avatar win=False
+        SpriteCounter stype=exit win=True
+        Timeout limit=1500 win=True

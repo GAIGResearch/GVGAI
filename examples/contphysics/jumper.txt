@@ -1,0 +1,61 @@
+BasicGame
+    SpriteSet
+
+        platforms > solid=True
+            ground > Immovable color=DARKGRAY
+
+        moving > physicstype=CONT gravity=2.0
+            avatar > PlatformerAvatar img=newset/man1 mass=0.5 friction=0.15 jump_strength=30 healthPoints=20
+
+        coin > Missile orientation=LEFT speed=0.4 img=oryx/gold1
+
+        goalSpawner > Immovable invisible=True hidden=True
+            goalSpawn300 >
+            goalSpawn500 >
+
+        portal > SpawnPoint invisible=True hidden=True
+            coinPortal > stype=coin prob=0.1 cooldown=5 total=30
+            obsPortalS > stype=obsShortL cooldown=40 total=10 orientation=LEFT
+            obsPortalS2 > stype=obsShortL cooldown=60 total=10 orientation=LEFT
+            obsPortalL > stype=obsLongL cooldown=120 total=10 orientation=LEFT
+            goalPortal > stype=goal prob=1 total=1
+
+        obstacle > Missile speed=0.2
+            obsShortL > hMult=2  img=oryx/slime2
+            obsLongL > hMult=3  img=oryx/slime1
+
+        goal > Missile orientation=LEFT speed=0.2 img=newset/exit2 portal=True
+
+        wall > Immovable solid=False color=DARKGRAY
+
+        winnerNPC > Immovable color=RED img=oryx/sparkle2
+            
+    TerminationSet
+        MultiSpriteCounter stype1=winnerNPC limit=1 win=True
+        SpriteCounter stype=avatar win=False
+
+
+    InteractionSet
+
+        avatar TIME > transformToAll stype=goalSpawn300 stypeTo=goalPortal nextExecution=300 timer=300 repeating=False
+        avatar TIME > transformToAll stype=goalSpawn500 stypeTo=goalPortal nextExecution=500 timer=500 repeating=False
+        coin avatar > killSprite scoreChange=1
+        goal avatar > killSprite
+        avatar wall ground > wallStop
+        avatar goal > transformTo stype=winnerNPC
+        avatar obstacle > subtractHealthPoints
+
+        obstacle EOS > killSprite
+
+
+
+    LevelMapping
+        g > goalSpawn300
+        h > goalSpawn500
+        s > obsPortalS wall
+        t > obsPortalS2 wall
+        l > obsPortalL wall
+        u > obsPortalS2 obsPortalL wall
+        c > coinPortal wall
+        . > ground
+        A > avatar

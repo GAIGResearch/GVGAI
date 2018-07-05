@@ -1,0 +1,38 @@
+BasicGame key_handler=Pulse
+    SpriteSet
+        floor > Immovable img=newset/floor6 hidden=True
+        avatar > ShootAvatar img=newset/man3 frameRate=8 stype=water
+        plant > Immovable
+            start >
+            fresh > img=oryx/bush3
+            wilting > img=oryx/bush1
+            wilted > img=oryx/bush2
+            dead > color=RED
+            overwatered > color=BLUE
+
+        water > Flicker img=oryx/slime1 shrinkfactor=0.5 singleton=True
+
+        wall > Immovable color=BLACK img=newset/floor4
+
+
+    LevelMapping
+        . > floor
+        A > avatar floor
+        f > start floor
+
+    InteractionSet
+        avatar wall EOS > stepBack
+
+        start TIME > transformTo stype=fresh
+        wilted TIME > transformTo stype=dead timer=210 repeating=True  scoreChange=-10
+        wilting TIME > transformTo stype=wilted timer=160 repeating=True
+        fresh TIME > transformTo stype=wilting timer=100 repeating=True
+
+        fresh water > transformTo stype=overwatered  scoreChange=-5 killSecond=True
+        wilting water > transformTo  stype=fresh scoreChange=5 killSecond=True
+        wilted water > transformTo  stype=wilting scoreChange=2 killSecond=True
+
+    TerminationSet
+        SpriteCounterMore stype=dead limit=1 win=False
+        SpriteCounterMore stype=overwatered limit=1 win=False
+        Timeout limit=1500 win=True

@@ -500,17 +500,19 @@ public abstract class VGDLSprite {
             else
                 allImages = images.get(Types.v2DirStr(orientation.getVector()));
 
-            if (frameRate > 0 && frameRemaining <= 0) {
+            if(allImages.size() > 0) {
+                if (frameRate > 0 && frameRemaining <= 0) {
 
-                if (allImages.size() > 0) {
-                    currentFrame = (currentFrame + 1) % allImages.size();
-                    frameRemaining = frameRate;
-                    image = allImages.get(currentFrame);
+                    if (allImages.size() > 0) {
+                        currentFrame = (currentFrame + 1) % allImages.size();
+                        frameRemaining = frameRate;
+                        image = allImages.get(currentFrame);
+                    }
+
+                } else if (!autotiling) {
+
+                    image = allImages.get(0);
                 }
-
-            } else if (!autotiling){
-
-                image = allImages.get(0);
             }
         }
     }

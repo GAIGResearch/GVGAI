@@ -1,0 +1,47 @@
+BasicGame square_size=25
+
+    SpriteSet
+        background > Immovable img=oryx/space1 hidden=True
+        avatar > FlakAvatar stype=ballStart physicstype=CONT wMult=4 friction=0.2 mass=0.2 img=oryx/floor3 healthPoints=3 limitHealthPoints=3
+
+        balls > Missile orientation=UP speed=20 physicstype=CONT img=oryx/bullet2 shrinkfactor=2 singleton=True
+            ballStart >
+            ball >
+
+        ballLost > Passive invisible=True hidden=True
+
+        brick > Passive img=newset/blockG
+            brick2 > wMult=2
+            brick1 >
+
+        block > Passive img=newset/block2
+            longwall > wMult=2
+            wall >
+
+
+    TerminationSet
+        SpriteCounter stype=avatar limit=0 win=False
+        SpriteCounter stype=brick limit=0 win=True
+           
+    InteractionSet
+
+        ballStart brick block > transformToAll stype=ballStart stypeTo=ball
+
+        brick ball > killSprite scoreChange=2
+
+        ball avatar > bounceDirection
+        ball block > wallBounce
+        avatar block > wallStop
+
+        ball EOS > subtractHealthPoints stype=avatar value=1
+        ball EOS > transformTo stype=ballLost
+        ball brick > wallBounce
+
+    LevelMapping
+        . > background
+        o > background ball
+        m > background brick2
+        n > background brick1
+        b > background longwall
+        w > background wall
+        A > background avatar

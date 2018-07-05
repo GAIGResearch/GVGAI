@@ -1,0 +1,143 @@
+BasicGame key_handler=Pulse
+    SpriteSet
+        background > Immovable hidden=True img=oryx/space1
+        empty > Immovable img=oryx/space1
+
+        pipe > Immovable
+            pipeLR > color=RED img=newset/pipeLR
+            pipeUD > color=BLUE img=newset/pipeUD
+
+            pipeLU > color=PINK img=newset/pipeLU
+            pipeLD > color=GREEN img=newset/pipeLD
+            pipeRU > color=YELLOW img=newset/pipeRU
+            pipeRD > color=ORANGE img=newset/pipeRD
+
+            correct > invisible=True hidden=True
+            incorrect > invisible=True hidden=True
+
+        change > Immovable
+            cpipeLR > invisible=True hidden=True
+            cpipeUD > invisible=True hidden=True
+
+            cpipeLU > invisible=True hidden=True
+            cpipeLD > invisible=True hidden=True
+            cpipeRU > invisible=True hidden=True
+            cpipeRD > invisible=True hidden=True
+
+        moving >
+            avatar  > ShootAvatar stype=flip img=oryx/spaceship1
+            ball > Missile speed=0  img=oryx/bullet1
+                ballL > orientation=LEFT
+                ballR > orientation=RIGHT
+                ballU > orientation=UP
+                ballD > orientation=DOWN
+
+        flip > Flicker
+
+        start > Immovable invisible=True hidden=True
+        reset > Portal invisible=True portal=True stype=start
+
+        end > Door img=newset/exit2
+
+        pickup > Resource img=oryx/gold1 shrinkfactor=0.2
+
+    LevelMapping
+        A > avatar background
+        p > end background
+        a > ballR start background
+        0 > pipeLR background
+        1 > pipeUD background
+        2 > pipeLU background
+        3 > pipeLD background
+        4 > pipeRU background
+        5 > pipeRD background
+        r > pickup background
+        . > empty
+
+    TerminationSet
+        SpriteCounter stype=end limit=0 win=True
+        SpriteCounter stype=ball limit=0 win=False
+
+    InteractionSet
+        avatar wall EOS > stepBack
+        end ball > killBoth
+        ball EOS > killSprite scoreChange=-10
+
+        incorrect flip > killSprite
+        correct flip > killSprite
+
+        pickup ball > killSprite scoreChange=100
+
+        #hitting the ball teleports it to start point
+        ball flip wall > spawn stype=reset
+        reset ball > killSprite
+        ball reset > transformTo stype=ballR
+        ball reset > teleportToExit
+
+        #hitting the start points sets the ball moving
+        start flip > setSpeedForAll value=1 stype=ball
+
+        #flipping pipes
+        pipeLR flip > spawn stype=cpipeUD
+        pipeUD flip > spawn stype=cpipeLU
+        pipeLU flip > spawn stype=cpipeLD
+        pipeLD flip > spawn stype=cpipeRU
+        pipeRU flip > spawn stype=cpipeRD
+        pipeRD flip > spawn stype=cpipeLR
+
+        pipeRD cpipeLR > transformTo stype=pipeLR
+        pipeRU cpipeRD > transformTo stype=pipeRD
+        pipeLD cpipeRU > transformTo stype=pipeRU
+        pipeLU cpipeLD > transformTo stype=pipeLD
+        pipeUD cpipeLU > transformTo stype=pipeLU
+        pipeLR cpipeUD > transformTo stype=pipeUD
+
+        #ball not ok, must stop
+        pipeLR ballU ballD > spawn stype=incorrect
+        pipeUD ballL ballR > spawn stype=incorrect
+        pipeLU ballL ballU > spawn stype=incorrect
+        pipeLD ballL ballD > spawn stype=incorrect
+        pipeRU ballR ballU > spawn stype=incorrect
+        pipeRD ballR ballD > spawn stype=incorrect
+
+        #ball ok, can continue
+        pipeLR ballL ballR > spawn stype=correct
+        pipeUD ballU ballD > spawn stype=correct
+
+        #ball met correct corner, change orientation
+        ballR pipeLU > align orient=False
+        ballR pipeLU > spawn stype=correct
+        ballR pipeLU > transformTo stype=ballU
+        ballD pipeLU > align orient=False
+        ballD pipeLU > spawn stype=correct
+        ballD pipeLU > transformTo stype=ballL
+
+        ballR pipeLD > align orient=False
+        ballR pipeLD > spawn stype=correct
+        ballR pipeLD > transformTo stype=ballD
+        ballU pipeLD > align orient=False
+        ballU pipeLD > spawn stype=correct
+        ballU pipeLD > transformTo stype=ballL
+
+        ballL pipeRU > align orient=False
+        ballL pipeRU > spawn stype=correct
+        ballL pipeRU > transformTo stype=ballU
+        ballD pipeRU > align orient=False
+        ballD pipeRU > spawn stype=correct
+        ballD pipeRU > transformTo stype=ballR
+
+        ballL pipeRD > align orient=False
+        ballL pipeRD > spawn stype=correct
+        ballL pipeRD > transformTo stype=ballD
+        ballU pipeRD > align orient=False
+        ballU pipeRD > spawn stype=correct
+        ballU pipeRD > transformTo stype=ballR
+
+        incorrect ball > setSpeedForAll value=0 stype=ball
+        correct ball > setSpeedForAll value=1 stype=ball
+
+        #tidying up
+        correct correct > killSprite
+        incorrect incorrect > killSprite
+        incorrect correct > killBoth
+        change flip > killBoth
