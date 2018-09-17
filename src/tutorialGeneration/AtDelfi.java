@@ -14,7 +14,7 @@ public class AtDelfi {
 
 	private boolean verbose;
 	
-	private Graph gameGraph;
+	private AtDelfiGraph gameGraph;
 	private SLDescription sl;
 	private GameDescription gd;
 	private LevelAnalyzer la;
@@ -59,7 +59,7 @@ public class AtDelfi {
 	}
 	
 	public void buildGraph() {
-		this.gameGraph = new Graph(gd, sl, ga, la);
+		this.gameGraph = new AtDelfiGraph(gd, sl, ga, la);
 		this.gameGraph.build();
 	}
 
@@ -83,7 +83,7 @@ public class AtDelfi {
 	/**
 	 * @return the gameGraph
 	 */
-	public Graph getGameGraph() {
+	public AtDelfiGraph getGameGraph() {
 		return gameGraph;
 	}
 
@@ -91,7 +91,7 @@ public class AtDelfi {
 	/**
 	 * @param gameGraph the gameGraph to set
 	 */
-	public void setGameGraph(Graph gameGraph) {
+	public void setGameGraph(AtDelfiGraph gameGraph) {
 		this.gameGraph = gameGraph;
 	}
 }	
