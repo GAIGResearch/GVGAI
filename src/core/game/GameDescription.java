@@ -436,6 +436,10 @@ public class GameDescription {
 
 			return s;
 		}
+		
+		public HashMap<String, String> getParameters() {
+			return this.parameters;
+		}
 	}
 
 	/**
