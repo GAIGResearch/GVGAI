@@ -37,7 +37,6 @@ public class AtDelfiGraph {
 	 */
 	private List<Node> allNodes;
 	
-	
 	 
 	
 	/**
@@ -79,9 +78,9 @@ public class AtDelfiGraph {
 	/**
 	 * attributes for the nodes
 	 */
-	private String spriteAttributes = "shape:circle;fill-color:" + spriteColor +";size:100px;text-alignment:center;text-color:#000000;text-size:15;";
-	private String conditionAttributes = "shape:diamond;fill-color: " + conditionColor + " ;size: 100px;text-alignment: center;text-color:#000000;text-size:13;";
-	private String actionAttributes = "shape:box;fill-color: " + actionColor + " ;size: 75px;text-alignment: center;text-color:#FFFFFF;text-size:15;";
+	private String spriteAttributes = "shape:circle;fill-color:" + spriteColor +";size:100px;text-color:#000000;text-size:12;";
+	private String conditionAttributes = "shape:diamond;fill-color:" + conditionColor + ";size:100px;text-color:#000000;text-size:12;";
+	private String actionAttributes = "shape:box;fill-color:" + actionColor + ";size:75px;text-color:#000000;text-size:12;";
 	
 	/**
 	 * Constructs a new AtDelfi Graph
@@ -115,6 +114,7 @@ public class AtDelfiGraph {
 		
 		if(graphVisualization) {
 			graph.display();
+			spaceAllNodes();
 		}
 	}
 
@@ -138,6 +138,22 @@ public class AtDelfiGraph {
 			for (Node avatar : this.avatars) {
 				System.out.println(avatar.getId() + " : " + avatar.getName());
 			}
+	}
+	
+	public void spaceAllNodes() {
+		int counter = 0;
+		Iterator<? extends MultiNode> nodes = graph.getNodeIterator();
+		while(nodes.hasNext()) {
+			MultiNode node = nodes.next();
+			Iterator<? extends MultiNode> nodes2 = graph.getNodeIterator();
+			while(nodes2.hasNext()) {
+				MultiNode node2 = nodes2.next();
+				if(!node.equals(node2)) {
+					addHiddenEdge(Integer.parseInt(node.getId()), Integer.parseInt(node2.getId()), counter);
+					counter++;
+				}
+			}
+		}
 	}
 	
 	public void readInteractionSet() {
@@ -209,26 +225,51 @@ public class AtDelfiGraph {
 		condition.addInput(sprite1);
 		condition.addInput(sprite2);
 		
+		// create nodes for condition and action
+		createGraphNode(NodeType.CONDITION, condition.getName(), condition.getId());
+		createGraphNode(NodeType.ACTION, action.getName(), action.getId());
+
+		addEdge(sprite1.getId(), condition.getId());
+		addEdge(sprite2.getId(), condition.getId());
+		addEdge(condition.getId(), action.getId());
+		
 		// create output for action if applicable
+		actionDecisionTree(action, intData);
 		
 		if(verbose) 
 			System.out.println("Mechanic Generated: " + sprite1.getName() + " " + condition.getName() 
 			+ " " + sprite2.getName() + " " + action.getName());
-
 	}
 	
-	public void actionDecisionTree(Node sprite1, Node sprite2, Node action, InteractionData intData) {
-		if (intData.sprites.size() > 0) {
-			for (String spriteName : intData.sprites) {
-				Node output = findSpriteNode(spriteName);
-			}
-		}
+	public void actionDecisionTree(Node action, InteractionData intData) {
+		
+		
+		
+//		Node output = findSpriteNode(spriteName);
+//		
+//		action.addOutput(output);
+//		output.addInput(action);
+//		
+//		// add edge for action output
+//		addEdge(action.getId(), output.getId());
+
 	}
 	
 	public Node findSpriteNode(String spriteName) {
 		for (Node sprite : sprites) {
 			if (spriteName.equals(sprite.getName())) {
 				return sprite;
+			}
+		}
+		return null;
+	}
+	
+	public MultiNode findVisualGraphNode(int id) {
+		Iterator<? extends MultiNode> nodes = graph.getNodeIterator();
+		while(nodes.hasNext()) {
+			MultiNode node = nodes.next();
+			if(node.getId().equals("" + id)) {
+				return node;
 			}
 		}
 		return null;
@@ -249,6 +290,24 @@ public class AtDelfiGraph {
 		c.addAttribute("ui.style", details);
 		
 		return c;
+	}
+	
+	public Edge addEdge(int idOne, int idTwo) {
+		MultiNode first = findVisualGraphNode(idOne);
+		MultiNode second = findVisualGraphNode(idTwo);
+		Edge e = graph.addEdge(first.getId() + ":" + second.getId(), first, second, true);
+		e.addAttribute("layout.weight", 25);
+		return e;
+	}
+	
+	public Edge addHiddenEdge(int idOne, int idTwo, int counter) {
+
+		MultiNode first = findVisualGraphNode(idOne);
+		MultiNode second = findVisualGraphNode(idTwo);
+		Edge e = graph.addEdge("" + counter, first, second, true);
+		e.addAttribute("layout.weight", 25);
+		e.addAttribute("ui.hide");
+		return e;
 	}
 	/**
 	 * @return the sl
