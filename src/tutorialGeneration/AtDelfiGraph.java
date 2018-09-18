@@ -1,6 +1,7 @@
 package tutorialGeneration;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -37,8 +38,13 @@ public class AtDelfiGraph {
 	 */
 	private List<Node> allNodes;
 	
-	 
-	
+	private List<String> firstSpriteTargetActions = Arrays.asList("KillSprite", "KillIfHasLess", "KillIfHasMore", 
+			"KillIfOtherHasMore", "KillIfFromAbove", "FlipDirection", "ReverseDirection", "AttractGaze", "TurnAround", "WrapAround",
+			"BounceForward", "ChangeResource", "AddHealthPoints", "AddHealthPointsToMax", "Align", "TeleportToExit",
+			"SubtractHealthPoints", "CloneSprite");
+	private List<String> bothSpriteTargetActions = Arrays.asList("KillBoth", "PullWithIt", "CollectResource");
+	private List<String> stypeTargetActions = Arrays.asList("TransformTo", "KillAll", "TransformToSingleton", "SpawnIfHasMore",
+			"SpawnIfHasLess", "SpawnBehind");
 	/**
 	 * Information parsed from the VGDL File
 	 */
@@ -210,14 +216,14 @@ public class AtDelfiGraph {
 	
 	public void classifyInteractionData(Node sprite1, Node sprite2, InteractionData intData) {
 		Node condition = new Node("Collides", "n/a", "Condition");
-		Node action = new Node(intData.type, "n/a", "Action");
+//		Node action = new Node(intData.type, "n/a", "Action");
 		// add these to the respective lists
 		conditions.add(condition);
-		actions.add(action);
+//		actions.add(action);
 		
 		// add input/output for action/condition
-		condition.addOutput(action);
-		action.addInput(condition);
+//		condition.addOutput(action);
+//		action.addInput(condition);
 		
 		// add input/output for sprites/condition
 		sprite1.addOutput(condition);
@@ -227,23 +233,81 @@ public class AtDelfiGraph {
 		
 		// create nodes for condition and action
 		createGraphNode(NodeType.CONDITION, condition.getName(), condition.getId());
-		createGraphNode(NodeType.ACTION, action.getName(), action.getId());
+//		createGraphNode(NodeType.ACTION, action.getName(), action.getId());
 
 		addEdge(sprite1.getId(), condition.getId());
 		addEdge(sprite2.getId(), condition.getId());
-		addEdge(condition.getId(), action.getId());
+//		addEdge(condition.getId(), action.getId());
 		
 		// create output for action if applicable
-		actionDecisionTree(action, intData);
+		actionDecisionTree(sprite1, sprite2, condition, intData);
 		
-		if(verbose) 
-			System.out.println("Mechanic Generated: " + sprite1.getName() + " " + condition.getName() 
-			+ " " + sprite2.getName() + " " + action.getName());
+//		if(verbose) 
+//			System.out.println("Mechanic Generated: " + sprite1.getName() + " " + condition.getName() 
+//			+ " " + sprite2.getName() + " " + action.getName());
 	}
 	
-	public void actionDecisionTree(Node action, InteractionData intData) {
-		
-		
+	public void actionDecisionTree(Node sprite1, Node sprite2, Node condition, InteractionData intData) {
+		if (firstSpriteTargetActions.contains(intData.type)) {
+			// this actions targets only the first sprite
+			Node action = new Node(intData.type, "n/a", "Action");
+			actions.add(action);
+			
+			condition.addOutput(action);
+			action.addOutput(sprite1);
+			sprite1.addInput(action);
+			
+			createGraphNode(NodeType.ACTION, action.getName(), action.getId());
+			addEdge(action.getId(), sprite1.getId());
+			addEdge(condition.getId(), action.getId());
+			
+		} else if(bothSpriteTargetActions.contains(intData.type)) {
+			List<Node> actions = new ArrayList<Node>();
+			Node action1 = null;
+			Node action2 = null;
+			if(intData.type.equals("KillBoth")) {
+				action1 = new Node("KillSprite", "n/a", "Action");
+				action2 = new Node("KillSprite", "n/a", "Action");
+			} else if(intData.type.equals("PullWithIt")) {
+				action1 = new Node("Pulled", "n/a", "Action");
+				action2 = new Node("Puller", "n/a", "Action");
+			} else if(intData.type.equals("CollectResource")) {
+				action1 = new Node("KillSprite", "n/a", "Action");
+				action2 = new Node("IncreaseResource", "n/a", "Action");
+			}
+				
+			actions.add(action1);
+			actions.add(action2);
+
+			action1.addOutput(sprite1);
+			action2.addOutput(sprite2);
+			sprite1.addInput(action1);
+			sprite2.addInput(action2);
+			
+			createGraphNode(NodeType.ACTION, action1.getName(), action1.getId());
+			createGraphNode(NodeType.ACTION, action2.getName(), action2.getId());
+			
+			addEdge(action1.getId(), sprite1.getId());
+			addEdge(action2.getId(), sprite2.getId());	
+			
+			for(Node action : actions) {
+				condition.addOutput(action);
+				addEdge(condition.getId(), action.getId());
+			}
+			
+		} else if(stypeTargetActions.contains(intData.type)) {
+			// this actions targets only the second sprite
+			Node action = new Node(intData.type, "n/a", "Action");
+			actions.add(action);
+			
+			condition.addOutput(action);
+			action.addOutput(sprite1);
+			sprite2.addInput(action);
+			
+			createGraphNode(NodeType.ACTION, action.getName(), action.getId());
+			addEdge(action.getId(), sprite1.getId());
+			addEdge(condition.getId(), action.getId());
+		}
 		
 //		Node output = findSpriteNode(spriteName);
 //		
