@@ -44,7 +44,7 @@ public class TestAtDelfi {
     String gameFile, levelFile, recordTutorialFile;
 
     int levelIdx = 0; // level names from 0 to 4 (game_lvlN.txt).
-    int gameIdx = 0;
+    int gameIdx = 90;
     // + levelIdx + "_" + seed + ".txt";
     // where to record the actions
     // executed. null if not to save.
