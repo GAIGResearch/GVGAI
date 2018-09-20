@@ -32,7 +32,7 @@ public class AtDelfiGraph {
 	 * a flag to show the graph visualization
 	 */
 	private boolean graphVisualization = true;
-	
+		
 	/**
 	 * A list of all the nodes in the AtDelfi Mechanic graph
 	 */
@@ -44,7 +44,7 @@ public class AtDelfiGraph {
 			"SubtractHealthPoints", "CloneSprite", "StepBack");
 	private List<String> bothSpriteTargetActions = Arrays.asList("KillBoth", "PullWithIt", "CollectResource");
 	private List<String> stypePlusTargetActions = Arrays.asList("TransformTo", "TransformToSingleton");
-	private List<String> stypeTargetActions = Arrays.asList("KillAll", "SpawnIfHasMore", "SpawnIfHasLess", "SpawnBehind");
+	private List<String> stypeTargetActions = Arrays.asList("Spawn", "KillAll", "SpawnIfHasMore", "SpawnIfHasLess", "SpawnBehind");
 	/**
 	 * Information parsed from the VGDL File
 	 */
@@ -66,14 +66,13 @@ public class AtDelfiGraph {
 	 * Enums for node types in the visualization graph
 	 */
 	public enum NodeType {
-		SPRITE, CONDITION, ACTION
+		SPRITE, CONDITION, ACTION, UKNOWN
 	};
 	/**
 	 * the visualization graph
 	 */
 	private Graph graph;
-	
-	
+
 	/**
 	 * colors for the nodes
 	 */
@@ -84,9 +83,9 @@ public class AtDelfiGraph {
 	/**
 	 * attributes for the nodes
 	 */
-	private String spriteAttributes = "shape:circle;fill-color:" + spriteColor +";size:100px;text-color:#000000;text-size:12;";
-	private String conditionAttributes = "shape:diamond;fill-color:" + conditionColor + ";size:100px;text-color:#000000;text-size:12;";
-	private String actionAttributes = "shape:box;fill-color:" + actionColor + ";size:75px;text-color:#000000;text-size:12;";
+	private String spriteAttributes = "shape:circle;fill-color:" + spriteColor +";size:100px;text-color:#000000;text-size:12;text-alignment:center;";
+	private String conditionAttributes = "shape:diamond;fill-color:" + conditionColor + ";size:100px;text-color:#000000;text-size:12;text-alignment:center;";
+	private String actionAttributes = "shape:box;fill-color:" + actionColor + ";size:75px;text-color:#FFFFFF;text-size:12;text-alignment:center;";
 	
 	/**
 	 * Constructs a new AtDelfi Graph
@@ -106,10 +105,10 @@ public class AtDelfiGraph {
 		sprites = new ArrayList<Node>();
 		conditions = new ArrayList<Node>();
 		actions = new ArrayList<Node>();
-		
-		
-		System.setProperty("org.grapphstream.ui.render", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
+		allNodes = new ArrayList<Node>();
+
 		graph = new MultiGraph("Mechanic Graph");
+		System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
 	}
 	
 	public void build() {
@@ -117,13 +116,34 @@ public class AtDelfiGraph {
 			System.out.println("Building Mechanic Graph...");
 		readSpriteSet();
 		readInteractionSet();
+		allNodes.addAll(sprites);
+		allNodes.addAll(conditions);
+		allNodes.addAll(actions);
 		
 		if(graphVisualization) {
+			visualizeGraph();
 			graph.display();
-			spaceAllNodes();
 		}
+
 	}
 
+	public void visualizeGraph() {
+
+		// create all nodes
+		for(Node node : allNodes) {
+			// add this as a node in the visualization graph
+			createGraphNode(getVisualNodeType(node), node.getName(), node.getId());
+		}
+		// create all edges
+		for (Node node : allNodes) {
+			for (Node output : node.getOutputs()) {
+				addEdge(node.getId(), output.getId());
+			}
+		}
+		// space the nodes out a bit
+		spaceAllNodes();
+	}
+	
 	public void readSpriteSet() {
 		if (verbose) {
 			System.out.println("Creating all game entity nodes...");
@@ -189,8 +209,7 @@ public class AtDelfiGraph {
 		Node sprite = new Node(current.name, current.type, "Sprite");
 		this.sprites.add(sprite);
 		
-		// add this as a node in the visualization graph
-		createGraphNode(NodeType.SPRITE, sprite.getName(), sprite.getId());
+
 		// add this node to the avatar list
 		if (current.isAvatar){
 			this.avatars.add(sprite);
@@ -217,36 +236,17 @@ public class AtDelfiGraph {
 	
 	public void classifyInteractionData(Node sprite1, Node sprite2, InteractionData intData) {
 		Node condition = new Node("Collides", "n/a", "Condition");
-//		Node action = new Node(intData.type, "n/a", "Action");
 		// add these to the respective lists
 		conditions.add(condition);
-//		actions.add(action);
-		
-		// add input/output for action/condition
-//		condition.addOutput(action);
-//		action.addInput(condition);
 		
 		// add input/output for sprites/condition
 		sprite1.addOutput(condition);
 		sprite2.addOutput(condition);
 		condition.addInput(sprite1);
 		condition.addInput(sprite2);
-		
-		// create nodes for condition and action
-		createGraphNode(NodeType.CONDITION, condition.getName(), condition.getId());
-//		createGraphNode(NodeType.ACTION, action.getName(), action.getId());
 
 		actionDecisionTree(sprite1, sprite2, condition, intData);
-
-		addEdge(sprite1.getId(), condition.getId());
-		addEdge(sprite2.getId(), condition.getId());
-//		addEdge(condition.getId(), action.getId());
-		
-		// create output for action if applicable
-		
-//		if(verbose) 
-//			System.out.println("Mechanic Generated: " + sprite1.getName() + " " + condition.getName() 
-//			+ " " + sprite2.getName() + " " + action.getName());
+	
 	}
 	
 	public void actionDecisionTree(Node sprite1, Node sprite2, Node condition, InteractionData intData) {
@@ -302,8 +302,8 @@ public class AtDelfiGraph {
 			action1.addOutput(sprite1);
 			sprite1.addInput(action1);
 			
-			createGraphNode(NodeType.ACTION, action1.getName(), action1.getId());
-			addEdge(action1.getId(), sprite1.getId());
+//			createGraphNode(NodeType.ACTION, action1.getName(), action1.getId());
+//			addEdge(action1.getId(), sprite1.getId());
 		}
 		if(action2 != null) {
 			actionList.add(action2);
@@ -311,8 +311,8 @@ public class AtDelfiGraph {
 			action2.addOutput(sprite2);
 			sprite2.addInput(action2);
 			
-			createGraphNode(NodeType.ACTION, action2.getName(), action2.getId());
-			addEdge(action2.getId(), sprite2.getId());	
+//			createGraphNode(NodeType.ACTION, action2.getName(), action2.getId());
+//			addEdge(action2.getId(), sprite2.getId());	
 		}
 		if(action3 != null) {
 			Node output = findSpriteNode(intData.sprites.get(0)); 
@@ -322,13 +322,13 @@ public class AtDelfiGraph {
 			action3.addOutput(output);
 			output.addInput(action3);
 			
-			createGraphNode(NodeType.ACTION, action3.getName(), action3.getId());
-			addEdge(action3.getId(), output.getId());
+//			createGraphNode(NodeType.ACTION, action3.getName(), action3.getId());
+//			addEdge(action3.getId(), output.getId());
 		}
 		
 		for(Node action : actionList) {
 			condition.addOutput(action);
-			addEdge(condition.getId(), action.getId());
+//			addEdge(condition.getId(), action.getId());
 		}
 		if(verbose) 
 			System.out.println("Mechanic: " + sprite1.getName() + " " + sprite2.getName() + " collides " + action1.getName());
@@ -389,12 +389,14 @@ public class AtDelfiGraph {
 		e.addAttribute("ui.hide");
 		return e;
 	}
+	
 	/**
 	 * @return the sl
 	 */
 	public SLDescription getSl() {
 		return sl;
 	}
+	
 	/**
 	 * @param sl the sl to set
 	 */
@@ -476,5 +478,16 @@ public class AtDelfiGraph {
 	 */
 	public void setSprites(List<Node> sprites) {
 		this.sprites = sprites;
+	}
+	
+	public NodeType getVisualNodeType(Node n) {
+		if (n.getCategory().equals("Sprite")) 
+			return NodeType.SPRITE;
+		else if (n.getCategory().equals("Condition")) 
+			return NodeType.CONDITION;
+		else if (n.getCategory().equals("Action"))
+			return NodeType.ACTION;
+		else
+			return NodeType.UKNOWN;
 	}
 }
