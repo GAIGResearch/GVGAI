@@ -45,15 +45,9 @@ public class TestAtDelfi {
 
     int levelIdx = 0; // level names from 0 to 4 (game_lvlN.txt).
     int gameIdx = 0;
-    // + levelIdx + "_" + seed + ".txt";
-    // where to record the actions
-    // executed. null if not to save.
-
 
     public TestAtDelfi() {
-        // Other settings
-        boolean visuals = true;
-        
+        // settings        
         this.gameFile = this.generateTutorialPath + this.games[this.gameIdx] + ".txt";
         this.levelFile = this.gamesPath + this.games[this.gameIdx] + "_lvl" + this.levelIdx + ".txt";
         this.recordTutorialFile = this.generateTutorialPath + this.games[this.gameIdx] + "_tutorial.txt";

@@ -40,7 +40,7 @@ public class AtDelfiGraph {
 	
 	private List<String> firstSpriteTargetActions = Arrays.asList("KillSprite", "KillIfHasLess", "KillIfHasMore", 
 			"KillIfOtherHasMore", "KillIfFromAbove", "FlipDirection", "ReverseDirection", "AttractGaze", "TurnAround", "WrapAround",
-			"BounceForward", "ChangeResource", "AddHealthPoints", "AddHealthPointsToMax", "Align", "TeleportToExit",
+			"BounceForward", "ChangeResource", "AddHealthPoints", "AddHealthPointsToMax", "Align",
 			"SubtractHealthPoints", "CloneSprite", "StepBack");
 	private List<String> bothSpriteTargetActions = Arrays.asList("KillBoth", "PullWithIt", "CollectResource");
 	private List<String> stypePlusTargetActions = Arrays.asList("TransformTo", "TransformToSingleton");
@@ -115,6 +115,7 @@ public class AtDelfiGraph {
 		if (verbose)
 			System.out.println("Building Mechanic Graph...");
 		readSpriteSet();
+		parseAllSpriteMechanics();
 		readInteractionSet();
 		allNodes.addAll(sprites);
 		allNodes.addAll(conditions);
@@ -155,7 +156,10 @@ public class AtDelfiGraph {
 			createSpriteEntity(current);
 		}
 		
-		if(verbose)
+		// sneak the score and time nodes into existence
+		makeScoreAndTimeNodes();
+		
+		if(verbose) {
 			System.out.println("ID \t:\t Name \t\t:\t Type");
 			for(Node sprite : this.sprites) {
 				System.out.println(sprite.getId() + " \t:\t " + sprite.getName() + "    \t:\t " + sprite.getType());
@@ -164,6 +168,19 @@ public class AtDelfiGraph {
 			for (Node avatar : this.avatars) {
 				System.out.println(avatar.getId() + " : " + avatar.getName());
 			}
+		}
+		
+			
+			
+	}
+	
+	public void makeScoreAndTimeNodes() {
+		Node score = new Node("Score", "n/a", "Sprite");
+		Node time = new Node("Time", "n/a", "Sprite");
+		
+		// add to sprites
+		sprites.add(score);
+		sprites.add(time);
 	}
 	
 	public void spaceAllNodes() {
@@ -253,6 +270,7 @@ public class AtDelfiGraph {
 		Node action1 = null;
 		Node action2 = null;
 		Node action3 = null;
+		Node action4 = null;
 		List<Node> actionList = new ArrayList<Node>();
 
 		if (firstSpriteTargetActions.contains(intData.type)) {
@@ -272,14 +290,6 @@ public class AtDelfiGraph {
 				action1 = new Node("NothingImportant", "n/a", "Action");
 			}
 		} else if(stypePlusTargetActions.contains(intData.type)) {
-			// this actions targets some stype output in addition to possibly one of the first two sprites
-			if(intData.type.equals("TransformTo")) {
-				action1 = new Node("Transformee", "n/a", "Action");
-				action3 = new Node("TransformTo", "n/a", "Action");
-			} else if(intData.type.equals("KillAll")) {
-				action1 = new Node("KillAll", "n/a", "Action");
-			} 
-		} else if(stypePlusTargetActions.contains(intData.type)) {
 			if(intData.type.equals("TransformTo")) {
 				action1 = new Node("Transformee", "n/a", "Action");
 				action3 = new Node("TransformTo", "n/a", "Action");
@@ -292,27 +302,44 @@ public class AtDelfiGraph {
 		} else if(stypeTargetActions.contains(intData.type)) {
 			if(intData.type.contains("Spawn")) {
 				action1 = new Node("Spawn", "n/a", "Action");
+			} else if(intData.type.equals("KillAll")) {
+				action1 = new Node("KillAll", "n/a", "Action");
 			} else {
 				action1 = new Node("KillSprite", "n/a", "Action");
 			}
+		} else {
+			if(intData.type.equals("TeleportToExit")) {
+				Node stype = null;
+				if(sprite1.getType().equals("Portal")){
+					stype = findSpriteNode(sprite1.getAttributes().get("stype"));	
+				} else {
+					stype = findSpriteNode(sprite2.getAttributes().get("stype"));	
+				}
+				condition = new Node("Collides", "n/a", "Condition");
+				action4 = new Node("TeleportsTo", "n/a", "Action");
+				action1 = new Node("Teleportee", "n/a", "Action");
+				
+				actionList.add(action4);
+				action4.addOutput(stype);
+
+				action4.addInput(condition);
+				stype.addInput(action4);
+				
+				conditions.add(condition);
+				actions.add(action4);
+			} 
 		}
 		if(action1 != null) {
 			actionList.add(action1);
 			actions.add(action1);			
 			action1.addOutput(sprite1);
 			sprite1.addInput(action1);
-			
-//			createGraphNode(NodeType.ACTION, action1.getName(), action1.getId());
-//			addEdge(action1.getId(), sprite1.getId());
 		}
 		if(action2 != null) {
 			actionList.add(action2);
 			actions.add(action2);
 			action2.addOutput(sprite2);
 			sprite2.addInput(action2);
-			
-//			createGraphNode(NodeType.ACTION, action2.getName(), action2.getId());
-//			addEdge(action2.getId(), sprite2.getId());	
 		}
 		if(action3 != null) {
 			Node output = findSpriteNode(intData.sprites.get(0)); 
@@ -321,18 +348,75 @@ public class AtDelfiGraph {
 			
 			action3.addOutput(output);
 			output.addInput(action3);
+		}
+		// score change mechanics
+		if(Integer.parseInt(intData.scoreChange) != 0) {
+			// now search for Score node
+			Node score = findSpriteNode("Score");
+			Node scoreChangeAction = new Node("ScoreChange", "n/a", "Action");
 			
-//			createGraphNode(NodeType.ACTION, action3.getName(), action3.getId());
-//			addEdge(action3.getId(), output.getId());
+			actions.add(scoreChangeAction);
+			scoreChangeAction.addAttribute("score", intData.scoreChange);
+			scoreChangeAction.addOutput(score);
+			score.addInput(scoreChangeAction);
+			actionList.add(scoreChangeAction);
 		}
 		
 		for(Node action : actionList) {
 			condition.addOutput(action);
-//			addEdge(condition.getId(), action.getId());
 		}
-		if(verbose) 
-			System.out.println("Mechanic: " + sprite1.getName() + " " + sprite2.getName() + " collides " + action1.getName());
+		
 
+		if(verbose)
+			try{
+				System.out.println("Mechanic: " + sprite1.getName() + " " + sprite2.getName() + " collides " + intData.type);
+			} catch (Exception e)
+			{
+				System.out.println("Special Case: " + intData.type);
+			}
+
+	}
+	
+	public void parseAllSpriteMechanics() {
+		for (Node sprite : sprites) {
+			parseSpriteMechanics(sprite);
+		}
+		
+		for (Node avatar : avatars) {
+			parseAvatarMechanics();
+		}
+	}
+	
+	public void parseSpriteMechanics(Node sprite) {
+		// check for Portal functionality
+		if (sprite.getType().equals("Portal")) {
+			// get stype to see end destination of the portal
+			Node stype = findSpriteNode(sprite.getAttributes().get("stype"));
+			
+			// create conditions and actions for every other sprite
+//			for (Node sprite1 : sprites) {
+//				if (sprite != sprite1) {
+//					Node condition = new Node("Collides", "n/a", "Condition");
+//					Node action = new Node("TeleportsTo", "n/a", "Action");
+//					
+//					sprite.addOutput(condition);
+//					sprite1.addOutput(condition);
+//					condition.addOutput(action);
+//					action.addOutput(stype);
+//					
+//					condition.addInput(sprite);
+//					condition.addInput(sprite1);
+//					action.addInput(condition);
+//					stype.addInput(action);
+//				}
+//			}
+		}
+		// check for SpawnPoint functionality
+		
+	}
+	
+	public void parseAvatarMechanics() {
+		// 
 	}
 	
 	public Node findSpriteNode(String spriteName) {
