@@ -1,5 +1,10 @@
 package tutorialGeneration;
 
+import javax.swing.BorderFactory;
+import javax.swing.border.Border;
+
+import org.graphstream.graph.Graph;
+
 import core.game.Game;
 import core.game.GameDescription;
 import core.game.SLDescription;
@@ -60,9 +65,16 @@ public class AtDelfi {
 	
 	public void buildGraph() {
 		this.gameGraph = new AtDelfiGraph(gd, sl, ga, la);
-		this.gameGraph.build();
+		Graph graph = this.gameGraph.build();
+		changeGraphTitle(graph);
 	}
 
+	
+	public void changeGraphTitle(Graph graph) {
+		String title = this.gameName;
+		Border border = BorderFactory.createTitledBorder(title);
+		graph.display().getDefaultView().setBorder(border);
+	}
 	public Game getGame() {
         VGDLFactory.GetInstance().init(); // This always first thing to do.
         VGDLRegistry.GetInstance().init();

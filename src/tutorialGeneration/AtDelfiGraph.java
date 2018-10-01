@@ -60,7 +60,7 @@ public class AtDelfiGraph {
 	private List<Node> sprites;
 	private List<Node> conditions;
 	private List<Node> actions;
-	
+	private List<Node> terminations;
 	
 	/**
 	 * Enums for node types in the visualization graph
@@ -105,18 +105,21 @@ public class AtDelfiGraph {
 		sprites = new ArrayList<Node>();
 		conditions = new ArrayList<Node>();
 		actions = new ArrayList<Node>();
+		terminations = new ArrayList<Node>();
 		allNodes = new ArrayList<Node>();
 
 		graph = new MultiGraph("Mechanic Graph");
+		
 		System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
 	}
 	
-	public void build() {
+	public Graph build() {
 		if (verbose)
 			System.out.println("Building Mechanic Graph...");
 		readSpriteSet();
 		parseAllSpriteMechanics();
 		readInteractionSet();
+		readTerminationSet();
 		allNodes.addAll(sprites);
 		allNodes.addAll(conditions);
 		allNodes.addAll(actions);
@@ -124,7 +127,11 @@ public class AtDelfiGraph {
 		if(graphVisualization) {
 			visualizeGraph();
 			graph.display();
+			
+			
 		}
+		
+		return graph;
 
 	}
 
@@ -206,10 +213,13 @@ public class AtDelfiGraph {
 		
 		for(Node sprite1 : sprites) {
 			for (Node sprite2 : sprites) {
-				ArrayList<InteractionData> intDataList = gd.getInteraction(sprite1.getName(), sprite2.getName());
-				for (InteractionData intData : intDataList) {
-					if(sprite1 != sprite2)
-						classifyInteractionData(sprite1, sprite2, intData);
+				if (!sprite1.getName().equals("Time") && !sprite1.getName().equals("Score") 
+						&& !sprite2.getName().equals("Time") && !sprite2.getName().equals("Score")) {
+					ArrayList<InteractionData> intDataList = gd.getInteraction(sprite1.getName(), sprite2.getName());
+					for (InteractionData intData : intDataList) {
+						if(sprite1 != sprite2)
+							classifyInteractionData(sprite1, sprite2, intData);
+					}
 				}
 			}
 		}
@@ -218,6 +228,11 @@ public class AtDelfiGraph {
 	public void readTerminationSet() {
 		if(verbose)
 			System.out.println("Reading Termination Set...");
+		List<TerminationData> terminations = gd.getTerminationConditions();
+		for(TerminationData termination : terminations) {
+			classifyTerminationData(termination);
+		}
+		
 	}
 	public void createSpriteEntity(SpriteData current) {
 		if(verbose) {
@@ -381,44 +396,88 @@ public class AtDelfiGraph {
 		for (Node sprite : sprites) {
 			parseSpriteMechanics(sprite);
 		}
-		
 		for (Node avatar : avatars) {
-			parseAvatarMechanics();
+			parseAvatarMechanics(avatar);
 		}
 	}
-	
-	public void parseSpriteMechanics(Node sprite) {
-		// check for Portal functionality
-		if (sprite.getType().equals("Portal")) {
-			// get stype to see end destination of the portal
-			Node stype = findSpriteNode(sprite.getAttributes().get("stype"));
-			
-			// create conditions and actions for every other sprite
-//			for (Node sprite1 : sprites) {
-//				if (sprite != sprite1) {
-//					Node condition = new Node("Collides", "n/a", "Condition");
-//					Node action = new Node("TeleportsTo", "n/a", "Action");
-//					
-//					sprite.addOutput(condition);
-//					sprite1.addOutput(condition);
-//					condition.addOutput(action);
-//					action.addOutput(stype);
-//					
-//					condition.addInput(sprite);
-//					condition.addInput(sprite1);
-//					action.addInput(condition);
-//					stype.addInput(action);
-//				}
-//			}
-		}
-		// check for SpawnPoint functionality
 		
+	public void parseSpriteMechanics(Node sprite) {
+		if(sprite.getType().equals("SpawnPoint")) {
+			
+			String name = "";
+			if(sprite.getAttributes().containsKey("cooldown")) {
+				name = "Every " + sprite.getAttributes().get("cooldown") + " Ticks";
+			} else {
+				name = "Every Tick";
+			}
+			
+			Node spawnee = findSpriteNode(sprite.getAttributes().get("stype"));
+			
+			Node condition = new Node(name, "n/a", "Condition");
+			Node action = new Node("Spawn", "n/a", "Action");
+			
+			conditions.add(condition);
+			actions.add(action);
+			
+			sprite.addOutput(condition);
+			condition.addOutput(action);
+			action.addOutput(spawnee);
+			
+			spawnee.addInput(action);
+			action.addInput(condition);
+			condition.addInput(sprite);
+		}
+	}
+	public void parseAvatarMechanics(Node avatar) {
+		// short conditional for what kind of avatar it is
+		if(avatar.getType().equals("ShootAvatar") || avatar.getType().equals("OngoingShootAvatar") || avatar.getType().equals("FlakAvatar")) {
+			Node condition = new Node("Press Space", "n/a", "Condition");
+			Node action = new Node("Spawn", "n/a", "Action");
+			Node output = findSpriteNode(avatar.getAttributes().get("stype"));
+
+			conditions.add(condition);
+			actions.add(action);
+			
+			avatar.addOutput(condition);
+			condition.addInput(avatar);
+			condition.addOutput(action);
+			action.addInput(condition);
+			action.addOutput(output);
+			output.addInput(action);
+		}
 	}
 	
-	public void parseAvatarMechanics() {
-		// 
+	public void classifyTerminationData(TerminationData termination) {
+		System.out.println("Termination Found");
+			
+		Node condition = new Node(termination.type, "Terminal Condition", "Condition");
+		condition.addAttribute("limit", "" + termination.limit);
+		
+		Node action = new Node((termination.win.equals("True") ? "Win" : "Lose"), "Termination", "Action");
+		
+		terminations.add(action);
+		condition.addOutput(action);
+		action.addInput(condition);
+		
+		actions.add(action);
+		conditions.add(condition);
+
+		// check if the portal will die on its own. If it does, we don't include it as a condition
+		for (String name : termination.sprites) {
+			Node sprite = findSpriteNode(name);
+			if(!sprite.getAttributes().containsKey("total") || sprite.getAttributes().get("total").equals("0")) {
+				sprite.addOutput(condition);
+				condition.addInput(sprite);
+			}
+		}
+		
+		// if this is a time condition, then it wont have any sprites associated with it by default, so add the Time node to it
+		if (condition.getName().equals("Timeout")) {
+			Node time = findSpriteNode("Time");
+			time.addOutput(condition);
+			condition.addInput(time);
+		}
 	}
-	
 	public Node findSpriteNode(String spriteName) {
 		for (Node sprite : sprites) {
 			if (spriteName.equals(sprite.getName())) {
