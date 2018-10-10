@@ -65,7 +65,11 @@ public class TestAtDelfi {
 			this.levelFile = this.gamesPath + gameInfo[1] + "_lvl" + this.levelIdx + ".txt";
 	        this.recordTutorialFile = this.generateTutorialPath + gameInfo[1] + "_tutorial.txt";
 
+
 			AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, this.getGame(this.gameIdx)[0], seed, this.verbose);
+			atdelfi.playGames();
+			atdelfi.buildGraph();
+			
 		}
 	}
 	
@@ -75,6 +79,8 @@ public class TestAtDelfi {
         this.recordTutorialFile = this.generateTutorialPath + games[gameIdx][1] + "_tutorial.txt";
 
 		AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, this.getGame(this.gameIdx)[0], seed, this.verbose);
+		atdelfi.playGames();
+		atdelfi.buildGraph();
 	}
 	
 	/**

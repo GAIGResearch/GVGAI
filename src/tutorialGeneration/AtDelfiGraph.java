@@ -1,5 +1,7 @@
 package tutorialGeneration;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,6 +23,7 @@ import org.graphstream.graph.implementations.*;
 import org.graphstream.ui.*;
 import org.graphstream.ui.layout.Layout;
 import org.graphstream.ui.view.Viewer;
+import org.json.simple.parser.ParseException;
 
 public class AtDelfiGraph {
 	/**
@@ -61,6 +64,8 @@ public class AtDelfiGraph {
 	private List<Node> conditions;
 	private List<Node> actions;
 	private List<Node> terminations;
+	
+	private List<Mechanic> mechanics;
 	
 	/**
 	 * Enums for node types in the visualization graph
@@ -107,6 +112,8 @@ public class AtDelfiGraph {
 		actions = new ArrayList<Node>();
 		terminations = new ArrayList<Node>();
 		allNodes = new ArrayList<Node>();
+		
+		mechanics = new ArrayList<Mechanic>();
 
 		graph = new MultiGraph("Mechanic Graph");
 		
@@ -287,6 +294,8 @@ public class AtDelfiGraph {
 		Node action3 = null;
 		Node action4 = null;
 		List<Node> actionList = new ArrayList<Node>();
+		
+		String readibleAction = intData.type;
 
 		if (firstSpriteTargetActions.contains(intData.type)) {
 			// this actions targets only the first sprite
@@ -344,6 +353,7 @@ public class AtDelfiGraph {
 				actions.add(action4);
 			} 
 		}
+
 		if(action1 != null) {
 			actionList.add(action1);
 			actions.add(action1);			
@@ -389,7 +399,11 @@ public class AtDelfiGraph {
 			{
 				System.out.println("Special Case: " + intData.type);
 			}
-
+		
+		// make mechanic
+		List<Node> sprites = Arrays.asList(new Node[]{sprite1, sprite2});
+		List<Node> conditions = Arrays.asList(new Node[]{condition});
+		createMechanic(sprites, conditions, actionList, readibleAction, false);
 	}
 	
 	public void parseAllSpriteMechanics() {
@@ -431,7 +445,7 @@ public class AtDelfiGraph {
 	public void parseAvatarMechanics(Node avatar) {
 		// short conditional for what kind of avatar it is
 		if(avatar.getType().equals("ShootAvatar") || avatar.getType().equals("OngoingShootAvatar") || avatar.getType().equals("FlakAvatar")) {
-			Node condition = new Node("Press Space", "n/a", "Condition");
+			Node condition = new Node("Press Space", "Player Input", "Condition");
 			Node action = new Node("Spawn", "n/a", "Action");
 			Node output = findSpriteNode(avatar.getAttributes().get("stype"));
 
@@ -478,6 +492,17 @@ public class AtDelfiGraph {
 			condition.addInput(time);
 		}
 	}
+	
+	public void createMechanic(List<Node> sprites2, List<Node> conditions2, List<Node> actionList, String readibleAction, boolean isTerminal) {
+		Mechanic mechanic = new Mechanic(isTerminal);
+		mechanic.setSprites(sprites2);
+		mechanic.setConditions(conditions2);
+		mechanic.setActions(actionList);
+		mechanic.setReadibleAction(readibleAction);
+		
+		mechanics.add(mechanic);
+	}
+	
 	public Node findSpriteNode(String spriteName) {
 		for (Node sprite : sprites) {
 			if (spriteName.equals(sprite.getName())) {
@@ -632,5 +657,23 @@ public class AtDelfiGraph {
 			return NodeType.ACTION;
 		else
 			return NodeType.UKNOWN;
+	}
+	
+	public void insertFrameInfo(VisualDemonstrationInterfacer vdi, String[] agents) {
+		for (Mechanic mech : mechanics) {
+			try {
+				HashMap<String, int[]> firstDict = vdi.oneMechanicQuery(mech, agents);
+				mech.setFrames(firstDict);
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 }

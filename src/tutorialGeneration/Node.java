@@ -22,6 +22,7 @@ public class Node {
 	
 	private Map<String,String> attributes;
 	
+	private List<Mechanic> mechanics;
 
 	public Node(String name, String type, String category) {
 		this.id = Node.idCounter++;
@@ -32,6 +33,8 @@ public class Node {
 		this.inputs = new ArrayList<Node>();
 		this.outputs = new ArrayList<Node>();
 		this.parents = new ArrayList<String>();
+		this.setMechanics(new ArrayList<Mechanic>());
+		
 		this.attributes = new HashMap<String, String>();
 		
 		this.addAttribute("isAvatar", "false");
@@ -183,5 +186,23 @@ public class Node {
 	 */
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	/**
+	 * @return the mechanics
+	 */
+	public List<Mechanic> getMechanics() {
+		return mechanics;
+	}
+
+	/**
+	 * @param mechanics the mechanics to set
+	 */
+	public void setMechanics(List<Mechanic> mechanics) {
+		this.mechanics = mechanics;
+	}
+	
+	public void addMechanic(Mechanic mechanic) {
+		this.mechanics.add(mechanic);
 	}
 }

@@ -1,9 +1,14 @@
 package tutorialGeneration;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+
 import javax.swing.BorderFactory;
 import javax.swing.border.Border;
 
 import org.graphstream.graph.Graph;
+import org.json.simple.parser.ParseException;
 
 import core.game.Game;
 import core.game.GameDescription;
@@ -14,6 +19,8 @@ import core.vgdl.VGDLRegistry;
 import tools.GameAnalyzer;
 import tools.IO;
 import tools.LevelAnalyzer;
+
+import video.basics.BunchOfGames;
 
 public class AtDelfi {
 
@@ -34,6 +41,11 @@ public class AtDelfi {
 	private String gameFile;
 	private String levelFile;
 	
+	private VisualDemonstrationInterfacer vdi;
+	
+//	private String[] agents = {"adrienctx.Agent", "NovelTS.Agent", "NovTea.Agent", "Number27.Agent", "YOLOBOT.Agent", "tracks.singlePlayer.simple.doNothing.Agent", "tracks.singlePlayer.simple.sampleonesteplookahead.Agent"};
+	private String[] agents = {"adrienctx.Agent"};
+
 	public AtDelfi(String gameFile, String levelFile, String gameName, int seed, boolean verbose) {
 		this.verbose = verbose;
 		if (this.verbose) 
@@ -60,16 +72,42 @@ public class AtDelfi {
 		this.la = new LevelAnalyzer(sl);
 		this.ga = new GameAnalyzer(gd);
 		
-		this.buildGraph();
+		try {
+			this.vdi = new VisualDemonstrationInterfacer(verbose);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+//		this.buildGraph();
 	}
 	
 	public void buildGraph() {
 		this.gameGraph = new AtDelfiGraph(gd, sl, ga, la);
 		Graph graph = this.gameGraph.build();
 		changeGraphTitle(graph);
+		this.gameGraph.insertFrameInfo(vdi, agents);
 	}
 
-	
+	public void playGames() {
+		ArrayList<BunchOfGames> bogs = new ArrayList<>();
+		for(int i = 0; i < agents.length; i++) {
+			for(int j = 0; j < 1; j++) {
+				bogs.add(new BunchOfGames(gameFile, levelFile, agents[i]));
+			}
+		}
+		try {
+			vdi.runBunchOfGames(bogs);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	public void changeGraphTitle(Graph graph) {
 		String title = this.gameName;
 		Border border = BorderFactory.createTitledBorder(title);
