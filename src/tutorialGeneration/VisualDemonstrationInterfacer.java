@@ -838,20 +838,20 @@ public class VisualDemonstrationInterfacer {
 //
 //		//1 - Configure your games
 //
-//		BunchOfGames bog1 = new BunchOfGames("examples/gridphysics/aliens.txt", 
-//				"examples/gridphysics/aliens_lvl0.txt", 
-//				"tracks.singlePlayer.tools.human.Agent");
-//
-//		BunchOfGames bog2 = new BunchOfGames("examples/gridphysics/aliens.txt", 
-//				"examples/gridphysics/aliens_lvl0.txt", 
-//				"tracks.singlePlayer.tools.human.Agent");
-//
-//		ArrayList<BunchOfGames> bunchOfGames = new ArrayList<>();
-//		bunchOfGames.add(bog1); bunchOfGames.add(bog2);
+		BunchOfGames bog1 = new BunchOfGames("examples/gridphysics/aliens.txt", 
+				"examples/gridphysics/aliens_lvl0.txt", 
+				"tracks.singlePlayer.tools.human.Agent");
+
+		BunchOfGames bog2 = new BunchOfGames("examples/gridphysics/aliens.txt", 
+				"examples/gridphysics/aliens_lvl0.txt", 
+				"tracks.singlePlayer.tools.human.Agent");
+
+		ArrayList<BunchOfGames> bunchOfGames = new ArrayList<>();
+		bunchOfGames.add(bog1); bunchOfGames.add(bog2);
 //		//	
 //		//	//2 - Run the games
-//		VisualDemonstrationInterfacer vdi = new VisualDemonstrationInterfacer(false);
-//		//vdi.runBunchOfGames(bunchOfGames);
+		VisualDemonstrationInterfacer vdi = new VisualDemonstrationInterfacer(false);
+		vdi.runBunchOfGames(bunchOfGames);
 //
 //		//			
 //		//3 - Query for everything

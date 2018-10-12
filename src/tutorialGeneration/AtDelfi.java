@@ -73,7 +73,7 @@ public class AtDelfi {
 		this.ga = new GameAnalyzer(gd);
 		
 		try {
-			this.vdi = new VisualDemonstrationInterfacer(verbose);
+			this.vdi = new VisualDemonstrationInterfacer(false);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
