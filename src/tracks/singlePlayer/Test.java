@@ -1,5 +1,6 @@
 package tracks.singlePlayer;
 
+import java.io.IOException;
 import java.util.Random;
 
 import core.logging.Logger;
@@ -12,7 +13,7 @@ import tracks.ArcadeMachine;
  */
 public class Test {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
 		// Available tracks:
 		String sampleRandomController = "tracks.singlePlayer.simple.sampleRandom.Agent";

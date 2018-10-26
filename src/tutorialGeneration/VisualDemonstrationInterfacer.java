@@ -68,7 +68,7 @@ public class VisualDemonstrationInterfacer {
 			return count;
 		} 
 	}
-	public void runGame(String game, String level1, String agentName)
+	public void runGame(String game, String level1, String agentName) throws IOException
 	{
 		ArcadeMachine.runOneGame(game, level1, true, agentName, "", 0, 0);
 	}
@@ -722,13 +722,19 @@ public class VisualDemonstrationInterfacer {
 			QueryActionRule ruleActionQuery = new QueryActionRule("simulation/game" + k + "/actions/actions.json");
 			QueryGameResult queryGameResult = new QueryGameResult("simulation/game" + k + "/result/result.json");
 			int frameNumber = -1;
+			System.out.println("Finding frames for: " + mech.getReadibleAction());
 			if(mech.getConditions().get(0).getType().equals("Player Input")) {
 				
 				frameNumber = ruleActionQuery.getFirstRuleActionFrameNumber();
 				
 			}
 			else {
-				frameNumber = mapFrameNumbersInTheSimulationByMechanic(mech, k)[4];
+				int[] frames = mapFrameNumbersInTheSimulationByMechanic(mech, k);
+				if(frames.length > 0) {
+					frameNumber = mapFrameNumbersInTheSimulationByMechanic(mech, k)[4];
+				} else {
+					frameNumber = -1;
+				}
 			}
 			dict.put(agents[k], getFrameNumbers(frameNumber));
 			
@@ -738,6 +744,9 @@ public class VisualDemonstrationInterfacer {
 	}
 	
 	public int[] getFrameNumbers(int frame) {
+		if(frame == -1) {
+			return new int[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+		}
 		int[] frames = new int[10];
 		
 		int lowerBound = Math.max(0, frame - 5);

@@ -34,8 +34,9 @@ public class ArcadeMachine {
      *            game description file.
      * @param level_file
      *            file with the level to be played.
+     * @throws IOException 
      */
-    public static double[] playOneGame(String game_file, String level_file, String actionFile, int randomSeed) {
+    public static double[] playOneGame(String game_file, String level_file, String actionFile, int randomSeed) throws IOException {
 		String agentName = "tracks.singlePlayer.tools.human.Agent";
 		boolean visuals = true;
 		return runOneGame(game_file, level_file, visuals, agentName, actionFile, randomSeed, 0);
@@ -52,8 +53,9 @@ public class ArcadeMachine {
      *            to save the actions of the game.
      * @param randomSeed
      *            for the game to be played.
+     * @throws IOException 
      */
-    public static double[] playOneGameMulti(String game_file, String level_file, String actionFile, int randomSeed) {
+    public static double[] playOneGameMulti(String game_file, String level_file, String actionFile, int randomSeed) throws IOException {
 		String agentName = "tracks.multiPlayer.tools.human.Agent";
 		boolean visuals = true;
 		return runOneGame(game_file, level_file, visuals, agentName, actionFile, randomSeed, 0);
@@ -80,9 +82,10 @@ public class ArcadeMachine {
      *            sampleRandom seed for the sampleRandom generator.
      * @param playerID
      *            ID of the human player
+     * @throws IOException 
      */
     public static double[] runOneGame(String game_file, String level_file, boolean visuals, String agentNames,
-	    String actionFile, int randomSeed, int playerID) {
+	    String actionFile, int randomSeed, int playerID) throws IOException {
 		VGDLFactory.GetInstance().init(); // This always first thing to do.
 		VGDLRegistry.GetInstance().init();
 
@@ -195,9 +198,10 @@ public class ArcadeMachine {
      *            file contains meta game information (winner, scores,
      *            timesteps, random seed) and names of all the files for player
      *            actions.
+     * @throws IOException 
      *
      */
-    public static double[] replayGame(String game_file, String level_file, boolean visuals, String actionFile) {
+    public static double[] replayGame(String game_file, String level_file, boolean visuals, String actionFile) throws IOException {
 		VGDLFactory.GetInstance().init(); // This always first thing to do.
 		VGDLRegistry.GetInstance().init();
 
@@ -390,8 +394,9 @@ public class ArcadeMachine {
      * @param actionFiles names of the files where the actions of this player, for this
      *   game, should be recorded. Accepts null if no recording is desired. If not null,
      *   this array must contain as much String objects as level_files.length*level_times.
+     * @throws IOException 
      */
-    public static void runGames(String game_file, String[] level_files, int level_times, String agentName, String[] actionFiles) {
+    public static void runGames(String game_file, String[] level_files, int level_times, String agentName, String[] actionFiles) throws IOException {
 	VGDLFactory.GetInstance().init(); // This always first thing to do.
 	VGDLRegistry.GetInstance().init();
 

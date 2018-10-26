@@ -1,5 +1,6 @@
 package core.competition;
 
+import java.io.IOException;
 import java.util.Random;
 
 import tracks.ArcadeMachine;
@@ -13,7 +14,7 @@ import tracks.ArcadeMachine;
  */
 public class AgentExecutor {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         String map = args[0];
         String level = args[1];

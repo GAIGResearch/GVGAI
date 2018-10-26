@@ -1,5 +1,7 @@
 package core.competition;
 
+import java.io.IOException;
+
 import tracks.ArcadeMachine;
 
 /**
@@ -45,7 +47,7 @@ public class GVGReplayer {
             delay = Integer.parseInt(arg2);
     }
 
-    public static void main(String args[])
+    public static void main(String args[]) throws IOException
     {
         if(args.length < 6 || (args.length % 2 != 0))
         {

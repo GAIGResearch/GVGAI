@@ -45,5 +45,10 @@ public class JEasyFrame extends JFrame {
     {
         System.exit(0);
     }
+    
+    public void closeWindow()
+    {
+    	dispose();
+    }
 }
 

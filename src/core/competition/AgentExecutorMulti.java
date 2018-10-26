@@ -2,6 +2,7 @@ package core.competition;
 
 import tracks.ArcadeMachine;
 
+import java.io.IOException;
 import java.util.Random;
 
 /**
@@ -13,7 +14,7 @@ import java.util.Random;
  */
 public class AgentExecutorMulti {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         String game = args[0];
         String level = args[1];

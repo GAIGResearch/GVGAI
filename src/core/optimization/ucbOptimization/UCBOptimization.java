@@ -1,5 +1,6 @@
 package core.optimization.ucbOptimization;
 
+import java.io.IOException;
 import java.util.Random;
 import tracks.ArcadeMachine;
 
@@ -114,8 +115,13 @@ public class UCBOptimization implements OptimizationObjective {
 	    for (int j = 0; j < this.repetition; j++) {
 		double[] gameResults = null;
 		do {
-		    gameResults = ArcadeMachine.runOneGame(this.gamePaths[i], this.levelPaths[i], false,
-			    "tracks.singlePlayer.tools.ucbOptimizerAgent.Agent", null, new Random().nextInt(), 0);
+		    try {
+				gameResults = ArcadeMachine.runOneGame(this.gamePaths[i], this.levelPaths[i], false,
+				    "tracks.singlePlayer.tools.ucbOptimizerAgent.Agent", null, new Random().nextInt(), 0);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} while (gameResults[0] < -10);
 
 		totalWins += Math.max(gameResults[0], 0);

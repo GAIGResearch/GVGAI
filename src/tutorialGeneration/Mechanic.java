@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 
 public class Mechanic {
+	public static int idCounter;
 	
+	private int id;
 	private List<Node> sprites;
 	private List<Node> conditions;
 	private List<Node> actions;
@@ -16,6 +18,8 @@ public class Mechanic {
 	private boolean isTerminal;
 	
 	public Mechanic(boolean isTerminal) {
+		this.setId(Mechanic.idCounter++);
+
 		sprites = new ArrayList<Node>();
 		conditions = new ArrayList<Node>();
 		actions = new ArrayList<Node>();
@@ -96,6 +100,19 @@ public class Mechanic {
 	public void setFrames(HashMap<String, int[]> frames) {
 		this.frames = frames;
 	}
-	
+
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(int id) {
+		this.id = id;
+	}
 	
 }

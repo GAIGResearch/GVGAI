@@ -34,7 +34,8 @@ public class AtDelfiGraph {
 	/**
 	 * a flag to show the graph visualization
 	 */
-	private boolean graphVisualization = true;
+	private boolean nodeVisualization = true;
+	private boolean mechanicVisualization = true;
 		
 	/**
 	 * A list of all the nodes in the AtDelfi Mechanic graph
@@ -115,7 +116,7 @@ public class AtDelfiGraph {
 		
 		mechanics = new ArrayList<Mechanic>();
 
-		graph = new MultiGraph("Mechanic Graph");
+		graph = new MultiGraph("Node Graph");
 		
 		System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
 	}
@@ -131,18 +132,18 @@ public class AtDelfiGraph {
 		allNodes.addAll(conditions);
 		allNodes.addAll(actions);
 		
-		if(graphVisualization) {
-			visualizeGraph();
-			graph.display();
-			
-			
+		if(nodeVisualization) {
+			visualizeNodeGraph();
+		}
+		if(mechanicVisualization) {
+			visualizeMechanicGraph();
 		}
 		
 		return graph;
 
 	}
 
-	public void visualizeGraph() {
+	public void visualizeNodeGraph() {
 
 		// create all nodes
 		for(Node node : allNodes) {
@@ -156,7 +157,23 @@ public class AtDelfiGraph {
 			}
 		}
 		// space the nodes out a bit
-		spaceAllNodes();
+		spaceAllNodes(graph);
+	}
+	
+	public void visualizeMechanicGraph() {
+		Graph mechGraph = new MultiGraph("Mechanic Graph");
+		for (Mechanic mech : mechanics) {
+			MultiNode n = createMechanicNode(mechGraph, mech);
+		}
+		
+		for(Mechanic mech : mechanics) {
+			for (Mechanic output : mech.getOutputs()) {
+				addEdge(mech.getId(), output.getId());
+			}
+		}
+		spaceAllNodes(mechGraph);
+		
+		mechGraph.display();
 	}
 	
 	public void readSpriteSet() {
@@ -197,7 +214,7 @@ public class AtDelfiGraph {
 		sprites.add(time);
 	}
 	
-	public void spaceAllNodes() {
+	public void spaceAllNodes(Graph graph) {
 		int counter = 0;
 		Iterator<? extends MultiNode> nodes = graph.getNodeIterator();
 		while(nodes.hasNext()) {
@@ -206,7 +223,7 @@ public class AtDelfiGraph {
 			while(nodes2.hasNext()) {
 				MultiNode node2 = nodes2.next();
 				if(!node.equals(node2)) {
-					addHiddenEdge(Integer.parseInt(node.getId()), Integer.parseInt(node2.getId()), counter);
+					addHiddenEdge(Integer.parseInt(node.getId()), Integer.parseInt(node2.getId()), counter, graph);
 					counter++;
 				}
 			}
@@ -475,8 +492,15 @@ public class AtDelfiGraph {
 		
 		actions.add(action);
 		conditions.add(condition);
+		
+		List<Node> mechConditions = new ArrayList<Node>();
+		mechConditions.add(condition);
+		
+		List<Node> mechActions = new ArrayList<Node>();
+		mechActions.add(action);
 
 		// check if the portal will die on its own. If it does, we don't include it as a condition
+		List<Node> mechSprites = new ArrayList<Node>();
 		for (String name : termination.sprites) {
 			Node sprite = findSpriteNode(name);
 			if(!sprite.getAttributes().containsKey("total") || sprite.getAttributes().get("total").equals("0")) {
@@ -491,6 +515,8 @@ public class AtDelfiGraph {
 			time.addOutput(condition);
 			condition.addInput(time);
 		}
+		
+		createMechanic(mechSprites, mechConditions, mechActions, condition.getName(), true);
 	}
 	
 	public void createMechanic(List<Node> sprites2, List<Node> conditions2, List<Node> actionList, String readibleAction, boolean isTerminal) {
@@ -540,6 +566,15 @@ public class AtDelfiGraph {
 		return c;
 	}
 	
+	public MultiNode createMechanicNode(Graph graph, Mechanic mech) {
+		String details = actionAttributes;
+		MultiNode c = graph.addNode("" + mech.getId());
+		
+		c.addAttribute("ui.label", mech.getReadibleAction());
+		c.addAttribute("ui.style", details);
+		return c;
+	}
+	
 	public Edge addEdge(int idOne, int idTwo) {
 		MultiNode first = findVisualGraphNode(idOne);
 		MultiNode second = findVisualGraphNode(idTwo);
@@ -548,7 +583,7 @@ public class AtDelfiGraph {
 		return e;
 	}
 	
-	public Edge addHiddenEdge(int idOne, int idTwo, int counter) {
+	public Edge addHiddenEdge(int idOne, int idTwo, int counter, Graph graph) {
 
 		MultiNode first = findVisualGraphNode(idOne);
 		MultiNode second = findVisualGraphNode(idTwo);
