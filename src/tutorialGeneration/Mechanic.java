@@ -24,7 +24,7 @@ public class Mechanic {
 		conditions = new ArrayList<Node>();
 		actions = new ArrayList<Node>();
 		
-		this.isTerminal = isTerminal;
+		this.setTerminal(isTerminal);
 		
 		setFrames(new HashMap<String, int[]>());
 	}
@@ -113,6 +113,20 @@ public class Mechanic {
 	 */
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	/**
+	 * @return the isTerminal
+	 */
+	public boolean isTerminal() {
+		return isTerminal;
+	}
+
+	/**
+	 * @param isTerminal the isTerminal to set
+	 */
+	public void setTerminal(boolean isTerminal) {
+		this.isTerminal = isTerminal;
 	}
 	
 }

@@ -728,6 +728,9 @@ public class VisualDemonstrationInterfacer {
 				frameNumber = ruleActionQuery.getFirstRuleActionFrameNumber();
 				
 			}
+			else if(mech.isTerminal()) {
+				frameNumber = queryGameResult.getLastFrameNumber();
+			}
 			else {
 				int[] frames = mapFrameNumbersInTheSimulationByMechanic(mech, k);
 				if(frames.length > 0) {
