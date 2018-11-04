@@ -2,6 +2,7 @@ package tutorialGeneration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 public class Mechanic {
@@ -127,6 +128,45 @@ public class Mechanic {
 	 */
 	public void setTerminal(boolean isTerminal) {
 		this.isTerminal = isTerminal;
+	}
+	
+	public String toString() {
+		String mechString = "";
+		
+		// all sprites
+		mechString += "Sprites: ";
+		for (Node sprite : sprites) {
+			mechString += sprite.getName() + ", ";
+		}
+		mechString += "\n";
+		
+		// all conditions
+		mechString += "Conditions: ";
+		for (Node condition : conditions) {
+			mechString += condition.getName() + ", ";
+		}
+		mechString += "\n";
+		
+		// all actions
+		mechString += "Actions: ";
+		for (Node action : actions) {
+			mechString += action.getName() + ", ";
+		}
+		mechString += "\n";
+				
+		// all frames
+		mechString += "Frames: ";
+	    Iterator it = frames.entrySet().iterator();
+	    while(it.hasNext()) {
+	        HashMap.Entry pair = (HashMap.Entry)it.next();
+	        mechString += "\n";
+	        mechString += pair.getKey() + ": [";
+	        for (int i : (int[]) pair.getValue()) {
+	        	mechString += i + ", ";
+	        }
+	        mechString += "]\n";
+	    }		
+		return mechString;
 	}
 	
 }

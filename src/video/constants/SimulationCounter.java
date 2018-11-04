@@ -14,4 +14,6 @@ public class SimulationCounter {
 	public static int resultsCounter = 0;
 	public static int spriteCaptureCounter = 0;
 	
+	public static String gameName = "simulation";
+	
 }

@@ -22,6 +22,7 @@ import video.basics.GameSummary;
 import video.basics.Interaction;
 import video.basics.InteractionFrame;
 import video.basics.InteractionQueryObject;
+import video.constants.SimulationCounter;
 import video.gui.main.ShowFrames;
 import video.gui.main.VideoPlayer;
 import video.handlers.FrameInteractionAssociation;
@@ -46,20 +47,40 @@ public class VisualDemonstrationInterfacer {
 	private long numberOfSimulations;
 
 	private HashMap<Integer, String> agentMap;
+	
+	private String gameName;
 	public VisualDemonstrationInterfacer(boolean deleteFolders) throws FileNotFoundException, IOException, ParseException {
 		numberOfSimulations = 0;
 		if(deleteFolders)
 			video.utils.Utils.deleteFolder(new File("simulation"));
 		summaries = new ArrayList<>();
 		agentMap = new HashMap<Integer, String>();
+		SimulationCounter.counter = 0;
+		SimulationCounter.resultsCounter = 0;
+		SimulationCounter.spriteCaptureCounter = 0;
 	}
 
+	public VisualDemonstrationInterfacer(String gameName, boolean deleteFolders) throws FileNotFoundException, IOException, ParseException {
+		numberOfSimulations = 0;
+		this.gameName = gameName;
+		SimulationCounter.gameName = gameName;
+		if(deleteFolders)
+			video.utils.Utils.deleteFolder(new File(gameName));
+		Files.createDirectories(Paths.get(gameName));
+		summaries = new ArrayList<>();
+		agentMap = new HashMap<Integer, String>();
+		SimulationCounter.counter = 0;
+		SimulationCounter.resultsCounter = 0;
+		SimulationCounter.spriteCaptureCounter = 0;
+	}
+	
+	
 	public long numberOfSimulationFoldersAreAvailable()
 	{
 		long count = 0;
 		try {
 			return count  = Files.find(
-					Paths.get("simulation/"), 
+					Paths.get(gameName + "/"), 
 					1, 
 					(path, attributes) -> attributes.isDirectory()
 					).count() - 1;
@@ -68,6 +89,8 @@ public class VisualDemonstrationInterfacer {
 			return count;
 		} 
 	}
+	
+	
 	public void runGame(String game, String level1, String agentName) throws IOException
 	{
 		ArcadeMachine.runOneGame(game, level1, true, agentName, "", 0, 0);
@@ -319,7 +342,7 @@ public class VisualDemonstrationInterfacer {
 		Interaction interaction = new Interaction(mechanic.getReadibleAction(), mechanic.getSprites().get(0).getName(), mechanic.getSprites().get(1).getName());
 		int [] frameNumbers = new int[]{};
 
-		String path = "simulation/game" + simulation + "/interactions/interaction.json";
+		String path = gameName + "/game" + simulation + "/interactions/interaction.json";
 		FrameInteractionAssociation frameInteractionAssociation = new FrameInteractionAssociation(path);
 		JSONObject interactionObject = null;
 		interactionObject = frameInteractionAssociation.
@@ -418,7 +441,7 @@ public class VisualDemonstrationInterfacer {
 		ArrayList<String> interactionpaths = new ArrayList<>();
 		for(int i = 0; i < numberOfSimulations2; i++)
 		{
-			interactionpaths.add("simulation/game" + i + "/interactions/interaction.json");
+			interactionpaths.add(gameName + "/game" + i + "/interactions/interaction.json");
 		}
 		return interactionpaths;
 	}
@@ -437,11 +460,11 @@ public class VisualDemonstrationInterfacer {
 	{
 		for(int i = 0; i < numberOfSimulations; i++)
 		{
-			Files.createDirectories(Paths.get("simulation/game" + i + "/frames/"));
-			Files.createDirectories(Paths.get("simulation/game" + i + "/interactions/"));
-			Files.createDirectories(Paths.get("simulation/game" + i + "/actions/"));
-			Files.createDirectories(Paths.get("simulation/game" + i + "/result/"));
-			Files.createDirectories(Paths.get("simulation/game" + i + "/capture/"));
+			Files.createDirectories(Paths.get(gameName + "/game" + i + "/frames/"));
+			Files.createDirectories(Paths.get(gameName + "/game" + i + "/interactions/"));
+			Files.createDirectories(Paths.get(gameName + "/game" + i + "/actions/"));
+			Files.createDirectories(Paths.get(gameName + "/game" + i + "/result/"));
+			Files.createDirectories(Paths.get(gameName + "/game" + i + "/capture/"));
 		}
 	}
 
@@ -460,7 +483,7 @@ public class VisualDemonstrationInterfacer {
 		ArrayList<String> interactionFiles = new ArrayList<>();
 		for (int i = 0; i < bunchOfgames.size(); i++) 
 		{
-			interactionFiles.add("simulation/game" + i + "/interactions/interaction.json");
+			interactionFiles.add(gameName + "/game" + i + "/interactions/interaction.json");
 		}
 
 		try {
@@ -493,7 +516,7 @@ public class VisualDemonstrationInterfacer {
 		ArrayList<String> interactionFiles = new ArrayList<>();
 		for (int i = 0; i < bunchOfgames.size(); i++) 
 		{
-			interactionFiles.add("simulation/game" + i + "/interactions/interaction.json");
+			interactionFiles.add(gameName + "/game" + i + "/interactions/interaction.json");
 		}
 
 		try {
@@ -545,11 +568,11 @@ public class VisualDemonstrationInterfacer {
 		for (int i = 0; i < simulationNumber; i++) {
 
 			//1 - Load Files
-			String fileInteraction = "simulation/game" 
+			String fileInteraction = gameName + "/game" 
 					+ i + "/interactions/interaction.json";
-			String fileCapture = "simulation/game" 
+			String fileCapture = gameName + "/game" 
 					+ i + "/capture/capture.json";
-			String fileResult = "simulation/game" 
+			String fileResult = gameName + "/game" 
 					+ i + "/result/result.json";
 
 			//2 - Initialize Auxiliary classes
@@ -577,7 +600,7 @@ public class VisualDemonstrationInterfacer {
 		{
 			Interaction interaction = new Interaction(mechanics.get(i).getReadibleAction(), mechanics.get(i).getSprites().get(0).getName(), mechanics.get(i).getSprites().get(0).getName());
 			String [] frames = new String[]{};
-			String path = "simulation/game" 
+			String path = gameName + "/game" 
 					+ simulationNumber + "/interactions/interaction.json";
 			FrameInteractionAssociation frameInteractionAssociation = new FrameInteractionAssociation(path);
 
@@ -620,11 +643,11 @@ public class VisualDemonstrationInterfacer {
 		for (int i = 0; i < simulationNumber; i++) {
 
 			//1 - Load Files
-			String fileInteraction = "simulation/game" 
+			String fileInteraction = gameName + "/game" 
 					+ i + "/interactions/interaction.json";
-			String fileCapture = "simulation/game" 
+			String fileCapture = gameName + "/game" 
 					+ i + "/capture/capture.json";
-			String fileResult = "simulation/game" 
+			String fileResult = gameName + "/game" 
 					+ i + "/result/result.json";
 
 			//2 - Initialize Auxiliary classes
@@ -713,14 +736,15 @@ public class VisualDemonstrationInterfacer {
 		return simulationAndFrameNumbers;
 	}
 
+	
 	public HashMap<String, int[]> oneMechanicQuery(Mechanic mech, String[] agents) throws FileNotFoundException, IOException, ParseException {
 		HashMap<String, int[]> dict = new HashMap<String, int[]>();
 		
 		int numberOfSimulations = (int)numberOfSimulationFoldersAreAvailable();
 		int[][] myReturnArray = new int[numberOfSimulations][];
 		for(int k = 0; k < numberOfSimulations; k++) {
-			QueryActionRule ruleActionQuery = new QueryActionRule("simulation/game" + k + "/actions/actions.json");
-			QueryGameResult queryGameResult = new QueryGameResult("simulation/game" + k + "/result/result.json");
+			QueryActionRule ruleActionQuery = new QueryActionRule(gameName + "/game" + k + "/actions/actions.json");
+			QueryGameResult queryGameResult = new QueryGameResult(gameName + "/game" + k + "/result/result.json");
 			int frameNumber = -1;
 			System.out.println("Finding frames for: " + mech.getReadibleAction());
 			if(mech.getConditions().get(0).getType().equals("Player Input")) {
@@ -729,7 +753,12 @@ public class VisualDemonstrationInterfacer {
 				
 			}
 			else if(mech.isTerminal()) {
-				frameNumber = queryGameResult.getLastFrameNumber();
+				if ((mech.getActions().get(0).getName().equals("Win") && queryGameResult.getResult() == 1) 
+						|| mech.getActions().get(0).getName().equals("Lose") && queryGameResult.getResult() == 0) {
+					frameNumber = queryGameResult.getLastFrameNumber();
+				} else {
+					frameNumber = -1;
+				}
 			}
 			else {
 				int[] frames = mapFrameNumbersInTheSimulationByMechanic(mech, k);
@@ -766,8 +795,8 @@ public class VisualDemonstrationInterfacer {
 		int[][] myReturnArray = new int[numberOfSimulations][];
 		for(int k = 0; k < numberOfSimulations; k++) {
 			
-			QueryActionRule ruleActionQuery = new QueryActionRule("simulation/game" + k + "/actions/actions.json");
-			QueryGameResult queryGameResult = new QueryGameResult("simulation/game" + k + "/result/result.json");
+			QueryActionRule ruleActionQuery = new QueryActionRule(gameName + "/game" + k + "/actions/actions.json");
+			QueryGameResult queryGameResult = new QueryGameResult(gameName + "/game" + k + "/result/result.json");
 			
 			int[] earliestFrames = new int[superP.size()+1];
 			for(int i = 0; i < superP.size()-1; i++){

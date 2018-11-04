@@ -503,6 +503,7 @@ public class AtDelfiGraph {
 		List<Node> mechSprites = new ArrayList<Node>();
 		for (String name : termination.sprites) {
 			Node sprite = findSpriteNode(name);
+			mechSprites.add(sprite);
 			if(!sprite.getAttributes().containsKey("total") || sprite.getAttributes().get("total").equals("0")) {
 				sprite.addOutput(condition);
 				condition.addInput(sprite);
@@ -512,6 +513,7 @@ public class AtDelfiGraph {
 		// if this is a time condition, then it wont have any sprites associated with it by default, so add the Time node to it
 		if (condition.getName().equals("Timeout")) {
 			Node time = findSpriteNode("Time");
+			mechSprites.add(time);
 			time.addOutput(condition);
 			condition.addInput(time);
 		}
@@ -697,8 +699,12 @@ public class AtDelfiGraph {
 	public void insertFrameInfo(VisualDemonstrationInterfacer vdi, String[] agents) {
 		for (Mechanic mech : mechanics) {
 			try {
+				int isWin;
 				HashMap<String, int[]> firstDict = vdi.oneMechanicQuery(mech, agents);
 				mech.setFrames(firstDict);
+				if (verbose) {
+					System.out.println(mech.toString());
+				}
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

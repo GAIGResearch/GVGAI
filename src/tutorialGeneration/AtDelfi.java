@@ -43,8 +43,8 @@ public class AtDelfi {
 	
 	private VisualDemonstrationInterfacer vdi;
 	
-//	private String[] agents = {"adrienctx.Agent", "NovelTS.Agent", "NovTea.Agent", "Number27.Agent", "YOLOBOT.Agent", "tracks.singlePlayer.simple.doNothing.Agent", "tracks.singlePlayer.simple.sampleonesteplookahead.Agent"};
-	private String[] agents = {"adrienctx.Agent"};
+	private String[] agents = {"adrienctx.Agent", "NovelTS.Agent", "NovTea.Agent", "Number27.Agent", "YOLOBOT.Agent", "tracks.singlePlayer.simple.doNothing.Agent", "tracks.singlePlayer.simple.sampleonesteplookahead.Agent"};
+//	private String[] agents = {"adrienctx.Agent"};
 
 	public AtDelfi(String gameFile, String levelFile, String gameName, int seed, boolean verbose) {
 		this.verbose = verbose;
@@ -73,7 +73,7 @@ public class AtDelfi {
 		this.ga = new GameAnalyzer(gd);
 		
 		try {
-			this.vdi = new VisualDemonstrationInterfacer(false);
+			this.vdi = new VisualDemonstrationInterfacer(this.gameName, false);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -94,10 +94,24 @@ public class AtDelfi {
 		this.gameGraph.insertFrameInfo(vdi, agents);
 	}
 
+	public void testPlayGames() {
+		ArrayList<BunchOfGames> bogs = new ArrayList<>();
+		for(int i = 0; i < 1; i++) {
+			for(int j = 0; j < 1; j++) {
+				bogs.add(new BunchOfGames(gameFile, levelFile, agents[i]));
+			}
+		}
+		try {
+			vdi.runBunchOfGames(bogs);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	public void playGames() {
 		ArrayList<BunchOfGames> bogs = new ArrayList<>();
 		for(int i = 0; i < agents.length; i++) {
-			for(int j = 0; j < 1; j++) {
+			for(int j = 0; j < 5; j++) {
 				bogs.add(new BunchOfGames(gameFile, levelFile, agents[i]));
 			}
 		}

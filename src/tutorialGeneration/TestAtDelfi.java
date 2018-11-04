@@ -1,5 +1,6 @@
 package tutorialGeneration;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import core.game.Game;
@@ -55,7 +56,10 @@ public class TestAtDelfi {
 		
 //		tester.testAllGames(seed);
 		tester.testOneGame(seed, tester.gameIdx);
-
+//		tester.testFirstGames(seed);
+//		tester.testSecondGames(seed);
+//		tester.testThirdGames(seed);
+//		tester.testFourthGames(seed);
 	}
 	
 	public void testAllGames(int seed) {
@@ -66,20 +70,79 @@ public class TestAtDelfi {
 	        this.recordTutorialFile = this.generateTutorialPath + gameInfo[1] + "_tutorial.txt";
 
 
-			AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, this.getGame(this.gameIdx)[0], seed, this.verbose);
-			atdelfi.playGames();
-			atdelfi.buildGraph();
+			AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, gameInfo[1], seed, this.verbose);
+			atdelfi.testPlayGames();
+//			atdelfi.buildGraph();
 			
 		}
 	}
 	
+	public void testFirstGames(int seed) {
+		// Set up AtDelfi
+		for (String[] gameInfo : Arrays.copyOfRange(this.games, 0, 12)) {
+			this.gameFile = this.generateTutorialPath + gameInfo[1] + ".txt";
+			this.levelFile = this.gamesPath + gameInfo[1] + "_lvl" + this.levelIdx + ".txt";
+	        this.recordTutorialFile = this.generateTutorialPath + gameInfo[1] + "_tutorial.txt";
+
+
+			AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, gameInfo[1], seed, this.verbose);
+			atdelfi.playGames();
+//			atdelfi.buildGraph();
+			
+		}
+	}
+	
+	public void testSecondGames(int seed) {
+		// Set up AtDelfi
+		for (String[] gameInfo : Arrays.copyOfRange(this.games, 12, 24)) {
+			this.gameFile = this.generateTutorialPath + gameInfo[1] + ".txt";
+			this.levelFile = this.gamesPath + gameInfo[1] + "_lvl" + this.levelIdx + ".txt";
+	        this.recordTutorialFile = this.generateTutorialPath + gameInfo[1] + "_tutorial.txt";
+
+
+			AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, gameInfo[1], seed, this.verbose);
+			atdelfi.playGames();
+//			atdelfi.buildGraph();
+			
+		}
+	}
+	
+	public void testThirdGames(int seed) {
+		// Set up AtDelfi
+		for (String[] gameInfo : Arrays.copyOfRange(this.games, 24, 36)) {
+			this.gameFile = this.generateTutorialPath + gameInfo[1] + ".txt";
+			this.levelFile = this.gamesPath + gameInfo[1] + "_lvl" + this.levelIdx + ".txt";
+	        this.recordTutorialFile = this.generateTutorialPath + gameInfo[1] + "_tutorial.txt";
+
+
+			AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, gameInfo[1], seed, this.verbose);
+			atdelfi.playGames();
+//			atdelfi.buildGraph();
+			
+		}
+	}
+	
+	public void testFourthGames(int seed) {
+		// Set up AtDelfi
+		for (String[] gameInfo : Arrays.copyOfRange(this.games, 36, 49)) {
+			this.gameFile = this.generateTutorialPath + gameInfo[1] + ".txt";
+			this.levelFile = this.gamesPath + gameInfo[1] + "_lvl" + this.levelIdx + ".txt";
+	        this.recordTutorialFile = this.generateTutorialPath + gameInfo[1] + "_tutorial.txt";
+
+
+			AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, gameInfo[1], seed, this.verbose);
+			atdelfi.playGames();
+//			atdelfi.buildGraph();
+			
+		}
+	}
 	public void testOneGame(int seed, int gameIdx) {
 		this.gameFile = this.generateTutorialPath + games[gameIdx][1] + ".txt";
 		this.levelFile = this.gamesPath + games[gameIdx][1] + "_lvl" + this.levelIdx + ".txt";
         this.recordTutorialFile = this.generateTutorialPath + games[gameIdx][1] + "_tutorial.txt";
 
-		AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, this.getGame(this.gameIdx)[0], seed, this.verbose);
-		atdelfi.playGames();
+		AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, this.getGame(this.gameIdx)[1], seed, this.verbose);
+		atdelfi.testPlayGames();
 		atdelfi.buildGraph();
 	}
 	

@@ -1008,7 +1008,7 @@ public abstract class Game {
 			
 			//storing this (view) frame
 			storeFrame.saveImage(new File(
-					"simulation/game" + SimulationCounter.counter +
+					SimulationCounter.gameName + "/game" + SimulationCounter.counter +
 					"/" + "frames/frame" + this.gameTick + ".png"), view);
 
 			// Update the frame title to reflect current score and tick.
@@ -1024,10 +1024,10 @@ public abstract class Game {
 		}
 		
 		//stores the interaction in a JSONFile
-		storeInteraction.writeInteractionJSONFile("simulation/game" + SimulationCounter.counter +
+		storeInteraction.writeInteractionJSONFile(SimulationCounter.gameName + "/game" + SimulationCounter.counter +
 				"/" + "/interactions/interaction.json");
 		
-		storePlayerAction.writePlayerActionJSONFile("simulation/game" + SimulationCounter.counter +
+		storePlayerAction.writePlayerActionJSONFile(SimulationCounter.gameName + "/game" + SimulationCounter.counter +
 				"/" + "actions/actions.json");
 		
 		SimulationCounter.counter += 1;
@@ -1279,7 +1279,7 @@ public abstract class Game {
 					,String.valueOf(gameTick));
 			
 			storeGameSimulationResult.
-			writeResultToAJSONFile("simulation/game" + SimulationCounter.resultsCounter +
+			writeResultToAJSONFile(SimulationCounter.gameName + "/game" + SimulationCounter.resultsCounter +
 					"/" + "result/result.json");
 			SimulationCounter.resultsCounter += 1;
 		}
@@ -1304,7 +1304,7 @@ public abstract class Game {
 		
 		storeSpriteCapture.
 			writeSpriteCaptureJSONFile
-				("simulation/game" + SimulationCounter.spriteCaptureCounter +
+				(SimulationCounter.gameName + "/game" + SimulationCounter.spriteCaptureCounter +
 						"/" + "capture/capture.json");
 		SimulationCounter.spriteCaptureCounter += 1;
 		
