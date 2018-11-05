@@ -172,6 +172,14 @@ public class Mechanic {
 	    }		
 		return mechString;
 	}
+	
+	public boolean isWin() {
+		if(this.getActions().get(0).equals("Win")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	/**
 	 * @return the visted

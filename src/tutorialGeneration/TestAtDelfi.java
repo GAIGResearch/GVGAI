@@ -1,6 +1,7 @@
 package tutorialGeneration;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 import core.game.Game;
@@ -11,6 +12,8 @@ import core.vgdl.VGDLParser;
 import core.vgdl.VGDLRegistry;
 import tools.IO;
 import tools.Utils;
+import tutorialGeneration.criticalPathing.CriticalPather;
+import tutorialGeneration.criticalPathing.GreedyPather;
 
 public class TestAtDelfi {
 	boolean verbose = true;
@@ -136,14 +139,23 @@ public class TestAtDelfi {
 			
 		}
 	}
+	
 	public void testOneGame(int seed, int gameIdx) {
 		this.gameFile = this.generateTutorialPath + games[gameIdx][1] + ".txt";
 		this.levelFile = this.gamesPath + games[gameIdx][1] + "_lvl" + this.levelIdx + ".txt";
         this.recordTutorialFile = this.generateTutorialPath + games[gameIdx][1] + "_tutorial.txt";
 
 		AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, this.getGame(this.gameIdx)[1], seed, this.verbose);
-		atdelfi.testPlayGames();
-		atdelfi.buildGraph();
+//		atdelfi.testPlayGames();
+		atdelfi.buildGraph();	
+		
+		CriticalPather criticalPather = new GreedyPather(atdelfi.getGameGraph());
+		
+		List<Mechanic> critPath = atdelfi.criticalPath(criticalPather, "adrienctx", true);
+		
+		for (Mechanic m : critPath) {
+			System.out.println(m.getReadibleAction());
+		}
 	}
 	
 	/**

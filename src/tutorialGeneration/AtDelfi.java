@@ -3,6 +3,7 @@ package tutorialGeneration;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.border.Border;
@@ -19,7 +20,7 @@ import core.vgdl.VGDLRegistry;
 import tools.GameAnalyzer;
 import tools.IO;
 import tools.LevelAnalyzer;
-
+import tutorialGeneration.criticalPathing.CriticalPather;
 import video.basics.BunchOfGames;
 
 public class AtDelfi {
@@ -42,7 +43,7 @@ public class AtDelfi {
 	private String levelFile;
 	
 	private VisualDemonstrationInterfacer vdi;
-	
+		
 	private String[] agents = {"adrienctx.Agent", "NovelTS.Agent", "NovTea.Agent", "Number27.Agent", "YOLOBOT.Agent", "tracks.singlePlayer.simple.doNothing.Agent", "tracks.singlePlayer.simple.sampleonesteplookahead.Agent"};
 //	private String[] agents = {"adrienctx.Agent"};
 
@@ -108,6 +109,14 @@ public class AtDelfi {
 			e.printStackTrace();
 		}
 	}
+	
+	public List<Mechanic> criticalPath(CriticalPather criticalPather, String agent, boolean isWin) {
+		List<Mechanic> criticalPath = criticalPather.findCriticalPath(agent, isWin);
+		
+		return criticalPath;
+	}
+	
+	
 	public void playGames() {
 		ArrayList<BunchOfGames> bogs = new ArrayList<>();
 		for(int i = 0; i < agents.length; i++) {
