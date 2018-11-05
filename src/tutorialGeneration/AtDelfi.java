@@ -158,4 +158,6 @@ public class AtDelfi {
 	public void setGameGraph(AtDelfiGraph gameGraph) {
 		this.gameGraph = gameGraph;
 	}
+	
+	
 }	

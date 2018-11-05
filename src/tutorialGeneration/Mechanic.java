@@ -18,9 +18,13 @@ public class Mechanic {
 	
 	private boolean isTerminal;
 	
+	
+	private boolean visted;
+	
 	public Mechanic(boolean isTerminal) {
 		this.setId(Mechanic.idCounter++);
 
+		setVisted(false);
 		sprites = new ArrayList<Node>();
 		conditions = new ArrayList<Node>();
 		actions = new ArrayList<Node>();
@@ -167,6 +171,20 @@ public class Mechanic {
 	        mechString += "]\n";
 	    }		
 		return mechString;
+	}
+
+	/**
+	 * @return the visted
+	 */
+	public boolean isVisted() {
+		return visted;
+	}
+
+	/**
+	 * @param visted the visted to set
+	 */
+	public void setVisted(boolean visted) {
+		this.visted = visted;
 	}
 	
 }

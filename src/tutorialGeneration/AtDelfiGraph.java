@@ -717,4 +717,21 @@ public class AtDelfiGraph {
 			}
 		}
 	}
+	
+	public List<Mechanic> getMechanics() {
+		return mechanics;
+	}
+	
+	
+	public List<Node> getConditions() {
+		return conditions;
+	}
+	
+	public List<Node> getActions() {
+		return actions;
+	}
+	
+	public List<Node> getAvatars() {
+		return avatars;
+	}
 }
