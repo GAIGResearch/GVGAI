@@ -93,6 +93,13 @@ public class AtDelfi {
 		Graph graph = this.gameGraph.build();
 		changeGraphTitle(graph);
 		this.gameGraph.insertFrameInfo(vdi, agents);
+		
+		if(gameGraph.isMechanicVisualization()) {
+			gameGraph.visualizeMechanicGraph();
+		}
+		if(gameGraph.isNodeVisualization()) {
+			gameGraph.visualizeNodeGraph();
+		}
 	}
 
 	public void testPlayGames() {

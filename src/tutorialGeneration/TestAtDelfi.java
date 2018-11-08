@@ -43,7 +43,7 @@ public class TestAtDelfi {
     String gameFile, levelFile, recordTutorialFile;
 
     int levelIdx = 0; // level names from 0 to 4 (game_lvlN.txt).
-    int gameIdx = 42;
+    int gameIdx = 0;
 
     public TestAtDelfi() {
         // settings        
@@ -151,10 +151,10 @@ public class TestAtDelfi {
 		
 		CriticalPather criticalPather = new GreedyPather(atdelfi.getGameGraph());
 		
-		List<Mechanic> critPath = atdelfi.criticalPath(criticalPather, "adrienctx", true);
+		List<Mechanic> critPath = atdelfi.criticalPath(criticalPather, "adrienctx.Agent", true);
 		
 		for (Mechanic m : critPath) {
-			System.out.println(m.getReadibleAction());
+			System.out.println(m.getSprites().get(0).getName() + " " + m.getReadibleAction() + " " + m.getActions().get(0).getName());
 		}
 	}
 	

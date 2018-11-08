@@ -52,6 +52,11 @@ public class Mechanic {
 	
 	public void setSprites(List<Node> sprites2) {
 		this.sprites = sprites2;
+		
+		for (Node sprite: sprites) {
+			if(!sprite.getMechanics().contains(this))
+				sprite.addMechanic(this);
+		}
 	}
 	
 	public List<Node> getConditions() {
@@ -60,6 +65,11 @@ public class Mechanic {
 	
 	public void setConditions(List<Node> conditions) {
 		this.conditions = conditions;
+		
+		for (Node cond: conditions) {
+			if(!cond.getMechanics().contains(this))
+				cond.addMechanic(this);
+		}
 	}
 	
 	public List<Node> getActions() {
@@ -68,6 +78,11 @@ public class Mechanic {
 	
 	public void setActions(List<Node> actions) {
 		this.actions = actions;
+		
+		for (Node action: actions) {
+			if(!action.getMechanics().contains(this))
+				action.addMechanic(this);
+		}
 	}
 	
 	

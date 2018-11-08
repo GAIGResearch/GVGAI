@@ -740,7 +740,7 @@ public class VisualDemonstrationInterfacer {
 	public HashMap<String, int[]> oneMechanicQuery(Mechanic mech, String[] agents) throws FileNotFoundException, IOException, ParseException {
 		HashMap<String, int[]> dict = new HashMap<String, int[]>();
 		
-		int numberOfSimulations = (int)numberOfSimulationFoldersAreAvailable();
+		int numberOfSimulations = agents.length;
 		int[][] myReturnArray = new int[numberOfSimulations][];
 		for(int k = 0; k < numberOfSimulations; k++) {
 			QueryActionRule ruleActionQuery = new QueryActionRule(gameName + "/game" + k + "/actions/actions.json");

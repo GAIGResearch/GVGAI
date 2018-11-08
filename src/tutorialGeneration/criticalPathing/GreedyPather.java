@@ -39,15 +39,26 @@ public class GreedyPather extends CriticalPather {
 			// loop thru all the mechs
 			for (Mechanic mech : currentChoices) {
 				// if the mech has an earlier frame then the current earliest, replace 
-				if (mech.getFrames().get(agent)[0] < earliestMech.getFrames().get(agent)[0]) {
+				if (mech.getFrames().get(agent)[0] < earliestFrame && mech.getFrames().get(agent)[0] != -1) {
 					earliestMech = mech;
 				}
 			}
+			
+			// break if earliestMech is null
+			if(earliestMech == null) {
+				break;
+			}
+			
 			// reset currentChoices
-			currentChoices = earliestMech.getOutputs();
+			currentChoices = new ArrayList<Mechanic>();
+			for(Mechanic mech : earliestMech.getOutputs()) {
+				if(!mech.isVisted()) {
+					currentChoices.add(mech);
+				}
+			}
 			// put this round in the critical path
 			criticalPath.add(earliestMech);
-			
+			earliestMech.setVisted(true);
 			// check if the earliest was a terminal
 			if (earliestMech.isTerminal() && earliestMech.isWin() == isWin) {
 				terminate = true;

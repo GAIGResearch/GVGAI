@@ -132,12 +132,12 @@ public class AtDelfiGraph {
 		allNodes.addAll(conditions);
 		allNodes.addAll(actions);
 		
-		if(nodeVisualization) {
-			visualizeNodeGraph();
-		}
-		if(mechanicVisualization) {
-			visualizeMechanicGraph();
-		}
+//		if(nodeVisualization) {
+//			visualizeNodeGraph();
+//		}
+//		if(mechanicVisualization) {
+//			visualizeMechanicGraph();
+//		}
 		
 		return graph;
 
@@ -153,7 +153,7 @@ public class AtDelfiGraph {
 		// create all edges
 		for (Node node : allNodes) {
 			for (Node output : node.getOutputs()) {
-				addEdge(node.getId(), output.getId());
+				addEdge(node.getId(), output.getId(), this.graph);
 			}
 		}
 		// space the nodes out a bit
@@ -168,7 +168,7 @@ public class AtDelfiGraph {
 		
 		for(Mechanic mech : mechanics) {
 			for (Mechanic output : mech.getOutputs()) {
-				addEdge(mech.getId(), output.getId());
+				addEdge(mech.getId(), output.getId(), mechGraph);
 			}
 		}
 		spaceAllNodes(mechGraph);
@@ -475,6 +475,12 @@ public class AtDelfiGraph {
 			action.addInput(condition);
 			action.addOutput(output);
 			output.addInput(action);
+			
+			Mechanic mech = new Mechanic(false);
+			mech.addAction(action);
+			mech.addCondition(condition);
+			mech.addSprite(avatar);
+			mechanics.add(mech);
 		}
 	}
 	
@@ -529,6 +535,7 @@ public class AtDelfiGraph {
 		mechanic.setReadibleAction(readibleAction);
 		
 		mechanics.add(mechanic);
+		
 	}
 	
 	public Node findSpriteNode(String spriteName) {
@@ -540,7 +547,7 @@ public class AtDelfiGraph {
 		return null;
 	}
 	
-	public MultiNode findVisualGraphNode(int id) {
+	public MultiNode findVisualGraphNode(Graph graph, int id) {
 		Iterator<? extends MultiNode> nodes = graph.getNodeIterator();
 		while(nodes.hasNext()) {
 			MultiNode node = nodes.next();
@@ -572,23 +579,26 @@ public class AtDelfiGraph {
 		String details = actionAttributes;
 		MultiNode c = graph.addNode("" + mech.getId());
 		
-		c.addAttribute("ui.label", mech.getReadibleAction());
+		c.addAttribute("ui.label", mech.getActions().get(0).getName() + " : " + mech.getFrames().get("adrienctx.Agent")[0]);
 		c.addAttribute("ui.style", details);
 		return c;
 	}
 	
-	public Edge addEdge(int idOne, int idTwo) {
-		MultiNode first = findVisualGraphNode(idOne);
-		MultiNode second = findVisualGraphNode(idTwo);
-		Edge e = graph.addEdge(first.getId() + ":" + second.getId(), first, second, true);
-		e.addAttribute("layout.weight", 25);
-		return e;
+	public Edge addEdge(int idOne, int idTwo, Graph graph) {
+		if(idOne != idTwo) {
+			MultiNode first = findVisualGraphNode(graph, idOne);
+			MultiNode second = findVisualGraphNode(graph,idTwo);
+			Edge e = graph.addEdge(first.getId() + ":" + second.getId(), first, second, true);
+			e.addAttribute("layout.weight", 25);
+			return e;
+		}
+		return null;
 	}
 	
 	public Edge addHiddenEdge(int idOne, int idTwo, int counter, Graph graph) {
 
-		MultiNode first = findVisualGraphNode(idOne);
-		MultiNode second = findVisualGraphNode(idTwo);
+		MultiNode first = findVisualGraphNode(graph, idOne);
+		MultiNode second = findVisualGraphNode(graph, idTwo);
 		Edge e = graph.addEdge("" + counter, first, second, true);
 		e.addAttribute("layout.weight", 25);
 		e.addAttribute("ui.hide");
@@ -733,5 +743,33 @@ public class AtDelfiGraph {
 	
 	public List<Node> getAvatars() {
 		return avatars;
+	}
+
+	/**
+	 * @return the nodeVisualization
+	 */
+	public boolean isNodeVisualization() {
+		return nodeVisualization;
+	}
+
+	/**
+	 * @param nodeVisualization the nodeVisualization to set
+	 */
+	public void setNodeVisualization(boolean nodeVisualization) {
+		this.nodeVisualization = nodeVisualization;
+	}
+
+	/**
+	 * @return the mechanicVisualization
+	 */
+	public boolean isMechanicVisualization() {
+		return mechanicVisualization;
+	}
+
+	/**
+	 * @param mechanicVisualization the mechanicVisualization to set
+	 */
+	public void setMechanicVisualization(boolean mechanicVisualization) {
+		this.mechanicVisualization = mechanicVisualization;
 	}
 }
