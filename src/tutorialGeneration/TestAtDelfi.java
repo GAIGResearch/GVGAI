@@ -57,8 +57,8 @@ public class TestAtDelfi {
         int seed = new Random().nextInt();
 		TestAtDelfi tester = new TestAtDelfi();		
 		
-//		tester.testAllGames(seed);
-		tester.testOneGame(seed, tester.gameIdx);
+		tester.testAllGames(seed);
+//		tester.testOneGame(seed, tester.gameIdx);
 //		tester.testFirstGames(seed);
 //		tester.testSecondGames(seed);
 //		tester.testThirdGames(seed);
@@ -74,7 +74,7 @@ public class TestAtDelfi {
 
 
 			AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, gameInfo[1], seed, this.verbose);
-			atdelfi.testPlayGames();
+			atdelfi.playGames();
 //			atdelfi.buildGraph();
 			
 		}

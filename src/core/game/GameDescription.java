@@ -503,9 +503,15 @@ public class GameDescription {
 		 * All the depending sprites on that
 		 */
 		public ArrayList<String> sprites;
+		
+		/**
+		 * All the param options like "stype" associated with this interaction
+		 */
+		public HashMap<String, String> parameters;
 
 		public InteractionData() {
 			sprites = new ArrayList<String>();
+			parameters = new HashMap<String, String>();
 		}
 
 		@Override

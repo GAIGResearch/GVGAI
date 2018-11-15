@@ -772,7 +772,7 @@ public abstract class Game {
 			temp.type = temp.type.substring(temp.type.lastIndexOf('.') + 1);
 			temp.scoreChange = e.scoreChange;
 			temp.sprites.addAll(e.getEffectSprites());
-
+			
 			results.add(temp);
 		}
 
@@ -1008,7 +1008,7 @@ public abstract class Game {
 			
 			//storing this (view) frame
 			storeFrame.saveImage(new File(
-					SimulationCounter.gameName + "/game" + SimulationCounter.counter +
+					SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
 					"/" + "frames/frame" + this.gameTick + ".png"), view);
 
 			// Update the frame title to reflect current score and tick.
@@ -1024,11 +1024,11 @@ public abstract class Game {
 		}
 		
 		//stores the interaction in a JSONFile
-		storeInteraction.writeInteractionJSONFile(SimulationCounter.gameName + "/game" + SimulationCounter.counter +
-				"/" + "/interactions/interaction.json");
+		storeInteraction.writeInteractionJSONFile(SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
+				"/interactions/interaction.json");
 		
-		storePlayerAction.writePlayerActionJSONFile(SimulationCounter.gameName + "/game" + SimulationCounter.counter +
-				"/" + "actions/actions.json");
+		storePlayerAction.writePlayerActionJSONFile(SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
+				"/actions/actions.json");
 		
 		SimulationCounter.counter += 1;
 		
@@ -1279,7 +1279,7 @@ public abstract class Game {
 					,String.valueOf(gameTick));
 			
 			storeGameSimulationResult.
-			writeResultToAJSONFile(SimulationCounter.gameName + "/game" + SimulationCounter.resultsCounter +
+			writeResultToAJSONFile(SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
 					"/" + "result/result.json");
 			SimulationCounter.resultsCounter += 1;
 		}
@@ -1304,7 +1304,7 @@ public abstract class Game {
 		
 		storeSpriteCapture.
 			writeSpriteCaptureJSONFile
-				(SimulationCounter.gameName + "/game" + SimulationCounter.spriteCaptureCounter +
+				(SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
 						"/" + "capture/capture.json");
 		SimulationCounter.spriteCaptureCounter += 1;
 		

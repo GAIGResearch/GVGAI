@@ -47,7 +47,7 @@ public class AtDelfiGraph {
 			"BounceForward", "ChangeResource", "AddHealthPoints", "AddHealthPointsToMax", "Align",
 			"SubtractHealthPoints", "CloneSprite", "StepBack");
 	private List<String> bothSpriteTargetActions = Arrays.asList("KillBoth", "PullWithIt", "CollectResource");
-	private List<String> stypePlusTargetActions = Arrays.asList("TransformTo", "TransformToSingleton");
+	private List<String> stypePlusTargetActions = Arrays.asList("TransformTo", "TransformToSingleton", "TransformToAll");
 	private List<String> stypeTargetActions = Arrays.asList("Spawn", "KillAll", "SpawnIfHasMore", "SpawnIfHasLess", "SpawnBehind");
 	/**
 	 * Information parsed from the VGDL File
@@ -78,6 +78,7 @@ public class AtDelfiGraph {
 	 * the visualization graph
 	 */
 	private Graph graph;
+	private Graph mechanicGraph;
 
 	/**
 	 * colors for the nodes
@@ -85,13 +86,17 @@ public class AtDelfiGraph {
 	private String spriteColor = "#FCEC8C";
 	private String conditionColor = "#E77E43";
 	private String actionColor = "#743C2E";
-			
+	private String critPathColor = "#F4A742";
+	private String mechanicColor = "#FFFFFF";
 	/**
 	 * attributes for the nodes
 	 */
 	private String spriteAttributes = "shape:circle;fill-color:" + spriteColor +";size:100px;text-color:#000000;text-size:12;text-alignment:center;";
 	private String conditionAttributes = "shape:diamond;fill-color:" + conditionColor + ";size:100px;text-color:#000000;text-size:12;text-alignment:center;";
 	private String actionAttributes = "shape:box;fill-color:" + actionColor + ";size:75px;text-color:#FFFFFF;text-size:12;text-alignment:center;";
+	
+	private String critPathAttributes = "shape:rounded-box;fill-color:" + critPathColor +";size:250px, 25px;text-color:#000000;text-size:12;text-alignment:center;";
+	private String mechanicAttributes = "shape:rounded-box;stroke-mode:plain;fill-color:" + mechanicColor +";size:250px, 25px;text-color:#000000;text-size:12;text-alignment:center;";
 	
 	/**
 	 * Constructs a new AtDelfi Graph
@@ -161,19 +166,19 @@ public class AtDelfiGraph {
 	}
 	
 	public void visualizeMechanicGraph() {
-		Graph mechGraph = new MultiGraph("Mechanic Graph");
+		mechanicGraph = new MultiGraph("Mechanic Graph");
 		for (Mechanic mech : mechanics) {
-			MultiNode n = createMechanicNode(mechGraph, mech);
+			MultiNode n = createMechanicNode(mechanicGraph, mech);
 		}
 		
 		for(Mechanic mech : mechanics) {
 			for (Mechanic output : mech.getOutputs()) {
-				addEdge(mech.getId(), output.getId(), mechGraph);
+				addEdge(mech.getId(), output.getId(), mechanicGraph);
 			}
 		}
-		spaceAllNodes(mechGraph);
+		spaceAllNodes(mechanicGraph);
 		
-		mechGraph.display();
+		mechanicGraph.display();
 	}
 	
 	public void readSpriteSet() {
@@ -339,6 +344,13 @@ public class AtDelfiGraph {
 				action1 = new Node("Transformee", "n/a", "Action");
 				action2 = new Node("TransformTo","n/a", "Action");
 				action3 = new Node("Spawn", "n/a", "Action");
+			} 
+			else if(intData.type.equals("TransformToAll")) {
+				System.out.println("TransformToAll");
+				action3 = new Node("Transformee", "n/a", "Action");
+				action4 = new Node("TransformTo", "n/a", "Action");
+				
+				
 			}
 		} else if(stypeTargetActions.contains(intData.type)) {
 			if(intData.type.contains("Spawn")) {
@@ -480,6 +492,7 @@ public class AtDelfiGraph {
 			mech.addAction(action);
 			mech.addCondition(condition);
 			mech.addSprite(avatar);
+			mech.setReadibleAction(action.getName());
 			mechanics.add(mech);
 		}
 	}
@@ -524,7 +537,7 @@ public class AtDelfiGraph {
 			condition.addInput(time);
 		}
 		
-		createMechanic(mechSprites, mechConditions, mechActions, condition.getName(), true);
+		createMechanic(mechSprites, mechConditions, mechActions, action.getName(), true);
 	}
 	
 	public void createMechanic(List<Node> sprites2, List<Node> conditions2, List<Node> actionList, String readibleAction, boolean isTerminal) {
@@ -576,10 +589,15 @@ public class AtDelfiGraph {
 	}
 	
 	public MultiNode createMechanicNode(Graph graph, Mechanic mech) {
-		String details = actionAttributes;
+		String details = mechanicAttributes;
 		MultiNode c = graph.addNode("" + mech.getId());
 		
-		c.addAttribute("ui.label", mech.getActions().get(0).getName() + " : " + mech.getFrames().get("adrienctx.Agent")[0]);
+		String beginLabel = "";
+		for (Node sprite : mech.getSprites()) {
+			beginLabel += sprite.getName() + " ";
+		}
+		beginLabel += mech.getConditions().get(0).getName() + " ";
+		c.addAttribute("ui.label", beginLabel + mech.getReadibleAction() + " : " + mech.getFrames().get("adrienctx.Agent")[0]);
 		c.addAttribute("ui.style", details);
 		return c;
 	}
@@ -724,6 +742,17 @@ public class AtDelfiGraph {
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			}
+		}
+		
+		
+	}
+	
+	public void colorizeCriticalPath(List<Mechanic> criticalPath) {
+		if(mechanicVisualization) {
+			for (Mechanic mech : criticalPath) {
+				MultiNode mechNode = findVisualGraphNode(this.mechanicGraph, mech.getId());
+				mechNode.changeAttribute("ui.style", this.critPathAttributes);
 			}
 		}
 	}

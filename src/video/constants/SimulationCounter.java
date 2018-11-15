@@ -15,5 +15,7 @@ public class SimulationCounter {
 	public static int spriteCaptureCounter = 0;
 	
 	public static String gameName = "simulation";
-	
+	public static String agentName = "agent";
+	public static String levelCount = "0";
+	public static String playthroughCount = "0";
 }

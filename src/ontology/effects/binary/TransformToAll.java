@@ -54,7 +54,7 @@ public class TransformToAll extends TransformTo {
     public ArrayList<String> getEffectSprites(){
     	ArrayList<String> result = new ArrayList<String>();
     	if(stype!=null) result.add(stype);
-    	
+    	if(stypeTo!=null) result.add(stypeTo);
     	return result;
     }
 }

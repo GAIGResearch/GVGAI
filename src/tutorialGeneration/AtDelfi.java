@@ -45,7 +45,10 @@ public class AtDelfi {
 	private VisualDemonstrationInterfacer vdi;
 		
 	private String[] agents = {"adrienctx.Agent", "NovelTS.Agent", "NovTea.Agent", "Number27.Agent", "YOLOBOT.Agent", "tracks.singlePlayer.simple.doNothing.Agent", "tracks.singlePlayer.simple.sampleonesteplookahead.Agent"};
+	private int levelCount = 5;
 //	private String[] agents = {"adrienctx.Agent"};
+	
+	private boolean visualizeCriticalPath = true;
 
 	public AtDelfi(String gameFile, String levelFile, String gameName, int seed, boolean verbose) {
 		this.verbose = verbose;
@@ -110,7 +113,8 @@ public class AtDelfi {
 			}
 		}
 		try {
-			vdi.runBunchOfGames(bogs);
+			String[] agents = {"adrienctx.Agent"};
+			vdi.runBunchOfGames(bogs, agents, 1, 1);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -120,6 +124,10 @@ public class AtDelfi {
 	public List<Mechanic> criticalPath(CriticalPather criticalPather, String agent, boolean isWin) {
 		List<Mechanic> criticalPath = criticalPather.findCriticalPath(agent, isWin);
 		
+		if(visualizeCriticalPath) {
+			this.gameGraph.colorizeCriticalPath(criticalPath);
+		}
+		
 		return criticalPath;
 	}
 	
@@ -128,11 +136,13 @@ public class AtDelfi {
 		ArrayList<BunchOfGames> bogs = new ArrayList<>();
 		for(int i = 0; i < agents.length; i++) {
 			for(int j = 0; j < 5; j++) {
-				bogs.add(new BunchOfGames(gameFile, levelFile, agents[i]));
+				for (int k = 0; k < 30; k++) {
+					bogs.add(new BunchOfGames(gameFile, levelFile, agents[i]));
+				}
 			}
 		}
 		try {
-			vdi.runBunchOfGames(bogs);
+			vdi.runBunchOfGames(bogs, this.agents, 5, 30);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

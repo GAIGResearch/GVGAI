@@ -36,14 +36,17 @@ public class Mechanic {
 	
 	public void addSprite(Node sprite) {
 		sprites.add(sprite);
+		sprite.addMechanic(this);
 	}
 	
 	public void addCondition(Node condition) {
 		conditions.add(condition);
+		condition.addMechanic(this);
 	}
 	
 	public void addAction(Node action) {
 		actions.add(action);
+		action.addMechanic(this);
 	}
 	
 	public List<Node> getSprites() {

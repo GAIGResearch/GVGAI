@@ -149,6 +149,7 @@ public class VisualDemonstrationInterfacer {
 		// TODO save the video file locally and name it after the rule
 	}
 
+
 	public void writeQueryFramesInJSONFile(JSONArray mediaArray)
 	{
 		try (FileWriter file = new FileWriter("queriedFrames/qFrames.json")) {
@@ -446,15 +447,31 @@ public class VisualDemonstrationInterfacer {
 		return interactionpaths;
 	}
 
-	public void runBunchOfGames(ArrayList<BunchOfGames> bunchOfGames) throws IOException
+	public void runBunchOfGames(ArrayList<BunchOfGames> bunchOfGames, String[] agents, int levelCount, int playthroughsPerLevelCount) throws IOException
 	{
 		numberOfSimulations = bunchOfGames.size();
-		this.createDirectories((int)numberOfSimulations);
-		for (BunchOfGames game : bunchOfGames) 
-		{
-			this.runGame(game.gamePath, game.gameLevelPath, game.playerPath);
+		int gameCount = 0;
+//		this.createDirectories((int)numberOfSimulations);
+		for (int i = 0; i < agents.length; i++) {
+			for (int j = 0; j < levelCount; j++) {
+				for (int k = 0; k < playthroughsPerLevelCount; k++) {
+					createDirectories(agents[i], "" + j, "" + k);
+					SimulationCounter.agentName = agents[i];
+					SimulationCounter.levelCount = "" + j;
+					SimulationCounter.playthroughCount = "" + k;
+					this.runGame(bunchOfGames.get(gameCount).gamePath, bunchOfGames.get(gameCount).gameLevelPath, bunchOfGames.get(gameCount).playerPath);
+					gameCount++;
+				}
+			}
 		}
+//		for (int i = 0; i < bunchOfGames.size(); i++) 
+//		{
+//			System.out.println(Math.floor(i / (levelCount * playthroughsPerLevelCount)));
+////			SimulationCounter.agentName = agents[i / (levelCount)];
+////			this.runGame(bunchOfGames.get(i).gamePath, bunchOfGames.get(i).gameLevelPath, bunchOfGames.get(i).playerPath);
+//		}
 	}
+	
 
 	public void createDirectories(int numberOfSimulations) throws IOException
 	{
@@ -467,72 +484,80 @@ public class VisualDemonstrationInterfacer {
 			Files.createDirectories(Paths.get(gameName + "/game" + i + "/capture/"));
 		}
 	}
-
-	public ArrayList<InteractionFrame> runGameSimulations(ArrayList<BunchOfGames> bunchOfgames,
-			ArrayList<Interaction> interactions) throws IOException
-	{
-		ArrayList<InteractionFrame> frameCollection = new ArrayList<>();
-		try {
-			this.createDirectories(bunchOfgames.size());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		this.runBunchOfGames(bunchOfgames);
-
-		ArrayList<String> interactionFiles = new ArrayList<>();
-		for (int i = 0; i < bunchOfgames.size(); i++) 
-		{
-			interactionFiles.add(gameName + "/game" + i + "/interactions/interaction.json");
-		}
-
-		try {
-			frameCollection = retrieveFramePathsInTheCollection(interactions, interactionFiles);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return frameCollection;
+	
+	public void createDirectories(String agentName, String levelCount, String playthroughCount) throws IOException {
+		Files.createDirectories(Paths.get(gameName + "/" + agentName + "/" + levelCount + "/" + playthroughCount + "/frames/"));
+		Files.createDirectories(Paths.get(gameName + "/" + agentName + "/" + levelCount + "/" + playthroughCount + "/interactions/"));
+		Files.createDirectories(Paths.get(gameName + "/" + agentName + "/" + levelCount + "/" + playthroughCount + "/actions/"));
+		Files.createDirectories(Paths.get(gameName + "/" + agentName + "/" + levelCount + "/" + playthroughCount + "/result/"));
+		Files.createDirectories(Paths.get(gameName + "/" + agentName + "/" + levelCount + "/" + playthroughCount + "/capture/"));
 	}
 
-	public HashMap<Interaction, String[]> runMultipleGameSimulations(ArrayList<BunchOfGames> bunchOfgames,
-			ArrayList<Interaction> interactions) throws IOException
-	{
-		HashMap<Interaction, String[]> frameCollection = new HashMap<Interaction, String[]>();
-		try {
-			this.createDirectories(bunchOfgames.size());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		this.runBunchOfGames(bunchOfgames);
+//	public ArrayList<InteractionFrame> runGameSimulations(ArrayList<BunchOfGames> bunchOfgames,
+//			ArrayList<Interaction> interactions) throws IOException
+//	{
+//		ArrayList<InteractionFrame> frameCollection = new ArrayList<>();
+//		try {
+//			this.createDirectories(bunchOfgames.size());
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		this.runBunchOfGames(bunchOfgames);
+//
+//		ArrayList<String> interactionFiles = new ArrayList<>();
+//		for (int i = 0; i < bunchOfgames.size(); i++) 
+//		{
+//			interactionFiles.add(gameName + "/game" + i + "/interactions/interaction.json");
+//		}
+//
+//		try {
+//			frameCollection = retrieveFramePathsInTheCollection(interactions, interactionFiles);
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (ParseException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return frameCollection;
+//	}
 
-		ArrayList<String> interactionFiles = new ArrayList<>();
-		for (int i = 0; i < bunchOfgames.size(); i++) 
-		{
-			interactionFiles.add(gameName + "/game" + i + "/interactions/interaction.json");
-		}
-
-		try {
-			frameCollection = mapFramePathsInTheCollection(interactions, interactionFiles);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return frameCollection;
-	}
+//	public HashMap<Interaction, String[]> runMultipleGameSimulations(ArrayList<BunchOfGames> bunchOfgames,
+//			ArrayList<Interaction> interactions) throws IOException
+//	{
+//		HashMap<Interaction, String[]> frameCollection = new HashMap<Interaction, String[]>();
+//		try {
+//			this.createDirectories(bunchOfgames.size());
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		this.runBunchOfGames(bunchOfgames);
+//
+//		ArrayList<String> interactionFiles = new ArrayList<>();
+//		for (int i = 0; i < bunchOfgames.size(); i++) 
+//		{
+//			interactionFiles.add(gameName + "/game" + i + "/interactions/interaction.json");
+//		}
+//
+//		try {
+//			frameCollection = mapFramePathsInTheCollection(interactions, interactionFiles);
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (ParseException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return frameCollection;
+//	}
 
 	public String[] queryFrameCollection(HashMap<Interaction, String[]> frameMap, 
 			String rule, String sprite1, String sprite2)
@@ -736,44 +761,78 @@ public class VisualDemonstrationInterfacer {
 		return simulationAndFrameNumbers;
 	}
 
-	
-	public HashMap<String, int[]> oneMechanicQuery(Mechanic mech, String[] agents) throws FileNotFoundException, IOException, ParseException {
+	public void deleteUnusedFrames(int[][] frames, String agent) {
+		String agentFolder = gameName + "/game"; 
+	}
+	public HashMap<String, int[]> oneMechanicQuery(Mechanic mech, String[] agents, int levelCount, int playthroughCount) throws FileNotFoundException, IOException, ParseException {
 		HashMap<String, int[]> dict = new HashMap<String, int[]>();
 		
 		int numberOfSimulations = agents.length;
-		int[][] myReturnArray = new int[numberOfSimulations][];
-		for(int k = 0; k < numberOfSimulations; k++) {
-			QueryActionRule ruleActionQuery = new QueryActionRule(gameName + "/game" + k + "/actions/actions.json");
-			QueryGameResult queryGameResult = new QueryGameResult(gameName + "/game" + k + "/result/result.json");
-			int frameNumber = -1;
-			System.out.println("Finding frames for: " + mech.getReadibleAction());
-			if(mech.getConditions().get(0).getType().equals("Player Input")) {
-				
-				frameNumber = ruleActionQuery.getFirstRuleActionFrameNumber();
-				
-			}
-			else if(mech.isTerminal()) {
-				if ((mech.getActions().get(0).getName().equals("Win") && queryGameResult.getResult() == 1) 
-						|| mech.getActions().get(0).getName().equals("Lose") && queryGameResult.getResult() == 0) {
-					frameNumber = queryGameResult.getLastFrameNumber();
-				} else {
-					frameNumber = -1;
+		for(int i = 0; i < agents.length; i++) {
+			for(int j = 0; j < levelCount; j++) {
+				for(int k = 0; k < playthroughCount; k++){
+					QueryActionRule ruleActionQuery = new QueryActionRule(gameName + "/" + agents[i] + "/" + j + "/" + k + "/actions/actions.json");
+					QueryGameResult queryGameResult = new QueryGameResult(gameName + "/" + agents[i] + "/" + j + "/" + k + "/result/result.json");
+					int frameNumber = -1;
+					System.out.println("Finding frames for: " + mech.getReadibleAction());
+					if(mech.getConditions().get(0).getType().equals("Player Input")) {
+						
+						frameNumber = ruleActionQuery.getFirstRuleActionFrameNumber();
+						
+					}
+					else if(mech.isTerminal()) {
+						if ((mech.getActions().get(0).getName().equals("Win") && queryGameResult.getResult() == 1) 
+								|| mech.getActions().get(0).getName().equals("Lose") && queryGameResult.getResult() == 0) {
+							frameNumber = queryGameResult.getLastFrameNumber();
+						} else {
+							frameNumber = -1;
+						}
+					}
+					else {
+						int[] frames = mapFrameNumbersInTheSimulationByMechanic(mech, k);
+						if(frames.length > 0) {
+							frameNumber = mapFrameNumbersInTheSimulationByMechanic(mech, k)[4];
+						} else {
+							frameNumber = -1;
+						}
+					}
+					dict.put(agents[k], getFrameNumbers(frameNumber));
 				}
 			}
-			else {
-				int[] frames = mapFrameNumbersInTheSimulationByMechanic(mech, k);
-				if(frames.length > 0) {
-					frameNumber = mapFrameNumbersInTheSimulationByMechanic(mech, k)[4];
-				} else {
-					frameNumber = -1;
-				}
-			}
-			dict.put(agents[k], getFrameNumbers(frameNumber));
-			
 		}
+//		for(int k = 0; k < numberOfSimulations; k++) {
+//			QueryActionRule ruleActionQuery = new QueryActionRule(gameName + "/game" + k + "/actions/actions.json");
+//			QueryGameResult queryGameResult = new QueryGameResult(gameName + "/game" + k + "/result/result.json");
+//			int frameNumber = -1;
+//			System.out.println("Finding frames for: " + mech.getReadibleAction());
+//			if(mech.getConditions().get(0).getType().equals("Player Input")) {
+//				
+//				frameNumber = ruleActionQuery.getFirstRuleActionFrameNumber();
+//				
+//			}
+//			else if(mech.isTerminal()) {
+//				if ((mech.getActions().get(0).getName().equals("Win") && queryGameResult.getResult() == 1) 
+//						|| mech.getActions().get(0).getName().equals("Lose") && queryGameResult.getResult() == 0) {
+//					frameNumber = queryGameResult.getLastFrameNumber();
+//				} else {
+//					frameNumber = -1;
+//				}
+//			}
+//			else {
+//				int[] frames = mapFrameNumbersInTheSimulationByMechanic(mech, k);
+//				if(frames.length > 0) {
+//					frameNumber = mapFrameNumbersInTheSimulationByMechanic(mech, k)[4];
+//				} else {
+//					frameNumber = -1;
+//				}
+//			}
+//			dict.put(agents[k], getFrameNumbers(frameNumber));
+//			
+//		}
 		return dict;
 		
 	}
+	
 	
 	public int[] getFrameNumbers(int frame) {
 		if(frame == -1) {
@@ -879,20 +938,20 @@ public class VisualDemonstrationInterfacer {
 //
 //		//1 - Configure your games
 //
-		BunchOfGames bog1 = new BunchOfGames("examples/gridphysics/aliens.txt", 
-				"examples/gridphysics/aliens_lvl0.txt", 
-				"tracks.singlePlayer.tools.human.Agent");
-
-		BunchOfGames bog2 = new BunchOfGames("examples/gridphysics/aliens.txt", 
-				"examples/gridphysics/aliens_lvl0.txt", 
-				"tracks.singlePlayer.tools.human.Agent");
-
-		ArrayList<BunchOfGames> bunchOfGames = new ArrayList<>();
-		bunchOfGames.add(bog1); bunchOfGames.add(bog2);
-//		//	
-//		//	//2 - Run the games
-		VisualDemonstrationInterfacer vdi = new VisualDemonstrationInterfacer(false);
-		vdi.runBunchOfGames(bunchOfGames);
+//		BunchOfGames bog1 = new BunchOfGames("examples/gridphysics/aliens.txt", 
+//				"examples/gridphysics/aliens_lvl0.txt", 
+//				"tracks.singlePlayer.tools.human.Agent");
+//
+//		BunchOfGames bog2 = new BunchOfGames("examples/gridphysics/aliens.txt", 
+//				"examples/gridphysics/aliens_lvl0.txt", 
+//				"tracks.singlePlayer.tools.human.Agent");
+//
+//		ArrayList<BunchOfGames> bunchOfGames = new ArrayList<>();
+//		bunchOfGames.add(bog1); bunchOfGames.add(bog2);
+////		//	
+////		//	//2 - Run the games
+//		VisualDemonstrationInterfacer vdi = new VisualDemonstrationInterfacer(false);
+//		vdi.runBunchOfGames(bunchOfGames);
 //
 //		//			
 //		//3 - Query for everything
