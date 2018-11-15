@@ -728,7 +728,7 @@ public class AtDelfiGraph {
 		for (Mechanic mech : mechanics) {
 			try {
 				int isWin;
-				HashMap<String, int[]> firstDict = vdi.oneMechanicQuery(mech, agents);
+				HashMap<String, int[]> firstDict = vdi.oneMechanicQuery(mech, agents, AtDelfi.levelCount, AtDelfi.playthroughCount);
 				mech.setFrames(firstDict);
 				if (verbose) {
 					System.out.println(mech.toString());

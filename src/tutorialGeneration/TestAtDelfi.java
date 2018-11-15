@@ -74,8 +74,8 @@ public class TestAtDelfi {
 
 
 			AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, gameInfo[1], seed, this.verbose);
+			atdelfi.buildGraph();
 			atdelfi.playGames();
-//			atdelfi.buildGraph();
 			
 		}
 	}

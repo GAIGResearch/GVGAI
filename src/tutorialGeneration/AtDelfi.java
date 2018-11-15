@@ -44,8 +44,9 @@ public class AtDelfi {
 	
 	private VisualDemonstrationInterfacer vdi;
 		
-	private String[] agents = {"adrienctx.Agent", "NovelTS.Agent", "NovTea.Agent", "Number27.Agent", "YOLOBOT.Agent", "tracks.singlePlayer.simple.doNothing.Agent", "tracks.singlePlayer.simple.sampleonesteplookahead.Agent"};
-	private int levelCount = 5;
+	public static String[] agents = {"adrienctx.Agent", "NovelTS.Agent", "NovTea.Agent", "Number27.Agent", "YOLOBOT.Agent", "tracks.singlePlayer.simple.doNothing.Agent", "tracks.singlePlayer.simple.sampleonesteplookahead.Agent"};
+	public static int levelCount = 5;
+	public static int playthroughCount = 30;
 //	private String[] agents = {"adrienctx.Agent"};
 	
 	private boolean visualizeCriticalPath = true;
@@ -104,6 +105,10 @@ public class AtDelfi {
 			gameGraph.visualizeNodeGraph();
 		}
 	}
+	
+	public void insertFrameInfo() {
+		this.gameGraph.insertFrameInfo(vdi, agents);
+	}
 
 	public void testPlayGames() {
 		ArrayList<BunchOfGames> bogs = new ArrayList<>();
@@ -135,8 +140,8 @@ public class AtDelfi {
 	public void playGames() {
 		ArrayList<BunchOfGames> bogs = new ArrayList<>();
 		for(int i = 0; i < agents.length; i++) {
-			for(int j = 0; j < 5; j++) {
-				for (int k = 0; k < 30; k++) {
+			for(int j = 0; j < levelCount; j++) {
+				for (int k = 0; k < playthroughCount; k++) {
 					bogs.add(new BunchOfGames(gameFile, levelFile, agents[i]));
 				}
 			}
