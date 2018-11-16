@@ -10,10 +10,21 @@ public class BunchOfGames {
 	public String gameLevelPath;
 	public String playerPath; //agent who will play the game
 	
+	public String levelCount;
+	public String playthroughCount;
+	
 	public BunchOfGames(String gamePath, String gameLevelPath, String playerPath)
 	{
 		this.gamePath = gamePath;
 		this.gameLevelPath = gameLevelPath;
 		this.playerPath = playerPath;
+	}
+	
+	public BunchOfGames(String gamePath, String gameLevelPath, String playerPath, String levelCount, String playthroughCount) {
+		this.gamePath = gamePath;
+		this.gameLevelPath = gameLevelPath;
+		this.playerPath = playerPath;
+		this.levelCount = levelCount;
+		this.playthroughCount = playthroughCount;
 	}
 }

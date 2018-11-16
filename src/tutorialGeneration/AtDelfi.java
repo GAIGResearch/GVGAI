@@ -142,7 +142,8 @@ public class AtDelfi {
 		for(int i = 0; i < agents.length; i++) {
 			for(int j = 0; j < levelCount; j++) {
 				for (int k = 0; k < playthroughCount; k++) {
-					bogs.add(new BunchOfGames(gameFile, levelFile, agents[i]));
+					BunchOfGames game = new BunchOfGames(gameFile, levelFile, agents[i], "" + j, "" + k);
+					bogs.add(game);
 				}
 			}
 		}

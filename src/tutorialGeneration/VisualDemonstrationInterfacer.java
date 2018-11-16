@@ -450,26 +450,14 @@ public class VisualDemonstrationInterfacer {
 	public void runBunchOfGames(ArrayList<BunchOfGames> bunchOfGames, String[] agents, int levelCount, int playthroughsPerLevelCount) throws IOException
 	{
 		numberOfSimulations = bunchOfGames.size();
-		int gameCount = 0;
-//		this.createDirectories((int)numberOfSimulations);
-		for (int i = 0; i < agents.length; i++) {
-			for (int j = 0; j < levelCount; j++) {
-				for (int k = 0; k < playthroughsPerLevelCount; k++) {
-					createDirectories(agents[i], "" + j, "" + k);
-					SimulationCounter.agentName = agents[i];
-					SimulationCounter.levelCount = "" + j;
-					SimulationCounter.playthroughCount = "" + k;
-					this.runGame(bunchOfGames.get(gameCount).gamePath, bunchOfGames.get(gameCount).gameLevelPath, bunchOfGames.get(gameCount).playerPath);
-					gameCount++;
-				}
-			}
+		
+		for (BunchOfGames game : bunchOfGames) {
+			createDirectories(game.playerPath, game.levelCount, game.playthroughCount);
+			SimulationCounter.agentName = game.playerPath;
+			SimulationCounter.levelCount = game.levelCount;
+			SimulationCounter.playthroughCount = game.playthroughCount;
+			this.runGame(game.gamePath, game.gameLevelPath, game.playerPath);
 		}
-//		for (int i = 0; i < bunchOfGames.size(); i++) 
-//		{
-//			System.out.println(Math.floor(i / (levelCount * playthroughsPerLevelCount)));
-////			SimulationCounter.agentName = agents[i / (levelCount)];
-////			this.runGame(bunchOfGames.get(i).gamePath, bunchOfGames.get(i).gameLevelPath, bunchOfGames.get(i).playerPath);
-//		}
 	}
 	
 
@@ -761,9 +749,6 @@ public class VisualDemonstrationInterfacer {
 		return simulationAndFrameNumbers;
 	}
 
-	public void deleteUnusedFrames(int[][] frames, String agent) {
-		String agentFolder = gameName + "/game"; 
-	}
 	public HashMap<String, int[]> oneMechanicQuery(Mechanic mech, String[] agents, int levelCount, int playthroughCount) throws FileNotFoundException, IOException, ParseException {
 		HashMap<String, int[]> dict = new HashMap<String, int[]>();
 		
