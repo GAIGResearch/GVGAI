@@ -1007,10 +1007,15 @@ public abstract class Game {
 			}
 			
 			//storing this (view) frame
+			
+			/**
 			storeFrame.saveImage(new File(
 					SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
 					"/" + "frames/frame" + this.gameTick + ".png"), view);
+			**/
 
+			// storing this game state
+			
 			// Update the frame title to reflect current score and tick.
 			this.setTitle(frame);
 
@@ -1061,6 +1066,36 @@ public abstract class Game {
 
 		return handleResult();
 	}
+	
+	public ArrayList<Observation>[][] getData()
+    {
+    	ArrayList<Observation>[][] grid = this.getObservation().getObservationGrid();
+
+//    	int gridXlength = (int)this.getObservation().getWorldDimension().getWidth()/this.block_size;
+//    	int gridYlength = (int)this.getObservation().getWorldDimension().getHeight()/this.block_size;
+//
+//    	for (int j = 0; j < gridXlength ; j++) 
+//    	{
+//    		for (int j2 = 0; j2 < gridYlength; j2++) 
+//    		{
+//    			for (int k = 0; k < grid[j][j2].size(); k++) 
+//    			{
+//    				String spriteIdentifier = VGDLRegistry.GetInstance().getRegisteredSpriteKey(grid[j][j2].get(k).itype);
+//    				int spriteCode = grid[j][j2].get(k).obsID;
+//
+//    				if(spriteIdentifier != null)
+//    				{
+//    					int tick = (this.getObservation().getGameTick();
+//    					int x = (int) grid[j][j2].get(k).position.x / this.block_size;
+//    					int y = (int) grid[j][j2].get(k).position.y / this.block_size; 
+//    					
+//    				}	
+//    			}
+//    		}
+//    	}
+    	
+    	return grid;
+    }
 
 	public double[] playOnlineGame(Player[] players, int randomSeed, boolean isHuman, int humanID) {
 		// Prepare some structures and references for this game.

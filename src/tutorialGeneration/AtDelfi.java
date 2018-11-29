@@ -148,7 +148,7 @@ public class AtDelfi {
 			}
 		}
 		try {
-			vdi.runBunchOfGames(bogs, this.agents, 5, 30);
+			vdi.runBunchOfGames(bogs, this.agents, levelCount, playthroughCount);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
