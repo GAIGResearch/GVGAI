@@ -74,9 +74,9 @@ public class TestAtDelfi {
 
 
 			AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, gameInfo[1], seed, this.verbose);
-//			atdelfi.buildGraph();
 			atdelfi.playGames();
-			
+//			atdelfi.buildGraph();
+
 		}
 	}
 	
@@ -146,7 +146,7 @@ public class TestAtDelfi {
         this.recordTutorialFile = this.generateTutorialPath + games[gameIdx][1] + "_tutorial.txt";
 
 		AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, this.getGame(this.gameIdx)[1], seed, this.verbose);
-//		atdelfi.testPlayGames();
+		atdelfi.testPlayGames();
 		atdelfi.buildGraph();	
 		
 		CriticalPather criticalPather = new GreedyPather(atdelfi.getGameGraph());

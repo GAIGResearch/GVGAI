@@ -112,6 +112,8 @@ public class AtDelfi {
 
 	public void testPlayGames() {
 		ArrayList<BunchOfGames> bogs = new ArrayList<>();
+		levelCount = 1;
+		playthroughCount = 1;
 		for(int i = 0; i < 1; i++) {
 			for(int j = 0; j < 1; j++) {
 				bogs.add(new BunchOfGames(gameFile, levelFile, agents[i]));
@@ -119,7 +121,7 @@ public class AtDelfi {
 		}
 		try {
 			String[] agents = {"adrienctx.Agent"};
-			vdi.runBunchOfGames(bogs, agents, 1, 1);
+			vdi.runBunchOfGames(bogs, agents, levelCount, playthroughCount);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
