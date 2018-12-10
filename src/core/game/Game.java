@@ -926,13 +926,40 @@ public abstract class Game {
 	 * @return the score of the game played.
 	 */
 	public double[] runGame(Player[] players, int randomSeed) {
+		
+		//Object responsible to store the game frames
+		StoreFrame storeFrame = new StoreFrame();
+		
 		// Prepare some structures and references for this game.
 		prepareGame(players, randomSeed, -1);
 
 		// Play until the game is ended
 		while (!isEnded) {
 			this.gameCycle(); // Execute a game cycle.
+			
+			//storing player action
+			String action = players[0].getLastAction().toString();
+			if(action.equals(Types.ACTIONS.ACTION_USE.toString()))
+			{
+				PlayerAction playerAction = 
+						new PlayerAction(String.valueOf(this.gameTick), action);
+				storePlayerAction.storeAllPlayerActions(playerAction);
+			}
+			
+			ArrayList<Observation>[][] data = this.getData();
+			storeFrame.saveGameState(new File(
+					SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
+					"/" + "frames/frame" + this.gameTick + ".state"), data);
 		}
+		
+		//stores the interaction in a JSONFile
+		storeInteraction.writeInteractionJSONFile(SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
+				"/interactions/interaction.json");
+		
+		storePlayerAction.writePlayerActionJSONFile(SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
+				"/actions/actions.json");
+		
+		SimulationCounter.counter += 1;
 
 		// Update the forward model for the game state sent to the controller.
 		fwdModel.update(this);
