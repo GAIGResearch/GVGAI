@@ -916,6 +916,33 @@ public abstract class Game {
 		return acum;
 	}
 
+	public void storeFramesAndActions(Player[] players, StoreFrame storeFrame) {
+		
+		//storing player action
+		String action = players[0].getLastAction().toString();
+		if(action.equals(Types.ACTIONS.ACTION_USE.toString()))
+		{
+			PlayerAction playerAction = 
+					new PlayerAction(String.valueOf(this.gameTick), action);
+			storePlayerAction.storeAllPlayerActions(playerAction);
+		}
+		
+		ArrayList<Observation>[][] data = this.getData();
+		storeFrame.saveGameState(new File(
+				SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
+				"/" + "frames/frame" + this.gameTick + ".state"), data);
+	}
+	
+	public void storeActionsAndInteractions() {
+		//stores the interaction in a JSONFile
+		storeInteraction.writeInteractionJSONFile(SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
+				"/interactions/interaction.json");
+		
+		storePlayerAction.writePlayerActionJSONFile(SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
+				"/actions/actions.json");
+		
+		SimulationCounter.counter += 1;
+	}
 	/**
 	 * Runs a game, without graphics.
 	 *
@@ -928,7 +955,7 @@ public abstract class Game {
 	public double[] runGame(Player[] players, int randomSeed) {
 		
 		//Object responsible to store the game frames
-		StoreFrame storeFrame = new StoreFrame();
+		StoreFrame frameStorer = new StoreFrame();
 		
 		// Prepare some structures and references for this game.
 		prepareGame(players, randomSeed, -1);
@@ -936,30 +963,10 @@ public abstract class Game {
 		// Play until the game is ended
 		while (!isEnded) {
 			this.gameCycle(); // Execute a game cycle.
-			
-			//storing player action
-			String action = players[0].getLastAction().toString();
-			if(action.equals(Types.ACTIONS.ACTION_USE.toString()))
-			{
-				PlayerAction playerAction = 
-						new PlayerAction(String.valueOf(this.gameTick), action);
-				storePlayerAction.storeAllPlayerActions(playerAction);
-			}
-			
-			ArrayList<Observation>[][] data = this.getData();
-			storeFrame.saveGameState(new File(
-					SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
-					"/" + "frames/frame" + this.gameTick + ".state"), data);
+
+			storeFramesAndActions(players, frameStorer);
 		}
-		
-		//stores the interaction in a JSONFile
-		storeInteraction.writeInteractionJSONFile(SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
-				"/interactions/interaction.json");
-		
-		storePlayerAction.writePlayerActionJSONFile(SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
-				"/actions/actions.json");
-		
-		SimulationCounter.counter += 1;
+			storeActionsAndInteractions();
 
 		// Update the forward model for the game state sent to the controller.
 		fwdModel.update(this);
@@ -984,7 +991,7 @@ public abstract class Game {
 	public double[] playGame(Player[] players, int randomSeed, boolean isHuman, int humanID) {
 		
 		//Object responsible to store the game frames
-		StoreFrame storeFrame = new StoreFrame();
+		StoreFrame frameStorer = new StoreFrame();
 		// Prepare some structures and references for this game.
 		prepareGame(players, randomSeed, humanID);
 
@@ -1024,29 +1031,8 @@ public abstract class Game {
 			// Draw all sprites in the panel.
 			view.paint(this.spriteGroups);
 			
-			//storing player action
-			String action = players[0].getLastAction().toString();
-			if(action.equals(Types.ACTIONS.ACTION_USE.toString()))
-			{
-				PlayerAction playerAction = 
-						new PlayerAction(String.valueOf(this.gameTick), action);
-				storePlayerAction.storeAllPlayerActions(playerAction);
-			}
-			
-			//storing this (view) frame
-			
-			// TODO replace this frame storage with game state storage
-			/**
-			storeFrame.saveImage(new File(
-					SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
-					"/" + "frames/frame" + this.gameTick + ".png"), view);
-			**/
-			
-			// storing this game state
-			ArrayList<Observation>[][] data = this.getData();
-			storeFrame.saveGameState(new File(
-					SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
-					"/" + "frames/frame" + this.gameTick + ".state"), data);
+			storeFramesAndActions(players, frameStorer);
+
 			// Update the frame title to reflect current score and tick.
 			this.setTitle(frame);
 
@@ -1059,14 +1045,7 @@ public abstract class Game {
 			}
 		}
 		
-		//stores the interaction in a JSONFile
-		storeInteraction.writeInteractionJSONFile(SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
-				"/interactions/interaction.json");
-		
-		storePlayerAction.writePlayerActionJSONFile(SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
-				"/actions/actions.json");
-		
-		SimulationCounter.counter += 1;
+		storeActionsAndInteractions();
 		
 		if (isHuman && !wi.windowClosed && CompetitionParameters.killWindowOnEnd) {
 			if (CompetitionParameters.dialogBoxOnStartAndEnd) {
@@ -2061,6 +2040,14 @@ public abstract class Game {
 		return spriteGroups[spriteItype].getSpriteIterator();
 	}
 
+	/**
+	 * Returns the sprite groups data structure
+	 * @return the sprite groups data structure
+	 */
+	public SpriteGroup[] getSpriteGroups() {
+		return spriteGroups;
+	}
+	
 	/**
 	 * Gets an iterator for the collection of sprites for a particular sprite
 	 * type, AND all subtypes.

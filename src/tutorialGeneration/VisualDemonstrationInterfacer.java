@@ -93,7 +93,9 @@ public class VisualDemonstrationInterfacer {
 	
 	public void runGame(String game, String level1, String agentName) throws IOException
 	{
-		ArcadeMachine.runOneGame(game, level1, true, agentName, "", 0, 0);
+		SimulationCounter.saveSpriteGroup = true;
+		SimulationCounter.itypesJson = new ArrayList<String>();
+		ArcadeMachine.runOneGame(game, level1, false, agentName, "", 0, 0);
 	}
 
 	public HashMap<Integer, TupleRuleFrames> queryVisualDemonstrations(InteractionQueryObject [] iqos) throws FileNotFoundException, IOException, ParseException
@@ -457,10 +459,27 @@ public class VisualDemonstrationInterfacer {
 			SimulationCounter.levelCount = game.levelCount;
 			SimulationCounter.playthroughCount = game.playthroughCount;
 			this.runGame(game.gamePath, game.gameLevelPath, game.playerPath);
+			
+			storeSpriteMapping(game.playerPath, game.levelCount, game.playthroughCount);
 		}
 	}
 	
+	
+	public void storeSpriteMapping(String agentName, String levelCount, String playthroughCount) {
+		try(FileWriter writer = new FileWriter(gameName + "/" + agentName + "/" + levelCount + "/" + playthroughCount + "/mappings/" + "spritemap.json")) {
+			for(int i = 0; i < SimulationCounter.itypesJson.size(); i++){
+				String json = SimulationCounter.itypesJson.get(i);
+				writer.write(json + "\n");
+			}
+			writer.close();
 
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+
+	
 	public void createDirectories(int numberOfSimulations) throws IOException
 	{
 		for(int i = 0; i < numberOfSimulations; i++)
@@ -479,6 +498,7 @@ public class VisualDemonstrationInterfacer {
 		Files.createDirectories(Paths.get(gameName + "/" + agentName + "/" + levelCount + "/" + playthroughCount + "/actions/"));
 		Files.createDirectories(Paths.get(gameName + "/" + agentName + "/" + levelCount + "/" + playthroughCount + "/result/"));
 		Files.createDirectories(Paths.get(gameName + "/" + agentName + "/" + levelCount + "/" + playthroughCount + "/capture/"));
+		Files.createDirectories(Paths.get(gameName + "/" + agentName + "/" + levelCount + "/" + playthroughCount + "/mappings/"));
 	}
 
 //	public ArrayList<InteractionFrame> runGameSimulations(ArrayList<BunchOfGames> bunchOfgames,
@@ -785,35 +805,6 @@ public class VisualDemonstrationInterfacer {
 				}
 			}
 		}
-//		for(int k = 0; k < numberOfSimulations; k++) {
-//			QueryActionRule ruleActionQuery = new QueryActionRule(gameName + "/game" + k + "/actions/actions.json");
-//			QueryGameResult queryGameResult = new QueryGameResult(gameName + "/game" + k + "/result/result.json");
-//			int frameNumber = -1;
-//			System.out.println("Finding frames for: " + mech.getReadibleAction());
-//			if(mech.getConditions().get(0).getType().equals("Player Input")) {
-//				
-//				frameNumber = ruleActionQuery.getFirstRuleActionFrameNumber();
-//				
-//			}
-//			else if(mech.isTerminal()) {
-//				if ((mech.getActions().get(0).getName().equals("Win") && queryGameResult.getResult() == 1) 
-//						|| mech.getActions().get(0).getName().equals("Lose") && queryGameResult.getResult() == 0) {
-//					frameNumber = queryGameResult.getLastFrameNumber();
-//				} else {
-//					frameNumber = -1;
-//				}
-//			}
-//			else {
-//				int[] frames = mapFrameNumbersInTheSimulationByMechanic(mech, k);
-//				if(frames.length > 0) {
-//					frameNumber = mapFrameNumbersInTheSimulationByMechanic(mech, k)[4];
-//				} else {
-//					frameNumber = -1;
-//				}
-//			}
-//			dict.put(agents[k], getFrameNumbers(frameNumber));
-//			
-//		}
 		return dict;
 		
 	}
