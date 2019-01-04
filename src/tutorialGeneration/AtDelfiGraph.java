@@ -58,6 +58,11 @@ public class AtDelfiGraph {
 	private LevelAnalyzer la;
 	
 	/**
+	 * The name of the game
+	 */
+	private String name;
+	
+	/**
 	 * represents the entity which the player controls in the game
 	 */
 	private List<Node> avatars;
@@ -104,13 +109,16 @@ public class AtDelfiGraph {
 	 * @param sl the SLDescription of the game
 	 * @param ga the GameAnalyzer of the game
 	 * @param la the LevelAnalyzer of the game
+	 * @param gameName the name of the game
 	 */
 	
-	public AtDelfiGraph(GameDescription gd, SLDescription sl, GameAnalyzer ga, LevelAnalyzer la) {
+	public AtDelfiGraph(GameDescription gd, SLDescription sl, GameAnalyzer ga, LevelAnalyzer la, String gameName) {
 		this.gd = gd;
 		this.sl = sl;
 		this.ga = ga;
 		this.la = la;
+		
+		this.name = gameName;
 		
 		avatars = new ArrayList<Node>();
 		sprites = new ArrayList<Node>();
@@ -598,6 +606,7 @@ public class AtDelfiGraph {
 		}
 		beginLabel += mech.getConditions().get(0).getName() + " ";
 		c.addAttribute("ui.label", beginLabel + mech.getReadibleAction() + " : " + mech.getFrames().get("adrienctx.Agent")[0]);
+//		c.addAttribute("ui.label", beginLabel + mech.getReadibleAction());
 		c.addAttribute("ui.style", details);
 		return c;
 	}
@@ -748,6 +757,38 @@ public class AtDelfiGraph {
 		
 	}
 	
+	public void insertFrameInformation(VisualDemonstrationInterfacer vdi) {
+		
+		ArrayList<String> agents = vdi.getAgents(this.name);
+		int levelCount = vdi.getLevelCount(this.name);
+		int playthroughCount = vdi.getPlaythroughCount(this.name);
+		
+		for(Mechanic mech: mechanics) {
+
+			// keeps track of avg frames by agent-level 
+			HashMap<String, int[]> frames = new HashMap<String, int[]>();
+
+				
+			for (String agent : agents) {
+				int[] framesForAgent = new int[levelCount];
+				for(int i = 0; i < levelCount; i++) {
+					try {
+						framesForAgent[i] = vdi.mechAgentLevelQuery(mech, agent, i);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						framesForAgent[i] = -1;
+					}
+				}
+				frames.put(agent, framesForAgent);
+					
+			}
+				
+			mech.setFrames(frames);
+		} 
+		
+	}
+		
 	public void colorizeCriticalPath(List<Mechanic> criticalPath) {
 		if(mechanicVisualization) {
 			for (Mechanic mech : criticalPath) {

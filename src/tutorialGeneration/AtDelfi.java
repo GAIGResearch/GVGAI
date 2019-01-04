@@ -93,10 +93,10 @@ public class AtDelfi {
 	}
 	
 	public void buildGraph() {
-		this.gameGraph = new AtDelfiGraph(gd, sl, ga, la);
+		this.gameGraph = new AtDelfiGraph(gd, sl, ga, la, this.gameName);
 		Graph graph = this.gameGraph.build();
 		changeGraphTitle(graph);
-		this.gameGraph.insertFrameInfo(vdi, agents);
+		this.gameGraph.insertFrameInformation(vdi);
 		
 		if(gameGraph.isMechanicVisualization()) {
 			gameGraph.visualizeMechanicGraph();

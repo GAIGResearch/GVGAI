@@ -806,9 +806,110 @@ public class VisualDemonstrationInterfacer {
 			}
 		}
 		return dict;
+	}
+	
+	public int mechAgentLevelQuery(Mechanic mech, String agent, int level) throws FileNotFoundException, IOException, ParseException {
+		float avg = 0;
+		float count = 0;
+		
+		File levelFile = new File(gameName + "/" + agent + "/" + level);
+		File[] listOfPlaythroughs = levelFile.listFiles();
+		
+		for(File playthrough : listOfPlaythroughs) {
+			if(playthrough.isDirectory()) {
+				QueryActionRule ruleActionQuery = new QueryActionRule(gameName + "/" + agent + "/" + level + "/" + playthrough.getName() + "/actions/actions.json");
+				QueryGameResult queryGameResult = new QueryGameResult(gameName + "/" + agent + "/" + level + "/" + playthrough.getName() + "/result/result.json");
+				
+				int frameNumber = -1;
+				System.out.println("Finding frames in " + gameName + "/" + agent + "/" + level + "/" + playthrough.getName() + " for: " + mech.getReadibleAction());
+				
+				if(mech.getConditions().get(0).getType().equals("Player Input")) {
+					
+					frameNumber = ruleActionQuery.getFirstRuleActionFrameNumber();
+					
+				}
+				else if(mech.isTerminal()) {
+					if ((mech.getActions().get(0).getName().equals("Win") && queryGameResult.getResult() == 1) 
+							|| mech.getActions().get(0).getName().equals("Lose") && queryGameResult.getResult() == 0) {
+						frameNumber = queryGameResult.getLastFrameNumber();
+					} else {
+						frameNumber = -1;
+					}
+				}
+				else {
+					int[] frames = mapFrameNumbersInTheSimulationByMechanic(mech, Integer.parseInt(playthrough.getName()));
+					if(frames.length > 0) {
+						frameNumber = mapFrameNumbersInTheSimulationByMechanic(mech, Integer.parseInt(playthrough.getName()))[4];
+					} else {
+						frameNumber = -1;
+					}
+				}
+				
+				if(frameNumber != -1) {
+					avg += frameNumber;
+					count += 1;
+				}
+			}
+		}
+		if(count == 0) {
+			count = 1;
+		}
+		return Math.round(avg / count);
+	}
+	
+	/***
+	 * Gets a list of agents in a specified game directory
+	 * @param gameName the name of the game
+	 * @return an arraylist of agent names
+	 */
+	public ArrayList<String> getAgents(String gameName) {
+		ArrayList<String> agents = new ArrayList<String>();
+		
+
+		File folder = new File(gameName);
+		File[] listOfFiles = folder.listFiles();
+		
+		for(File file : listOfFiles) {
+			if(file.isDirectory()) {
+				agents.add(file.getName());
+			}
+		}
+		
+		return agents;
 		
 	}
 	
+	/***
+	 * Gets the number of levels in this specific game directory for any agent
+	 * @param gameName
+	 * @return
+	 */
+	public int getLevelCount(String gameName) {
+		File folder = new File(gameName);
+		File[] listOfFiles = folder.listFiles();
+		
+		if(listOfFiles[0].isDirectory()) {
+			File agentFile = listOfFiles[0];
+			return agentFile.listFiles().length;
+		}
+		return 0;
+	}
+	
+	
+	public int getPlaythroughCount(String gameName) {
+		File folder = new File(gameName);
+		File[] listOfFiles = folder.listFiles();
+		
+		if(listOfFiles[0].isDirectory()) {
+			File agentFile = listOfFiles[0];
+			File[] listOfLevels = agentFile.listFiles();
+			if(listOfLevels[0].isDirectory()) {
+				File levelFile = listOfLevels[0];
+				return levelFile.listFiles().length;
+			}
+		}
+		return 0;
+	}
 	
 	public int[] getFrameNumbers(int frame) {
 		if(frame == -1) {

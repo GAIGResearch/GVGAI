@@ -57,8 +57,8 @@ public class TestAtDelfi {
         int seed = new Random().nextInt();
 		TestAtDelfi tester = new TestAtDelfi();		
 		
-		tester.testAllGames(seed);
-//		tester.testOneGame(seed, tester.gameIdx);
+//		tester.testAllGames(seed);
+		tester.testOneGame(seed, tester.gameIdx);
 //		tester.testFirstGames(seed);
 //		tester.testSecondGames(seed);
 //		tester.testThirdGames(seed);
@@ -74,8 +74,8 @@ public class TestAtDelfi {
 
 
 			AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, gameInfo[1], seed, this.verbose);
-			atdelfi.playGames();
-//			atdelfi.buildGraph();
+//			atdelfi.playGames();
+			atdelfi.buildGraph();
 
 		}
 	}
@@ -146,16 +146,16 @@ public class TestAtDelfi {
         this.recordTutorialFile = this.generateTutorialPath + games[gameIdx][1] + "_tutorial.txt";
 
 		AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, this.getGame(this.gameIdx)[1], seed, this.verbose);
-		atdelfi.testPlayGames();
+//		atdelfi.testPlayGames();
 		atdelfi.buildGraph();	
 		
-		CriticalPather criticalPather = new GreedyPather(atdelfi.getGameGraph());
-		
-		List<Mechanic> critPath = atdelfi.criticalPath(criticalPather, "adrienctx.Agent", true);
-		
-		for (Mechanic m : critPath) {
-			System.out.println(m.getSprites().get(0).getName() + " " + m.getReadibleAction() + " " + m.getActions().get(0).getName());
-		}
+//		CriticalPather criticalPather = new GreedyPather(atdelfi.getGameGraph());
+//		
+//		List<Mechanic> critPath = atdelfi.criticalPath(criticalPather, "adrienctx.Agent", true);
+//		
+//		for (Mechanic m : critPath) {
+//			System.out.println(m.getSprites().get(0).getName() + " " + m.getReadibleAction() + " " + m.getActions().get(0).getName());
+//		}
 	}
 	
 	/**
