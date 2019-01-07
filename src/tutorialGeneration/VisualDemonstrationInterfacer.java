@@ -808,7 +808,7 @@ public class VisualDemonstrationInterfacer {
 		return dict;
 	}
 	
-	public int mechAgentLevelQuery(Mechanic mech, String agent, int level) throws FileNotFoundException, IOException, ParseException {
+	public int mechAgentLevelQuery(Mechanic mech, String agent, int level, int type) throws FileNotFoundException, IOException, ParseException {
 		float avg = 0;
 		float count = 0;
 		
@@ -821,7 +821,7 @@ public class VisualDemonstrationInterfacer {
 				QueryGameResult queryGameResult = new QueryGameResult(gameName + "/" + agent + "/" + level + "/" + playthrough.getName() + "/result/result.json");
 				
 				int frameNumber = -1;
-				System.out.println("Finding frames in " + gameName + "/" + agent + "/" + level + "/" + playthrough.getName() + " for: " + mech.getReadibleAction());
+//				System.out.println("Finding frames in " + gameName + "/" + agent + "/" + level + "/" + playthrough.getName() + " for: " + mech.getReadibleAction());
 				
 				if(mech.getConditions().get(0).getType().equals("Player Input")) {
 					

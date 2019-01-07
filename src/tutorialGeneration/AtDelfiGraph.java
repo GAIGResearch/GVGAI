@@ -773,7 +773,7 @@ public class AtDelfiGraph {
 				int[] framesForAgent = new int[levelCount];
 				for(int i = 0; i < levelCount; i++) {
 					try {
-						framesForAgent[i] = vdi.mechAgentLevelQuery(mech, agent, i);
+						framesForAgent[i] = vdi.mechAgentLevelQuery(mech, agent, i, 0);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
