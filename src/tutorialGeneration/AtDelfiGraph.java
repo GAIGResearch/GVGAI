@@ -733,29 +733,29 @@ public class AtDelfiGraph {
 			return NodeType.UKNOWN;
 	}
 	
-	public void insertFrameInfo(VisualDemonstrationInterfacer vdi, String[] agents) {
-		for (Mechanic mech : mechanics) {
-			try {
-				int isWin;
-				HashMap<String, int[]> firstDict = vdi.oneMechanicQuery(mech, agents, AtDelfi.levelCount, AtDelfi.playthroughCount);
-				mech.setFrames(firstDict);
-				if (verbose) {
-					System.out.println(mech.toString());
-				}
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
-		
-	}
+//	public void insertFrameInfo(VisualDemonstrationInterfacer vdi, String[] agents) {
+//		for (Mechanic mech : mechanics) {
+//			try {
+//				int isWin;
+//				HashMap<String, int[]> firstDict = vdi.oneMechanicQuery(mech, agents, AtDelfi.levelCount, AtDelfi.playthroughCount);
+//				mech.setFrames(firstDict);
+//				if (verbose) {
+//					System.out.println(mech.toString());
+//				}
+//			} catch (FileNotFoundException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			} catch (ParseException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+//		
+//		
+//	}
 	
 	public void insertFrameInformation(VisualDemonstrationInterfacer vdi) {
 		
@@ -773,7 +773,7 @@ public class AtDelfiGraph {
 				int[] framesForAgent = new int[levelCount];
 				for(int i = 0; i < levelCount; i++) {
 					try {
-						framesForAgent[i] = vdi.mechAgentLevelQuery(mech, agent, i, 0);
+						framesForAgent[i] = vdi.mechAgentLevelQuery(mech, agent, i, 1);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

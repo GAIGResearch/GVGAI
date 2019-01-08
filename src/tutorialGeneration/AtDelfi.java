@@ -21,6 +21,7 @@ import tools.GameAnalyzer;
 import tools.IO;
 import tools.LevelAnalyzer;
 import tutorialGeneration.criticalPathing.CriticalPather;
+import tutorialGeneration.criticalPathing.GreedyPather;
 import video.basics.BunchOfGames;
 
 public class AtDelfi {
@@ -100,6 +101,10 @@ public class AtDelfi {
 		
 		if(gameGraph.isMechanicVisualization()) {
 			gameGraph.visualizeMechanicGraph();
+			if(visualizeCriticalPath) {
+				CriticalPather cp = new GreedyPather(gameGraph);
+				criticalPath(cp, "adrienctx.Agent", true);
+			}
 		}
 		if(gameGraph.isNodeVisualization()) {
 			gameGraph.visualizeNodeGraph();
@@ -107,7 +112,7 @@ public class AtDelfi {
 	}
 	
 	public void insertFrameInfo() {
-		this.gameGraph.insertFrameInfo(vdi, agents);
+		this.gameGraph.insertFrameInformation(vdi);
 	}
 
 	public void testPlayGames() {

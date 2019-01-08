@@ -340,12 +340,12 @@ public class VisualDemonstrationInterfacer {
 		return frames;
 	}
 
-	public int[] mapFrameNumbersInTheSimulationByMechanic(Mechanic mechanic, int simulation) throws FileNotFoundException, IOException, ParseException
+	public int[] mapFrameNumbersInTheSimulationByMechanic(Mechanic mechanic, String playthroughPath) throws FileNotFoundException, IOException, ParseException
 	{
 		Interaction interaction = new Interaction(mechanic.getReadibleAction(), mechanic.getSprites().get(0).getName(), mechanic.getSprites().get(1).getName());
 		int [] frameNumbers = new int[]{};
 
-		String path = gameName + "/game" + simulation + "/interactions/interaction.json";
+		String path = playthroughPath + "/interactions/interaction.json";
 		FrameInteractionAssociation frameInteractionAssociation = new FrameInteractionAssociation(path);
 		JSONObject interactionObject = null;
 		interactionObject = frameInteractionAssociation.
@@ -769,17 +769,61 @@ public class VisualDemonstrationInterfacer {
 		return simulationAndFrameNumbers;
 	}
 
-	public HashMap<String, int[]> oneMechanicQuery(Mechanic mech, String[] agents, int levelCount, int playthroughCount) throws FileNotFoundException, IOException, ParseException {
-		HashMap<String, int[]> dict = new HashMap<String, int[]>();
+//	public HashMap<String, int[]> oneMechanicQuery(Mechanic mech, String[] agents, int levelCount, int playthroughCount) throws FileNotFoundException, IOException, ParseException {
+//		HashMap<String, int[]> dict = new HashMap<String, int[]>();
+//		
+//		int numberOfSimulations = agents.length;
+//		for(int i = 0; i < agents.length; i++) {
+//			for(int j = 0; j < levelCount; j++) {
+//				for(int k = 0; k < playthroughCount; k++){
+//					QueryActionRule ruleActionQuery = new QueryActionRule(gameName + "/" + agents[i] + "/" + j + "/" + k + "/actions/actions.json");
+//					QueryGameResult queryGameResult = new QueryGameResult(gameName + "/" + agents[i] + "/" + j + "/" + k + "/result/result.json");
+//					int frameNumber = -1;
+//					System.out.println("Finding frames for: " + mech.getReadibleAction());
+//					if(mech.getConditions().get(0).getType().equals("Player Input")) {
+//						
+//						frameNumber = ruleActionQuery.getFirstRuleActionFrameNumber();
+//						
+//					}
+//					else if(mech.isTerminal()) {
+//						if ((mech.getActions().get(0).getName().equals("Win") && queryGameResult.getResult() == 1) 
+//								|| mech.getActions().get(0).getName().equals("Lose") && queryGameResult.getResult() == 0) {
+//							frameNumber = queryGameResult.getLastFrameNumber();
+//						} else {
+//							frameNumber = -1;
+//						}
+//					}
+//					else {
+//						int[] frames = mapFrameNumbersInTheSimulationByMechanic(mech, k);
+//						if(frames.length > 0) {
+//							frameNumber = mapFrameNumbersInTheSimulationByMechanic(mech, k)[4];
+//						} else {
+//							frameNumber = -1;
+//						}
+//					}
+//					dict.put(agents[k], getFrameNumbers(frameNumber));
+//				}
+//			}
+//		}
+//		return dict;
+//	}
+//	
+	public int mechAgentLevelQuery(Mechanic mech, String agent, int level, int type) throws FileNotFoundException, IOException, ParseException {
+		int avg = 0;
+		float count = 0;
 		
-		int numberOfSimulations = agents.length;
-		for(int i = 0; i < agents.length; i++) {
-			for(int j = 0; j < levelCount; j++) {
-				for(int k = 0; k < playthroughCount; k++){
-					QueryActionRule ruleActionQuery = new QueryActionRule(gameName + "/" + agents[i] + "/" + j + "/" + k + "/actions/actions.json");
-					QueryGameResult queryGameResult = new QueryGameResult(gameName + "/" + agents[i] + "/" + j + "/" + k + "/result/result.json");
+		File levelFile = new File(gameName + "/" + agent + "/" + level);
+		File[] listOfPlaythroughs = levelFile.listFiles();
+		
+		if(type == 0) {
+			for(File playthrough : listOfPlaythroughs) {
+				if(playthrough.isDirectory()) {
+					String playthroughPath = gameName + "/" + agent + "/" + level + "/" + playthrough.getName();
+					QueryActionRule ruleActionQuery = new QueryActionRule(playthroughPath + "/actions/actions.json");
+					QueryGameResult queryGameResult = new QueryGameResult(playthroughPath + "/result/result.json");
+					
 					int frameNumber = -1;
-					System.out.println("Finding frames for: " + mech.getReadibleAction());
+					
 					if(mech.getConditions().get(0).getType().equals("Player Input")) {
 						
 						frameNumber = ruleActionQuery.getFirstRuleActionFrameNumber();
@@ -794,67 +838,86 @@ public class VisualDemonstrationInterfacer {
 						}
 					}
 					else {
-						int[] frames = mapFrameNumbersInTheSimulationByMechanic(mech, k);
-						if(frames.length > 0) {
-							frameNumber = mapFrameNumbersInTheSimulationByMechanic(mech, k)[4];
-						} else {
+						try{
+							int[] frames = mapFrameNumbersInTheSimulationByMechanic(mech, playthroughPath);
+							if(frames.length > 0) {
+							frameNumber = mapFrameNumbersInTheSimulationByMechanic(mech, playthroughPath)[4];
+							} else {
+								frameNumber = -1;
+							}
+						} catch(Exception e) {
 							frameNumber = -1;
 						}
 					}
-					dict.put(agents[k], getFrameNumbers(frameNumber));
+					if(frameNumber != -1) {
+						avg += frameNumber;
+						count += 1;
+					}
+					
 				}
 			}
-		}
-		return dict;
-	}
-	
-	public int mechAgentLevelQuery(Mechanic mech, String agent, int level, int type) throws FileNotFoundException, IOException, ParseException {
-		float avg = 0;
-		float count = 0;
-		
-		File levelFile = new File(gameName + "/" + agent + "/" + level);
-		File[] listOfPlaythroughs = levelFile.listFiles();
-		
-		for(File playthrough : listOfPlaythroughs) {
-			if(playthrough.isDirectory()) {
-				QueryActionRule ruleActionQuery = new QueryActionRule(gameName + "/" + agent + "/" + level + "/" + playthrough.getName() + "/actions/actions.json");
-				QueryGameResult queryGameResult = new QueryGameResult(gameName + "/" + agent + "/" + level + "/" + playthrough.getName() + "/result/result.json");
-				
-				int frameNumber = -1;
-//				System.out.println("Finding frames in " + gameName + "/" + agent + "/" + level + "/" + playthrough.getName() + " for: " + mech.getReadibleAction());
-				
-				if(mech.getConditions().get(0).getType().equals("Player Input")) {
+			if(count == 0) {
+				count = 1;
+				avg = -1;
+			}
+			
+			int myAvg = Math.round(avg / count);
+			System.out.println("Avg frame for" + gameName + "/" + agent + "/" + level + "/" + " for "+  mech.getReadibleAction() + " is: " + myAvg);
+			return myAvg;
+		} else if (type == 1){
+			File minPlaythrough = null;
+			int minUniques = 100000;
+			for(File playthrough : listOfPlaythroughs) {
+				if(playthrough.isDirectory()) {
+					String playthroughPath = gameName + "/" + agent + "/" + level + "/" + playthrough.getName();		
+					String path = playthroughPath + "/interactions/interaction.json";
+					FrameInteractionAssociation frameInteractionAssociation = new FrameInteractionAssociation(path);
+					int size = frameInteractionAssociation.getUniqueInteractions().size();
 					
-					frameNumber = ruleActionQuery.getFirstRuleActionFrameNumber();
-					
-				}
-				else if(mech.isTerminal()) {
-					if ((mech.getActions().get(0).getName().equals("Win") && queryGameResult.getResult() == 1) 
-							|| mech.getActions().get(0).getName().equals("Lose") && queryGameResult.getResult() == 0) {
-						frameNumber = queryGameResult.getLastFrameNumber();
-					} else {
-						frameNumber = -1;
+					if (minUniques > size) {
+						minUniques = size;
+						minPlaythrough = playthrough;
 					}
+					
 				}
-				else {
-					int[] frames = mapFrameNumbersInTheSimulationByMechanic(mech, Integer.parseInt(playthrough.getName()));
+			}
+			String playthroughPath = gameName + "/" + agent + "/" + level + "/" + minPlaythrough.getName();
+			QueryActionRule ruleActionQuery = new QueryActionRule(playthroughPath + "/actions/actions.json");
+			QueryGameResult queryGameResult = new QueryGameResult(playthroughPath + "/result/result.json");
+			
+			int frameNumber = -1;
+			
+			if(mech.getConditions().get(0).getType().equals("Player Input")) {
+				
+				frameNumber = ruleActionQuery.getFirstRuleActionFrameNumber();
+				
+			}
+			else if(mech.isTerminal()) {
+				if ((mech.getActions().get(0).getName().equals("Win") && queryGameResult.getResult() == 1) 
+						|| mech.getActions().get(0).getName().equals("Lose") && queryGameResult.getResult() == 0) {
+					frameNumber = queryGameResult.getLastFrameNumber();
+				} else {
+					frameNumber = -1;
+				}
+			}
+			else {
+				try{
+					int[] frames = mapFrameNumbersInTheSimulationByMechanic(mech, playthroughPath);
 					if(frames.length > 0) {
-						frameNumber = mapFrameNumbersInTheSimulationByMechanic(mech, Integer.parseInt(playthrough.getName()))[4];
+					frameNumber = mapFrameNumbersInTheSimulationByMechanic(mech, playthroughPath)[4];
 					} else {
 						frameNumber = -1;
 					}
-				}
-				
-				if(frameNumber != -1) {
-					avg += frameNumber;
-					count += 1;
+				} catch(Exception e) {
+					frameNumber = -1;
 				}
 			}
+			return frameNumber;
+			
 		}
-		if(count == 0) {
-			count = 1;
+		else {
+			return -1;
 		}
-		return Math.round(avg / count);
 	}
 	
 	/***
@@ -925,51 +988,51 @@ public class VisualDemonstrationInterfacer {
 		return frames;
 	}
 	
-	public int[][] mapCriticalPath(ArrayList<ArrayList<Mechanic>> superP) throws FileNotFoundException, IOException, ParseException {
-		
-		int numberOfSimulations = (int)numberOfSimulationFoldersAreAvailable();
-		int[][] myReturnArray = new int[numberOfSimulations][];
-		for(int k = 0; k < numberOfSimulations; k++) {
-			
-			QueryActionRule ruleActionQuery = new QueryActionRule(gameName + "/game" + k + "/actions/actions.json");
-			QueryGameResult queryGameResult = new QueryGameResult(gameName + "/game" + k + "/result/result.json");
-			
-			int[] earliestFrames = new int[superP.size()+1];
-			for(int i = 0; i < superP.size()-1; i++){
-				int smallestFrame = Integer.MAX_VALUE;
-				for(int j = 1; j < superP.get(i).size(); j++) {
-					Mechanic temp = superP.get(i).get(j);
-					if(temp.getConditions().get(0).getType().equals("Player Input")) {
-						
-						int frameNumber = ruleActionQuery.getFirstRuleActionFrameNumber();
-						int frameCount = frameNumber;
-						if (frameCount < smallestFrame) 
-						{
-							smallestFrame = frameCount;
-						}
-					}
-					else {
-						// deal with as a normal mechanic
-						int [] frames = mapFrameNumbersInTheSimulationByMechanic(temp, k);
-						if(frames.length > 0 )
-						{
-							int frameCount = frames[4];
-							if (frameCount < smallestFrame || smallestFrame == -1) 
-							{
-								smallestFrame = frameCount;
-							}
-						}
-					}
-					earliestFrames[i+1] = smallestFrame;
-				}
-				
-			}
-			earliestFrames[0] = queryGameResult.getResult();
-			earliestFrames[earliestFrames.length-1] = queryGameResult.getLastFrameNumber();
-			myReturnArray[k] = earliestFrames;
-		}
-		return myReturnArray;
-	}
+//	public int[][] mapCriticalPath(ArrayList<ArrayList<Mechanic>> superP) throws FileNotFoundException, IOException, ParseException {
+//		
+//		int numberOfSimulations = (int)numberOfSimulationFoldersAreAvailable();
+//		int[][] myReturnArray = new int[numberOfSimulations][];
+//		for(int k = 0; k < numberOfSimulations; k++) {
+//			
+//			QueryActionRule ruleActionQuery = new QueryActionRule(gameName + "/game" + k + "/actions/actions.json");
+//			QueryGameResult queryGameResult = new QueryGameResult(gameName + "/game" + k + "/result/result.json");
+//			
+//			int[] earliestFrames = new int[superP.size()+1];
+//			for(int i = 0; i < superP.size()-1; i++){
+//				int smallestFrame = Integer.MAX_VALUE;
+//				for(int j = 1; j < superP.get(i).size(); j++) {
+//					Mechanic temp = superP.get(i).get(j);
+//					if(temp.getConditions().get(0).getType().equals("Player Input")) {
+//						
+//						int frameNumber = ruleActionQuery.getFirstRuleActionFrameNumber();
+//						int frameCount = frameNumber;
+//						if (frameCount < smallestFrame) 
+//						{
+//							smallestFrame = frameCount;
+//						}
+//					}
+//					else {
+//						// deal with as a normal mechanic
+//						int [] frames = mapFrameNumbersInTheSimulationByMechanic(temp, k);
+//						if(frames.length > 0 )
+//						{
+//							int frameCount = frames[4];
+//							if (frameCount < smallestFrame || smallestFrame == -1) 
+//							{
+//								smallestFrame = frameCount;
+//							}
+//						}
+//					}
+//					earliestFrames[i+1] = smallestFrame;
+//				}
+//				
+//			}
+//			earliestFrames[0] = queryGameResult.getResult();
+//			earliestFrames[earliestFrames.length-1] = queryGameResult.getLastFrameNumber();
+//			myReturnArray[k] = earliestFrames;
+//		}
+//		return myReturnArray;
+//	}
 
 	public static void main(String [] args) throws FileNotFoundException, IOException, ParseException
 	{
