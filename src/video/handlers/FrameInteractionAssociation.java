@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -35,6 +36,66 @@ public class FrameInteractionAssociation
 			}
 		}
 		return null;
+	}
+	
+	/***
+	 * Checks to see if the two given interactions are equivalent
+	 * @param one the first object
+	 * @param two the second object
+	 * @return a boolean value
+	 */
+	public boolean compareInteractions(JSONObject one, JSONObject two) {
+		String oneName, oneSprite1, oneSprite2, twoName, twoSprite1, twoSprite2;
+		
+		if(one != null && two != null) {
+			oneName = (String) one.get("interaction");
+			twoName = (String) two.get("interaction");
+			
+			oneSprite1 = (String) one.get("sprite1");
+			twoSprite1 = (String) two.get("sprite1");
+			
+			oneSprite2 = (String) one.get("sprite2");
+			twoSprite2 = (String) two.get("sprite2");
+			
+			if(oneName.equals(twoName) && oneSprite1.equals(twoSprite1) && oneSprite2.equals(twoSprite2)) {
+				return true;
+			} else {
+				return false;
+			}
+			
+		} else {
+			return false;
+		}
+	}
+	
+	/***
+	 * Checks to see if the given list already contains this object or not
+	 * @param list the list being looked over
+	 * @param interaction the interaction being looked for in the list
+	 * @return whether it contains these interactions
+	 */
+	public boolean containsObject(ArrayList<JSONObject> list, JSONObject interaction) {
+		for(JSONObject obj : list) {
+			if (compareInteractions(obj, interaction)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/***
+	 * Gets a list of unique interactions from this playthrough
+	 * @return
+	 */
+	public ArrayList<JSONObject> getUniqueInteractions() {
+		ArrayList<JSONObject> uniques = new ArrayList<JSONObject>();
+		
+		for(Object interaction : this.interactionArray) {
+			if(!containsObject(uniques, (JSONObject) interaction)) {
+				uniques.add((JSONObject) interaction);
+			}			
+		}
+		return uniques;
 	}
 	
 	public JSONObject retrieveInteraction(String interaction, String sprite1, String sprite2)
@@ -206,4 +267,23 @@ public class FrameInteractionAssociation
 		return interactionNames;
 	}
 	
+	public static void main(String[] args) {
+		try {
+			FrameInteractionAssociation fia = new FrameInteractionAssociation("aliens/adrienctx.Agent/0/0/interactions/interaction.json");
+			ArrayList<JSONObject> uniques = fia.getUniqueInteractions();
+			
+			for(JSONObject unique : uniques) {
+				System.out.println(unique);
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }

@@ -21,6 +21,7 @@ import tools.GameAnalyzer;
 import tools.IO;
 import tools.LevelAnalyzer;
 import tutorialGeneration.criticalPathing.CriticalPather;
+import tutorialGeneration.criticalPathing.GreedyPather;
 import video.basics.BunchOfGames;
 
 public class AtDelfi {
@@ -93,13 +94,17 @@ public class AtDelfi {
 	}
 	
 	public void buildGraph() {
-		this.gameGraph = new AtDelfiGraph(gd, sl, ga, la);
+		this.gameGraph = new AtDelfiGraph(gd, sl, ga, la, this.gameName);
 		Graph graph = this.gameGraph.build();
 		changeGraphTitle(graph);
-		this.gameGraph.insertFrameInfo(vdi, agents);
+		this.gameGraph.insertFrameInformation(vdi);
 		
 		if(gameGraph.isMechanicVisualization()) {
 			gameGraph.visualizeMechanicGraph();
+			if(visualizeCriticalPath) {
+				CriticalPather cp = new GreedyPather(gameGraph);
+				criticalPath(cp, "adrienctx.Agent", true);
+			}
 		}
 		if(gameGraph.isNodeVisualization()) {
 			gameGraph.visualizeNodeGraph();
@@ -107,11 +112,13 @@ public class AtDelfi {
 	}
 	
 	public void insertFrameInfo() {
-		this.gameGraph.insertFrameInfo(vdi, agents);
+		this.gameGraph.insertFrameInformation(vdi);
 	}
 
 	public void testPlayGames() {
 		ArrayList<BunchOfGames> bogs = new ArrayList<>();
+		levelCount = 1;
+		playthroughCount = 1;
 		for(int i = 0; i < 1; i++) {
 			for(int j = 0; j < 1; j++) {
 				bogs.add(new BunchOfGames(gameFile, levelFile, agents[i]));
@@ -119,7 +126,7 @@ public class AtDelfi {
 		}
 		try {
 			String[] agents = {"adrienctx.Agent"};
-			vdi.runBunchOfGames(bogs, agents, 1, 1);
+			vdi.runBunchOfGames(bogs, agents, levelCount, playthroughCount);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -148,7 +155,7 @@ public class AtDelfi {
 			}
 		}
 		try {
-			vdi.runBunchOfGames(bogs, this.agents, 5, 30);
+			vdi.runBunchOfGames(bogs, this.agents, levelCount, playthroughCount);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

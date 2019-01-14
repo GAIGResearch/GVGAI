@@ -311,6 +311,14 @@ public class GameDescription {
 		return result;
 	}
 
+	public SpriteData findSprite(String name) {
+		for(SpriteData sprite : getAllSpriteData()) {
+			if(name.equals(sprite.name)) {
+				return sprite;
+			}
+		}
+		return null;
+	}
 	/**
 	 * Get a list of all effects happening to the first sprite
 	 *

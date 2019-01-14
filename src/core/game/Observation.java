@@ -1,11 +1,14 @@
 package core.game;
 
+import java.io.Serializable;
+import com.google.gson.*;
+
 import tools.Vector2d;
 
 /**
  * Created by Diego on 19/03/14.
  */
-public class Observation implements Comparable<Observation>
+public class Observation implements Comparable<Observation>, Serializable
 {
 
     /**

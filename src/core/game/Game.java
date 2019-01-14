@@ -916,6 +916,33 @@ public abstract class Game {
 		return acum;
 	}
 
+	public void storeFramesAndActions(Player[] players, StoreFrame storeFrame) {
+		
+		//storing player action
+		String action = players[0].getLastAction().toString();
+		if(action.equals(Types.ACTIONS.ACTION_USE.toString()))
+		{
+			PlayerAction playerAction = 
+					new PlayerAction(String.valueOf(this.gameTick), action);
+			storePlayerAction.storeAllPlayerActions(playerAction);
+		}
+		
+		ArrayList<Observation>[][] data = this.getData();
+		storeFrame.saveGameState(new File(
+				SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
+				"/" + "frames/frame" + this.gameTick + ".state"), data);
+	}
+	
+	public void storeActionsAndInteractions() {
+		//stores the interaction in a JSONFile
+		storeInteraction.writeInteractionJSONFile(SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
+				"/interactions/interaction.json");
+		
+		storePlayerAction.writePlayerActionJSONFile(SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
+				"/actions/actions.json");
+		
+		SimulationCounter.counter += 1;
+	}
 	/**
 	 * Runs a game, without graphics.
 	 *
@@ -926,13 +953,20 @@ public abstract class Game {
 	 * @return the score of the game played.
 	 */
 	public double[] runGame(Player[] players, int randomSeed) {
+		
+		//Object responsible to store the game frames
+		StoreFrame frameStorer = new StoreFrame();
+		
 		// Prepare some structures and references for this game.
 		prepareGame(players, randomSeed, -1);
 
 		// Play until the game is ended
 		while (!isEnded) {
 			this.gameCycle(); // Execute a game cycle.
+
+			storeFramesAndActions(players, frameStorer);
 		}
+			storeActionsAndInteractions();
 
 		// Update the forward model for the game state sent to the controller.
 		fwdModel.update(this);
@@ -957,7 +991,7 @@ public abstract class Game {
 	public double[] playGame(Player[] players, int randomSeed, boolean isHuman, int humanID) {
 		
 		//Object responsible to store the game frames
-		StoreFrame storeFrame = new StoreFrame();
+		StoreFrame frameStorer = new StoreFrame();
 		// Prepare some structures and references for this game.
 		prepareGame(players, randomSeed, humanID);
 
@@ -997,19 +1031,7 @@ public abstract class Game {
 			// Draw all sprites in the panel.
 			view.paint(this.spriteGroups);
 			
-			//storing player action
-			String action = players[0].getLastAction().toString();
-			if(action.equals(Types.ACTIONS.ACTION_USE.toString()))
-			{
-				PlayerAction playerAction = 
-						new PlayerAction(String.valueOf(this.gameTick), action);
-				storePlayerAction.storeAllPlayerActions(playerAction);
-			}
-			
-			//storing this (view) frame
-			storeFrame.saveImage(new File(
-					SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
-					"/" + "frames/frame" + this.gameTick + ".png"), view);
+			storeFramesAndActions(players, frameStorer);
 
 			// Update the frame title to reflect current score and tick.
 			this.setTitle(frame);
@@ -1023,14 +1045,7 @@ public abstract class Game {
 			}
 		}
 		
-		//stores the interaction in a JSONFile
-		storeInteraction.writeInteractionJSONFile(SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
-				"/interactions/interaction.json");
-		
-		storePlayerAction.writePlayerActionJSONFile(SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
-				"/actions/actions.json");
-		
-		SimulationCounter.counter += 1;
+		storeActionsAndInteractions();
 		
 		if (isHuman && !wi.windowClosed && CompetitionParameters.killWindowOnEnd) {
 			if (CompetitionParameters.dialogBoxOnStartAndEnd) {
@@ -1061,6 +1076,13 @@ public abstract class Game {
 
 		return handleResult();
 	}
+	
+	public ArrayList<Observation>[][] getData()
+    {
+    	ArrayList<Observation>[][] grid = this.getObservation().getObservationGrid();
+
+      	return grid;
+    }
 
 	public double[] playOnlineGame(Player[] players, int randomSeed, boolean isHuman, int humanID) {
 		// Prepare some structures and references for this game.
@@ -2018,6 +2040,14 @@ public abstract class Game {
 		return spriteGroups[spriteItype].getSpriteIterator();
 	}
 
+	/**
+	 * Returns the sprite groups data structure
+	 * @return the sprite groups data structure
+	 */
+	public SpriteGroup[] getSpriteGroups() {
+		return spriteGroups;
+	}
+	
 	/**
 	 * Gets an iterator for the collection of sprites for a particular sprite
 	 * type, AND all subtypes.

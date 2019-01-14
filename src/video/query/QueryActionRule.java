@@ -76,6 +76,7 @@ public class QueryActionRule extends FrameInteractionAssociation{
 		return frameNumber;
 	}
 	
+	
 	public String[] getFirstEventActionFrames(String spriteFilter, String simulationNumber) throws FileNotFoundException, IOException, ParseException
 	{
 		String [] frames = null;
@@ -150,41 +151,5 @@ public class QueryActionRule extends FrameInteractionAssociation{
 		return frameKeeper;
 		}
 	
-	
-//	public static void main(String[] args) throws FileNotFoundException, IOException, ParseException
-//	{
-//		//It associates the first time a player hit a (valid) sprite with its object by pressing
-//		//the space key. Then it retrieves the frame of the interaction and returns a sequence of frames
-//		//wrapping the event
-//		QueryActionRule raq = new QueryActionRule();
-//		
-//	    //1st - configure your games and run the simulations to generate the data
-//		BunchOfGames bog1 = new BunchOfGames("examples/gridphysics/aliens.txt", 
-//					"examples/gridphysics/aliens_lvl1.txt", 
-//					"tracks.singlePlayer.tools.human.Agent");
-//			
-//		BunchOfGames bog2 = new BunchOfGames("examples/gridphysics/zelda.txt", 
-//					"examples/gridphysics/zelda_lvl1.txt", 
-//					"tracks.singlePlayer.tools.human.Agent");
-//		
-//		ArrayList<BunchOfGames> bogs = new ArrayList<>();
-//		bogs.add(bog1); /*bogs.add(bog2);*/ 
-//		VisualDemonstrationInterfacer vdi = new VisualDemonstrationInterfacer(true);	
-//		vdi.runBunchOfGames(bogs);
-//		
-//		//2 - store your interactions 
-//		ArrayList<Interaction> interactions = new ArrayList<>();
-//		interactions.add(new Interaction("KillSprite", "alienGreen", "sam"));
-//		//interactions.add(new Interaction("KillSprite", "monsterSlow", "sword"));
-//		
-//		//3 - collect the first (interaction) frames and the last ones (win/lose)
-//		//It says with "result:1" if it the final state is a win state 
-//		//and with "result:0" if it is a lose one
-//		FrameKeeper[] frameKeepers = raq.multipleQueryForFirstAndLastEvents(interactions);
-//		for (int i = 0; i < frameKeepers.length; i++) {
-//			frameKeepers[i].print();
-//		}
-//		
-//	}
 
 }
