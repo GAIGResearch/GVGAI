@@ -605,7 +605,7 @@ public class AtDelfiGraph {
 			beginLabel += sprite.getName() + " ";
 		}
 		beginLabel += mech.getConditions().get(0).getName() + " ";
-		c.addAttribute("ui.label", beginLabel + mech.getReadibleAction() + " : " + mech.getFrames().get("adrienctx.Agent")[0]);
+		c.addAttribute("ui.label", beginLabel + mech.getReadibleAction() + " : " + mech.getFrames().get("adrienctx.Agent")[1]);
 //		c.addAttribute("ui.label", beginLabel + mech.getReadibleAction());
 		c.addAttribute("ui.style", details);
 		return c;

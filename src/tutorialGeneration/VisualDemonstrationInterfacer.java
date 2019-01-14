@@ -819,41 +819,11 @@ public class VisualDemonstrationInterfacer {
 			for(File playthrough : listOfPlaythroughs) {
 				if(playthrough.isDirectory()) {
 					String playthroughPath = gameName + "/" + agent + "/" + level + "/" + playthrough.getName();
-					QueryActionRule ruleActionQuery = new QueryActionRule(playthroughPath + "/actions/actions.json");
-					QueryGameResult queryGameResult = new QueryGameResult(playthroughPath + "/result/result.json");
-					
-					int frameNumber = -1;
-					
-					if(mech.getConditions().get(0).getType().equals("Player Input")) {
-						
-						frameNumber = ruleActionQuery.getFirstRuleActionFrameNumber();
-						
-					}
-					else if(mech.isTerminal()) {
-						if ((mech.getActions().get(0).getName().equals("Win") && queryGameResult.getResult() == 1) 
-								|| mech.getActions().get(0).getName().equals("Lose") && queryGameResult.getResult() == 0) {
-							frameNumber = queryGameResult.getLastFrameNumber();
-						} else {
-							frameNumber = -1;
-						}
-					}
-					else {
-						try{
-							int[] frames = mapFrameNumbersInTheSimulationByMechanic(mech, playthroughPath);
-							if(frames.length > 0) {
-							frameNumber = mapFrameNumbersInTheSimulationByMechanic(mech, playthroughPath)[4];
-							} else {
-								frameNumber = -1;
-							}
-						} catch(Exception e) {
-							frameNumber = -1;
-						}
-					}
+					int frameNumber = getFrameNumber(mech, playthroughPath);
 					if(frameNumber != -1) {
 						avg += frameNumber;
 						count += 1;
 					}
-					
 				}
 			}
 			if(count == 0) {
@@ -872,52 +842,66 @@ public class VisualDemonstrationInterfacer {
 					String playthroughPath = gameName + "/" + agent + "/" + level + "/" + playthrough.getName();		
 					String path = playthroughPath + "/interactions/interaction.json";
 					FrameInteractionAssociation frameInteractionAssociation = new FrameInteractionAssociation(path);
+					QueryGameResult queryGameResult = new QueryGameResult(playthroughPath + "/result/result.json");
 					int size = frameInteractionAssociation.getUniqueInteractions().size();
 					
-					if (minUniques > size) {
+					if (minUniques > size && queryGameResult.getResult() == 1) {
 						minUniques = size;
 						minPlaythrough = playthrough;
 					}
 					
 				}
 			}
+			if(minPlaythrough == null) {
+				System.out.println("Its null, man.");
+			}
 			String playthroughPath = gameName + "/" + agent + "/" + level + "/" + minPlaythrough.getName();
-			QueryActionRule ruleActionQuery = new QueryActionRule(playthroughPath + "/actions/actions.json");
-			QueryGameResult queryGameResult = new QueryGameResult(playthroughPath + "/result/result.json");
-			
-			int frameNumber = -1;
-			
-			if(mech.getConditions().get(0).getType().equals("Player Input")) {
-				
-				frameNumber = ruleActionQuery.getFirstRuleActionFrameNumber();
-				
+			try {
+				int frameNumber = getFrameNumber(mech, playthroughPath);
+				return frameNumber;
+			} catch(Exception e) {
+				e.printStackTrace();
+				return -1;
 			}
-			else if(mech.isTerminal()) {
-				if ((mech.getActions().get(0).getName().equals("Win") && queryGameResult.getResult() == 1) 
-						|| mech.getActions().get(0).getName().equals("Lose") && queryGameResult.getResult() == 0) {
-					frameNumber = queryGameResult.getLastFrameNumber();
-				} else {
-					frameNumber = -1;
-				}
-			}
-			else {
-				try{
-					int[] frames = mapFrameNumbersInTheSimulationByMechanic(mech, playthroughPath);
-					if(frames.length > 0) {
-					frameNumber = mapFrameNumbersInTheSimulationByMechanic(mech, playthroughPath)[4];
-					} else {
-						frameNumber = -1;
-					}
-				} catch(Exception e) {
-					frameNumber = -1;
-				}
-			}
-			return frameNumber;
-			
 		}
 		else {
 			return -1;
 		}
+	}
+	
+	public int getFrameNumber(Mechanic mech, String playthroughPath) throws FileNotFoundException, IOException, ParseException {
+		
+		QueryActionRule ruleActionQuery = new QueryActionRule(playthroughPath + "/actions/actions.json");
+		QueryGameResult queryGameResult = new QueryGameResult(playthroughPath + "/result/result.json");
+		
+		int frameNumber = -1;
+		
+		if(mech.getConditions().get(0).getType().equals("Player Input")) {
+			
+			frameNumber = ruleActionQuery.getFirstRuleActionFrameNumber();
+			
+		}
+		else if(mech.isTerminal()) {
+			if ((mech.getActions().get(0).getName().equals("Win") && queryGameResult.getResult() == 1) 
+					|| mech.getActions().get(0).getName().equals("Lose") && queryGameResult.getResult() == 0) {
+				frameNumber = queryGameResult.getLastFrameNumber();
+			} else {
+				frameNumber = -1;
+			}
+		}
+		else {
+			try{
+				int[] frames = mapFrameNumbersInTheSimulationByMechanic(mech, playthroughPath);
+				if(frames.length > 0) {
+				frameNumber = mapFrameNumbersInTheSimulationByMechanic(mech, playthroughPath)[4];
+				} else {
+					frameNumber = -1;
+				}
+			} catch(Exception e) {
+				frameNumber = -1;
+			}
+		}
+		return frameNumber;
 	}
 	
 	/***
