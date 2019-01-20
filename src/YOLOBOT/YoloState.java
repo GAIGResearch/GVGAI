@@ -244,7 +244,7 @@ public class YoloState {
 
 	public TreeSet<Event> getEventsHistory() {
 		if (_eventHistory == null) {
-			_eventHistory = _stateObservation.getEventsHistory();
+			_eventHistory = _stateObservation.getHistoricEventsHistory();
 		}
 		return _eventHistory;
 	}

@@ -20,7 +20,7 @@ public class StoreInteraction {
 	public JSONObject storeInteraction(Interaction interaction)
 	{
 		JSONObject interactionObject = new JSONObject();
-		interactionObject.put("tick", interaction.tick);
+		interactionObject.put("tick", interaction.gameTick);
 		interactionObject.put("interaction", interaction.rule);
 		interactionObject.put("sprite1", interaction.sprite1);
 		interactionObject.put("sprite2", interaction.sprite2);

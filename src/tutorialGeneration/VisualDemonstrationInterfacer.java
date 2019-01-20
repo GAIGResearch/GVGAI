@@ -22,7 +22,7 @@ import video.basics.GameSummary;
 import video.basics.Interaction;
 import video.basics.InteractionFrame;
 import video.basics.InteractionQueryObject;
-import video.constants.SimulationCounter;
+import video.constants.InteractionStaticData;
 import video.gui.main.ShowFrames;
 import video.gui.main.VideoPlayer;
 import video.handlers.FrameInteractionAssociation;
@@ -55,23 +55,23 @@ public class VisualDemonstrationInterfacer {
 			video.utils.Utils.deleteFolder(new File("simulation"));
 		summaries = new ArrayList<>();
 		agentMap = new HashMap<Integer, String>();
-		SimulationCounter.counter = 0;
-		SimulationCounter.resultsCounter = 0;
-		SimulationCounter.spriteCaptureCounter = 0;
+		InteractionStaticData.counter = 0;
+		InteractionStaticData.resultsCounter = 0;
+		InteractionStaticData.spriteCaptureCounter = 0;
 	}
 
 	public VisualDemonstrationInterfacer(String gameName, boolean deleteFolders) throws FileNotFoundException, IOException, ParseException {
 		numberOfSimulations = 0;
 		this.gameName = gameName;
-		SimulationCounter.gameName = gameName;
+		InteractionStaticData.gameName = gameName;
 		if(deleteFolders)
 			video.utils.Utils.deleteFolder(new File(gameName));
 		Files.createDirectories(Paths.get(gameName));
 		summaries = new ArrayList<>();
 		agentMap = new HashMap<Integer, String>();
-		SimulationCounter.counter = 0;
-		SimulationCounter.resultsCounter = 0;
-		SimulationCounter.spriteCaptureCounter = 0;
+		InteractionStaticData.counter = 0;
+		InteractionStaticData.resultsCounter = 0;
+		InteractionStaticData.spriteCaptureCounter = 0;
 	}
 	
 	
@@ -93,8 +93,8 @@ public class VisualDemonstrationInterfacer {
 	
 	public void runGame(String game, String level1, String agentName) throws IOException
 	{
-		SimulationCounter.saveSpriteGroup = true;
-		SimulationCounter.itypesJson = new ArrayList<String>();
+		InteractionStaticData.saveSpriteGroup = true;
+		InteractionStaticData.itypesJson = new ArrayList<String>();
 		ArcadeMachine.runOneGame(game, level1, false, agentName, "", 0, 0);
 	}
 
@@ -455,9 +455,9 @@ public class VisualDemonstrationInterfacer {
 		
 		for (BunchOfGames game : bunchOfGames) {
 			createDirectories(game.playerPath, game.levelCount, game.playthroughCount);
-			SimulationCounter.agentName = game.playerPath;
-			SimulationCounter.levelCount = game.levelCount;
-			SimulationCounter.playthroughCount = game.playthroughCount;
+			InteractionStaticData.agentName = game.playerPath;
+			InteractionStaticData.levelCount = game.levelCount;
+			InteractionStaticData.playthroughCount = game.playthroughCount;
 			this.runGame(game.gamePath, game.gameLevelPath, game.playerPath);
 			
 			storeSpriteMapping(game.playerPath, game.levelCount, game.playthroughCount);
@@ -467,8 +467,8 @@ public class VisualDemonstrationInterfacer {
 	
 	public void storeSpriteMapping(String agentName, String levelCount, String playthroughCount) {
 		try(FileWriter writer = new FileWriter(gameName + "/" + agentName + "/" + levelCount + "/" + playthroughCount + "/mappings/" + "spritemap.json")) {
-			for(int i = 0; i < SimulationCounter.itypesJson.size(); i++){
-				String json = SimulationCounter.itypesJson.get(i);
+			for(int i = 0; i < InteractionStaticData.itypesJson.size(); i++){
+				String json = InteractionStaticData.itypesJson.get(i);
 				writer.write(json + "\n");
 			}
 			writer.close();

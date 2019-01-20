@@ -739,7 +739,7 @@ public class Chromosome implements Comparable<Chromosome>{
 					automatedWinSum += 0.5;
 				}
 				
-				TreeSet s1 = tempState.getEventsHistory();
+				TreeSet s1 = tempState.getHistoricEventsHistory();
 				Iterator<Event> iter1 = s1.iterator();
 				while(iter1.hasNext()) {
 					Event e = iter1.next();
@@ -771,7 +771,7 @@ public class Chromosome implements Comparable<Chromosome>{
 				}
 				
 				// gather all unique interactions between objects in the naive agent
-				TreeSet s1 = randomState.getEventsHistory();
+				TreeSet s1 = randomState.getHistoricEventsHistory();
 				Iterator<Event> iter1 = s1.iterator();
 				while(iter1.hasNext()) {
 					Event e = iter1.next();
@@ -804,7 +804,7 @@ public class Chromosome implements Comparable<Chromosome>{
 				}
 				
 				// gather all unique interactions between objects in the best agent
-				TreeSet s1 = naiveState.getEventsHistory();
+				TreeSet s1 = naiveState.getHistoricEventsHistory();
 				Iterator<Event> iter1 = s1.iterator();
 				while(iter1.hasNext()) {
 					Event e = iter1.next();

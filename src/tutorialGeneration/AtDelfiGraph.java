@@ -734,22 +734,35 @@ public class AtDelfiGraph {
 	}
 	
 
-	public void insertFrameInfo(VisualDemonstrationInterfacer vdi, String[] agents) {
-		for (Mechanic mech : mechanics) {
-			try {
-				int isWin;
-				HashMap<String, int[]> firstDict = vdi.oneMechanicQuery(mech, agents);
-				mech.setFrames(firstDict);
-				if (verbose) {
-					System.out.println(mech.toString());
-				}
-				frames.put(agent, framesForAgent);
+	public void insertFrameInformation(VisualDemonstrationInterfacer vdi) {
+
+			ArrayList<String> agents = vdi.getAgents(this.name);
+			int levelCount = vdi.getLevelCount(this.name);
+			int playthroughCount = vdi.getPlaythroughCount(this.name);
+
+			for(Mechanic mech: mechanics) {
+
+				// keeps track of avg frames by agent-level 
+				HashMap<String, int[]> frames = new HashMap<String, int[]>();
+
+
+				for (String agent : agents) {
+					int[] framesForAgent = new int[levelCount];
+					for(int i = 0; i < levelCount; i++) {
+						try {
+							framesForAgent[i] = vdi.mechAgentLevelQuery(mech, agent, i, 1);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							framesForAgent[i] = -1;
+						}
+						frames.put(agent, framesForAgent);
 					
-			}
+					}
 				
-			mech.setFrames(frames);
-		} 
-		
+					mech.setFrames(frames);
+				}
+			}						
 	}
 		
 	public void colorizeCriticalPath(List<Mechanic> criticalPath) {

@@ -19,7 +19,7 @@ import core.player.Player;
 import ontology.Types;
 import tools.ElapsedCpuTimer;
 import tools.StatSummary;
-import video.constants.SimulationCounter;
+import video.constants.InteractionStaticData;
 
 /**
  * Created with IntelliJ IDEA. User: Diego Date: 06/11/13 Time: 11:24 This is a
@@ -102,8 +102,8 @@ public class ArcadeMachine {
 		Game toPlay = new VGDLParser().parseGame(game_file);
 		toPlay.buildLevel(level_file, randomSeed);
 
-		if(SimulationCounter.saveSpriteGroup) {
-			SimulationCounter.createJSONInfo(toPlay);
+		if(InteractionStaticData.saveSpriteGroup) {
+			InteractionStaticData.createJSONInfo(toPlay);
 		}
 		
 		// Warm the game up.

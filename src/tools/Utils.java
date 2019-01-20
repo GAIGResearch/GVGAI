@@ -238,7 +238,6 @@ public class Utils
 
             idx++;
             
-            System.out.print(gameName + ", ");
         }
 
         return allGames;

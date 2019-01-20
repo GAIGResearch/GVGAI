@@ -38,7 +38,7 @@ public class RetrieveButton extends JButton implements ActionListener{
 		// TODO Auto-generated method stub
 		String interaction = interactionComboBox.getSelectedItem().toString();
 		int index = interactionComboBox.getSelectedIndex();
-		String tick = interactionComboBox.interaction[index].tick;
+		String tick = interactionComboBox.interaction[index].gameTick;
 		
 		System.out.println("index " + index);
 		System.out.println("tick " + tick);

@@ -112,9 +112,9 @@ public class ObjectiveController {
 	
 	public double checkObjectives(StateObservation stateObs, double prevScore, Vector2d prevPos, boolean updateExplorationBonus) {
 		// Check for events
-		if (stateObs.getEventsHistory().size() > 0 && stateObs.getEventsHistory().last().gameStep == stateObs.getGameTick() - 1) {
+		if (stateObs.getHistoricEventsHistory().size() > 0 && stateObs.getHistoricEventsHistory().last().gameStep == stateObs.getGameTick() - 1) {
 			double eventCount = 0;
-			Iterator<Event> iter = stateObs.getEventsHistory().descendingIterator();
+			Iterator<Event> iter = stateObs.getHistoricEventsHistory().descendingIterator();
 			
 			// Check all events that occurred last frame
 			while (iter.hasNext()) {
@@ -364,8 +364,8 @@ public class ObjectiveController {
 		HashMap<Integer, Integer> resources = stateObs.getAvatarResources();
 		if(resources != null) {
 			// Check for events
-			if (stateObs.getEventsHistory().size() > 0 && stateObs.getEventsHistory().last().gameStep == stateObs.getGameTick() - 1) {
-				Iterator<Event> iter = stateObs.getEventsHistory().descendingIterator();
+			if (stateObs.getHistoricEventsHistory().size() > 0 && stateObs.getHistoricEventsHistory().last().gameStep == stateObs.getGameTick() - 1) {
+				Iterator<Event> iter = stateObs.getHistoricEventsHistory().descendingIterator();
 				HashMap<Integer, Integer> prevResources = previousState.getAvatarResources();
 				
 				while (iter.hasNext()) {

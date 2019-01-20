@@ -119,9 +119,9 @@ public class AtDelfi {
 		ArrayList<BunchOfGames> bogs = new ArrayList<>();
 		levelCount = 1;
 		playthroughCount = 1;
-		for(int i = 0; i < 1; i++) {
-			for(int j = 0; j < 1; j++) {
-				bogs.add(new BunchOfGames(gameFile, levelFile, agents[i]));
+		for(int i = 0; i <levelCount; i++) {
+			for(int j = 0; j < playthroughCount; j++) {
+				bogs.add(new BunchOfGames(gameFile, levelFile, agents[i], "" + i, "" + j));
 			}
 		}
 		try {
