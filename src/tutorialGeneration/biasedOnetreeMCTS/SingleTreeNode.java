@@ -1,4 +1,4 @@
-package tutorialGeneration.biasedMCTS;
+package tutorialGeneration.biasedOnetreeMCTS;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -22,7 +22,7 @@ public class SingleTreeNode
     private final double HUGE_NEGATIVE = -10000.0;
     private final double HUGE_POSITIVE =  10000.0;
     
-    private final double BONUS = 100.0;
+    private final double BONUS = 10.0;
     // number of MCTS iterations
     public int numIterations = 5 * 1000000;
     
@@ -42,7 +42,7 @@ public class SingleTreeNode
     public int ROLLOUT_DEPTH = 100;
     
     public double K = Math.sqrt(2);
-//    public double K = 0.85;
+//    public double K = 0.35;
     public SingleTreeNode bestNode;
     public SingleTreeNode rootNode;
     public StateObservation rootState;
@@ -255,11 +255,11 @@ public class SingleTreeNode
     	critPath.add(new Interaction("KillSprite", "goal", "withkey"));
 //    	int indexFloor = 0;
     	Object[] interactionArray = this.interactions.toArray();
-    	for(GameEvent crit : critPath) {
-    		for(int i = 0; i < interactionArray.length; i++) {
-    			if(crit.equals((GameEvent) interactionArray[i])) {
+    	for(int i = 0; i < critPath.size(); i++) {
+    		for(int j = 0; j < interactionArray.length; j++) {
+    			if(critPath.get(i).equals((GameEvent) interactionArray[j])) {
 //    				indexFloor = i;
-    				bonus += BONUS;
+    				bonus += BONUS * i;
     				break;
     			}
     		}

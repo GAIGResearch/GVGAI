@@ -1,4 +1,4 @@
-package tutorialGeneration.biasedMCTS;
+package tutorialGeneration.biasedOnetreeMCTS;
 
 import java.io.IOException;
 import java.util.ArrayList;

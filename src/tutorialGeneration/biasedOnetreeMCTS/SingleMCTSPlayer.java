@@ -1,10 +1,14 @@
-package tutorialGeneration.biasedMCTS;
+package tutorialGeneration.biasedOnetreeMCTS;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import core.game.StateObservation;
 import ontology.Types;
+import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
+import ontology.Types;
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -20,6 +24,8 @@ public class SingleMCTSPlayer
      * Root of the tree.
      */
     public SingleTreeNode m_root;
+    
+    boolean oneTree= false;
 
     /**
      * Random generator.
@@ -62,8 +68,30 @@ public class SingleMCTSPlayer
      */
     public void run()
     {	        
-    	m_root.mctsSearch(improved);
-    	
+    	if	(oneTree) {
+    		m_root.mctsSearch(improved);
+    	} else {
+    		StateObservation a_gameState = m_root.rootState;
+    		ArrayList<ACTIONS> moves = new ArrayList<ACTIONS>();
+    		int count = 1;
+    		while (!a_gameState.isGameOver()) {
+	    	    init(a_gameState);
+	    		m_root.numIterations = 10000;
+	    	    m_root.mctsSearch(improved);
+	    	    int action = m_root.mostVisitedAction();
+	    	    Types.ACTIONS act = actions[action];
+    			System.out.println("Move Number " +  count);
+	    	    System.out.println("New Move: " + act);
+	    	    a_gameState.advance(act);
+	    	    count++;
+    		}
+    		
+    		if (a_gameState.getGameWinner() == Types.WINNER.PLAYER_WINS) {
+    			System.out.println("Won game!");
+    		} else {
+    			System.out.println("Lost game...");
+    		}
+    	}
     }
 
 }
