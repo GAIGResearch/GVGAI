@@ -58,35 +58,6 @@ public class AtDelfiValidator {
 		int seed = 100;
 		AtDelfiValidator validator = new AtDelfiValidator();
 		validator.runXperiments(10, true, seed, false);
-		
-//		
-//		try {
-//			StateObservation root = validator.startup(seed, gameFile, levelFile);
-//			
-//			// more setup stuff
-//	        ArrayList<Types.ACTIONS> act = root.getAvailableActions();
-//	        Types.ACTIONS[] actions = new Types.ACTIONS[act.size()];
-//	        
-//	        for(int i = 0; i < actions.length; ++i)
-//	        {
-//	            actions[i] = act.get(i);
-//	        }
-//	        
-//	        int num_actions = actions.length;
-//	        
-//	        boolean improved = true;
-//	        
-//	        SingleMCTSPlayer player = new SingleMCTSPlayer(new Random(seed), num_actions, actions, improved);
-//	        
-//	        player.init(root);
-//	        player.run();
-//	        
-//	        System.out.println("Complete");
-//	        
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 	}
 	
 	public String[] getGame(int id) {

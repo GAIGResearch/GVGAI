@@ -1,6 +1,8 @@
 package tutorialGeneration;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,10 +47,11 @@ public class AtDelfi {
 	
 	private VisualDemonstrationInterfacer vdi;
 		
-	public static String[] agents = {"adrienctx.Agent", "NovelTS.Agent", "NovTea.Agent", "Number27.Agent", "YOLOBOT.Agent", "tracks.singlePlayer.simple.doNothing.Agent", "tracks.singlePlayer.simple.sampleonesteplookahead.Agent"};
+	public static String[] agents;
+	//	= {"adrienctx.Agent", "NovelTS.Agent", "NovTea.Agent", "Number27.Agent", "YOLOBOT.Agent", "tracks.singlePlayer.simple.doNothing.Agent", "tracks.singlePlayer.simple.sampleonesteplookahead.Agent"};
 	public static int levelCount = 5;
 	public static int playthroughCount = 30;
-//	private String[] agents = {"adrienctx.Agent"};
+	//	private String[] agents = {"adrienctx.Agent"};
 	
 	private boolean visualizeCriticalPath = true;
 
@@ -90,9 +93,32 @@ public class AtDelfi {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		// read in all agents
+		generateAgents();
 //		this.buildGraph();
 	}
-	
+	public void generateAgents() {
+		try {
+			File agentsDirectory = new File("src/agents");
+			String[] agents = agentsDirectory.list(new FilenameFilter() {
+				  @Override
+				  public boolean accept(File current, String name) {
+				    return new File(current, name).isDirectory();
+				  }
+				});
+			
+			for(int i = 0; i < agents.length; i++) {
+				agents[i] = "agents." + agents[i] + ".Agent";
+			}
+			
+			this.agents = agents;
+			
+			System.out.println(agents);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
 	public void buildGraph() {
 		this.gameGraph = new AtDelfiGraph(gd, sl, ga, la, this.gameName);
 		Graph graph = this.gameGraph.build();
@@ -144,6 +170,8 @@ public class AtDelfi {
 	}
 	
 	public void playGames() {
+		if(verbose)
+			System.out.println("** Playing Games **");
 		ArrayList<BunchOfGames> bogs = new ArrayList<>();
 		for(int i = 0; i < agents.length; i++) {
 			for(int j = 0; j < levelCount; j++) {
@@ -153,6 +181,28 @@ public class AtDelfi {
 				}
 			}
 		}
+		try {
+			vdi.runBunchOfGames(bogs, this.agents, levelCount, playthroughCount);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void playGames(int id) {
+		if(verbose)
+			System.out.println("** Playing Games **");
+		ArrayList<BunchOfGames> bogs = new ArrayList<>();
+		
+		int agentId = id;
+
+		for(int j = 0; j < levelCount; j++) {
+			for (int k = 0; k < playthroughCount; k++) {
+				BunchOfGames game = new BunchOfGames(gameFile, levelFile, agents[agentId], "" + j, "" + k);
+				bogs.add(game);
+			}
+		}
+		
 		try {
 			vdi.runBunchOfGames(bogs, this.agents, levelCount, playthroughCount);
 		} catch (IOException e) {

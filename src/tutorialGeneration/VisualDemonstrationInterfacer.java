@@ -460,7 +460,7 @@ public class VisualDemonstrationInterfacer {
 			InteractionStaticData.playthroughCount = game.playthroughCount;
 			this.runGame(game.gamePath, game.gameLevelPath, game.playerPath);
 			
-			storeSpriteMapping(game.playerPath, game.levelCount, game.playthroughCount);
+//			storeSpriteMapping(game.playerPath, game.levelCount, game.playthroughCount);
 		}
 	}
 	

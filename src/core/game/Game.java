@@ -937,9 +937,10 @@ public abstract class Game {
 		}
 		
 		ArrayList<Observation>[][] data = this.getData();
-		storeFrame.saveGameState(new File(
-				InteractionStaticData.gameName + "/" + InteractionStaticData.agentName + "/" + InteractionStaticData.levelCount + "/" + InteractionStaticData.playthroughCount +
-				"/" + "frames/frame" + this.gameTick + ".state"), data);
+		/** Uncomment if you want game states saved! **/
+//		storeFrame.saveGameState(new File(
+//				InteractionStaticData.gameName + "/" + InteractionStaticData.agentName + "/" + InteractionStaticData.levelCount + "/" + InteractionStaticData.playthroughCount +
+//				"/" + "frames/frame" + this.gameTick + ".state"), data);
 	}
 	
 	public void storeActionsAndInteractions() {
