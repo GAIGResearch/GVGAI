@@ -1,5 +1,6 @@
 package tutorialGeneration.biasedOnetreeMCTS;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
@@ -53,43 +54,98 @@ public class AtDelfiValidator {
 		return toPlay.getObservation();
 	}
 	public static void main(String[] args) {
-
+		
 		int seed = 100;
 		AtDelfiValidator validator = new AtDelfiValidator();
+		validator.runXperiments(10, true, seed, false);
 		
-		String gameFile = validator.generateTutorialPath + validator.getGame(validator.gameIdx)[1] + ".txt";
-		String levelFile = validator.gamesPath + validator.getGame(validator.gameIdx)[1] + "_lvl" + validator.levelIdx + ".txt";
-		
-		try {
-			StateObservation root = validator.startup(seed, gameFile, levelFile);
-			
-			// more setup stuff
-	        ArrayList<Types.ACTIONS> act = root.getAvailableActions();
-	        Types.ACTIONS[] actions = new Types.ACTIONS[act.size()];
-	        
-	        for(int i = 0; i < actions.length; ++i)
-	        {
-	            actions[i] = act.get(i);
-	        }
-	        
-	        int num_actions = actions.length;
-	        
-	        boolean improved = true;
-	        
-	        SingleMCTSPlayer player = new SingleMCTSPlayer(new Random(seed), num_actions, actions, improved);
-	        
-	        player.init(root);
-	        player.run();
-	        
-	        System.out.println("Complete");
-	        
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		
+//		try {
+//			StateObservation root = validator.startup(seed, gameFile, levelFile);
+//			
+//			// more setup stuff
+//	        ArrayList<Types.ACTIONS> act = root.getAvailableActions();
+//	        Types.ACTIONS[] actions = new Types.ACTIONS[act.size()];
+//	        
+//	        for(int i = 0; i < actions.length; ++i)
+//	        {
+//	            actions[i] = act.get(i);
+//	        }
+//	        
+//	        int num_actions = actions.length;
+//	        
+//	        boolean improved = true;
+//	        
+//	        SingleMCTSPlayer player = new SingleMCTSPlayer(new Random(seed), num_actions, actions, improved);
+//	        
+//	        player.init(root);
+//	        player.run();
+//	        
+//	        System.out.println("Complete");
+//	        
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 	
 	public String[] getGame(int id) {
 		return games[id];
+	}
+	
+	public void runXperiments(int x, boolean improved, int seed, boolean seeded) {
+		
+		String gameFile = generateTutorialPath + getGame(gameIdx)[1] + ".txt";
+		String levelFile = gamesPath + getGame(gameIdx)[1] + "_lvl" + levelIdx + ".txt";
+		try{
+			// make experiments directory and main experiment file //
+			File directory = new File(String.valueOf("experiments"));
+
+			if(!directory.exists()){
+
+				directory.mkdir();
+			}
+			File mainFile = new File("experiments/main_file.txt");
+			
+			mainFile.createNewFile();
+			
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		// run x amount of experiments //
+		File mainFile = new File("experiments/main_file.txt");
+		int winning = 0;
+		for(int i = 0; i < x; i++) {
+			try{
+				File expFile = new File("experiments/experiment_"+ i + ".txt");
+				expFile.createNewFile();
+				
+				// more setup stuff
+				if(!seeded)
+					seed = new Random().nextInt();
+				StateObservation root = startup(seed, gameFile, levelFile);
+		        ArrayList<Types.ACTIONS> act = root.getAvailableActions();
+		        Types.ACTIONS[] actions = new Types.ACTIONS[act.size()];
+		        
+		        for(int k = 0; k < actions.length; ++k)
+		        {
+		            actions[k] = act.get(k);
+		        }
+		        
+		        int num_actions = actions.length;
+		        		        
+		        // create the mcts player //
+				if(!seeded)
+					seed = new Random().nextInt();
+		        SingleMCTSPlayer player = new SingleMCTSPlayer(new Random(seed), num_actions, actions, improved, expFile, mainFile);
+		        
+		        player.init(root);
+		        winning += player.run(i);
+		        System.out.println("Complete. Wins: " + winning + " / " + (i+1));
+				
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }

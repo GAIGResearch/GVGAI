@@ -19,10 +19,13 @@ public class SingleTreeNode
     public static SingleTreeNode deepestNode;
 
 	
-    private final double HUGE_NEGATIVE = -10000.0;
-    private final double HUGE_POSITIVE =  10000.0;
+    private final double HUGE_NEGATIVE = -100000.0;
+    private final double HUGE_POSITIVE =  100000.0;
     
     private final double BONUS = 10.0;
+    
+    private final double K_DECAY = 0.20;
+    private final double BONUS_DECAY = 0.50;
     // number of MCTS iterations
     public int numIterations = 5 * 1000000;
     
@@ -61,6 +64,7 @@ public class SingleTreeNode
         this.num_actions = num_actions;
         this.actions = actions;
         this.interactions = interactions;
+        this.K = Math.sqrt(2);
         children = new SingleTreeNode[num_actions];
         totValue = 0.0;
         this.childIdx = childIdx;
@@ -85,11 +89,11 @@ public class SingleTreeNode
         bestNode = null;
         while(numIters < numIterations){
 
-        	if(numIters % 10000 == 0) {
-        		System.out.println("*********************\n");
-        		System.out.println("Iteration: " + numIters);
-        		System.out.println("Deepest Node: " + SingleTreeNode.deepest);
-        	}
+//        	if(numIters % 500 == 0) {
+//        		System.out.println("*********************\n");
+//        		System.out.println("Iteration: " + numIters);
+//        		System.out.println("Deepest Node: " + SingleTreeNode.deepest);
+//        	}
             StateObservation state = rootState.copy();
 
             SingleTreeNode selected = treePolicy(state);
@@ -101,11 +105,12 @@ public class SingleTreeNode
             }
             numIters++;
         }
-        int won = 0;
-        if(bestNode != null) {
-        	won = 1;
-        }
-        System.out.println("Game Over\nResult: " + won);
+        System.out.println("Deepest Node: " + SingleTreeNode.deepest);
+//        int won = 0;
+//        if(bestNode != null) {
+//        	won = 1;
+//        }
+//        System.out.println("Game Over\nResult: " + won);
     }
     public SingleTreeNode getBestNode() {
     	return bestNode;
@@ -120,6 +125,7 @@ public class SingleTreeNode
                 return cur.expand(state);
 
             } else {
+            	cur.K = cur.K * (1 - K_DECAY);
                 SingleTreeNode next = cur.uct(state);
                 cur = next;
             }
@@ -195,6 +201,7 @@ public class SingleTreeNode
 
     public double rollOut(StateObservation state, boolean improved)
     {
+    	int ogGameTick = state.getGameTick();
         int thisDepth = 0;
 
         while (!finishRollout(state,thisDepth)) {
@@ -208,7 +215,7 @@ public class SingleTreeNode
         double delta = value(state);
         
         if(improved) {
-        	delta += getCritPathBonus();
+        	delta += getCritPathBonus(ogGameTick, state.getFirstTimeEventsHistory());
         }
         if(delta < bounds[0])
             bounds[0] = delta;
@@ -237,7 +244,7 @@ public class SingleTreeNode
         return rawScore;
     }
     
-    public double getCritPathBonus() {
+    public double getCritPathBonus(int ogGameTick, ArrayList<GameEvent> interactions) {
     	
     	double bonus = 0.0;
     	ArrayList<GameEvent> critPath = new ArrayList<GameEvent>();
@@ -254,13 +261,21 @@ public class SingleTreeNode
     	critPath.add(new Interaction("TransformTo", "nokey",  "key"));
     	critPath.add(new Interaction("KillSprite", "goal", "withkey"));
 //    	int indexFloor = 0;
-    	Object[] interactionArray = this.interactions.toArray();
+    	
+    	// one to one mapping to critPath
+    	int[] mechCounter = new int[critPath.size()];
+    	
+    	Object[] interactionArray = interactions.toArray();
     	for(int i = 0; i < critPath.size(); i++) {
     		for(int j = 0; j < interactionArray.length; j++) {
-    			if(critPath.get(i).equals((GameEvent) interactionArray[j])) {
+    			GameEvent interaction = (GameEvent) interactionArray[j];
+    			
+    			if(critPath.get(i).equals(interaction)) {
+    				mechCounter[i]++;
+    				if(Integer.parseInt(interaction.gameTick) >= ogGameTick) {
 //    				indexFloor = i;
-    				bonus += BONUS * i;
-    				break;
+    					bonus += BONUS * 2 * (1 - BONUS_DECAY) / mechCounter[i];
+    				}
     			}
     		}
     	}

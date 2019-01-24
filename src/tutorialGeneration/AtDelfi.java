@@ -143,7 +143,6 @@ public class AtDelfi {
 		return criticalPath;
 	}
 	
-	
 	public void playGames() {
 		ArrayList<BunchOfGames> bogs = new ArrayList<>();
 		for(int i = 0; i < agents.length; i++) {
