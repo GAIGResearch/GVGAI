@@ -46,6 +46,8 @@ public class AtDelfi {
 	private String levelFile;
 	
 	private VisualDemonstrationInterfacer vdi;
+	
+	public String path;
 		
 	public static String[] agents;
 	//	= {"adrienctx.Agent", "NovelTS.Agent", "NovTea.Agent", "Number27.Agent", "YOLOBOT.Agent", "tracks.singlePlayer.simple.doNothing.Agent", "tracks.singlePlayer.simple.sampleonesteplookahead.Agent"};
@@ -129,7 +131,7 @@ public class AtDelfi {
 			gameGraph.visualizeMechanicGraph();
 			if(visualizeCriticalPath) {
 				CriticalPather cp = new GreedyPather(gameGraph);
-				criticalPath(cp, "adrienctx.Agent", true);
+				criticalPath(cp, "agents.sampleMCTS.Agent", true);
 			}
 		}
 		if(gameGraph.isNodeVisualization()) {
@@ -194,17 +196,18 @@ public class AtDelfi {
 			System.out.println("** Playing Games **");
 		ArrayList<BunchOfGames> bogs = new ArrayList<>();
 		
-		int agentId = id;
+		int agentId = id%29;
 
 		for(int j = 0; j < levelCount; j++) {
 			for (int k = 0; k < playthroughCount; k++) {
+				String levelFile = this.path + j + ".txt";
 				BunchOfGames game = new BunchOfGames(gameFile, levelFile, agents[agentId], "" + j, "" + k);
 				bogs.add(game);
 			}
 		}
 		
 		try {
-			vdi.runBunchOfGames(bogs, this.agents, levelCount, playthroughCount);
+			vdi.runBunchOfGames(bogs, AtDelfi.agents, levelCount, playthroughCount);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
