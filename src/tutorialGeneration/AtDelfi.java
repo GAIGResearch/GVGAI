@@ -121,17 +121,17 @@ public class AtDelfi {
 			e.printStackTrace();
 		}
 	}
-	public void buildGraph() {
+	public void buildGraph(String agent, int level) {
 		this.gameGraph = new AtDelfiGraph(gd, sl, ga, la, this.gameName);
 		Graph graph = this.gameGraph.build();
 		changeGraphTitle(graph);
 		this.gameGraph.insertFrameInformation(vdi);
 		
 		if(gameGraph.isMechanicVisualization()) {
-			gameGraph.visualizeMechanicGraph();
+			gameGraph.visualizeMechanicGraph(agent, level);
 			if(visualizeCriticalPath) {
 				CriticalPather cp = new GreedyPather(gameGraph);
-				criticalPath(cp, "agents.sampleMCTS.Agent", true);
+				criticalPath(cp, agent, true, level);
 			}
 		}
 		if(gameGraph.isNodeVisualization()) {
@@ -161,8 +161,8 @@ public class AtDelfi {
 		}
 	}
 	
-	public List<Mechanic> criticalPath(CriticalPather criticalPather, String agent, boolean isWin) {
-		List<Mechanic> criticalPath = criticalPather.findCriticalPath(agent, isWin);
+	public List<Mechanic> criticalPath(CriticalPather criticalPather, String agent, boolean isWin, int level) {
+		List<Mechanic> criticalPath = criticalPather.findCriticalPath(agent, isWin, level);
 		
 		if(visualizeCriticalPath) {
 			this.gameGraph.colorizeCriticalPath(criticalPath);

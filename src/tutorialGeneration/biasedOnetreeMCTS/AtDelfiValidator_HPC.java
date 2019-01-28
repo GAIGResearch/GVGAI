@@ -128,7 +128,7 @@ public class AtDelfiValidator_HPC {
 
 				directory.mkdir();
 			}
-			File mainFile = new File("experiments/main_file_" + id +".txt");
+			File mainFile = new File("experiments/main_file_" + gameIdx + "_" + id +".txt");
 			
 			mainFile.createNewFile();
 			
@@ -136,11 +136,11 @@ public class AtDelfiValidator_HPC {
 			e.printStackTrace();
 		}
 		// run x amount of experiments //
-		File mainFile = new File("experiments/main_file_" + id +".txt");
+		File mainFile = new File("experiments/main_file_" + gameIdx + "_" + id +".txt");
 		int winning = 0;
 //		for(int i = 0; i < x; i++) {
 			try{
-				File expFile = new File("experiments/experiment_"+ id + ".txt");
+				File expFile = new File("experiments/experiment_" + gameIdx + "_" + id + ".txt");
 				expFile.createNewFile();
 				
 				// more setup stuff

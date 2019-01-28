@@ -22,7 +22,7 @@ public class GreedyPather extends CriticalPather {
 	}
 
 	@Override
-	public List<Mechanic> findCriticalPath(String agent, boolean isWin) {
+	public List<Mechanic> findCriticalPath(String agent, boolean isWin, int level) {
 		List<Mechanic> criticalPath = new ArrayList<Mechanic>();
 		
 		List<Mechanic> currentChoices = new ArrayList<Mechanic>();
@@ -39,7 +39,7 @@ public class GreedyPather extends CriticalPather {
 			// loop thru all the mechs
 			for (Mechanic mech : currentChoices) {
 				// if the mech has an earlier frame then the current earliest, replace 
-				if (mech.getFrames().get(agent)[0] < earliestFrame && mech.getFrames().get(agent)[0] != -1) {
+				if (mech.getFrames().get(agent)[level] < earliestFrame && mech.getFrames().get(agent)[level] != -1) {
 					earliestMech = mech;
 				}
 			}

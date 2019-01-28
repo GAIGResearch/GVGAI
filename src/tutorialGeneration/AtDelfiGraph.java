@@ -173,10 +173,10 @@ public class AtDelfiGraph {
 		spaceAllNodes(graph);
 	}
 	
-	public void visualizeMechanicGraph() {
+	public void visualizeMechanicGraph(String agent, int level) {
 		mechanicGraph = new MultiGraph("Mechanic Graph");
 		for (Mechanic mech : mechanics) {
-			MultiNode n = createMechanicNode(mechanicGraph, mech);
+			MultiNode n = createMechanicNode(mechanicGraph, mech, agent, level);
 		}
 		
 		for(Mechanic mech : mechanics) {
@@ -596,7 +596,7 @@ public class AtDelfiGraph {
 		return c;
 	}
 	
-	public MultiNode createMechanicNode(Graph graph, Mechanic mech) {
+	public MultiNode createMechanicNode(Graph graph, Mechanic mech, String agent, int level) {
 		String details = mechanicAttributes;
 		MultiNode c = graph.addNode("" + mech.getId());
 		
@@ -605,7 +605,7 @@ public class AtDelfiGraph {
 			beginLabel += sprite.getName() + " ";
 		}
 		beginLabel += mech.getConditions().get(0).getName() + " ";
-		c.addAttribute("ui.label", beginLabel + mech.getReadibleAction() + " : " + mech.getFrames().get("agents.sampleMCTS.Agent")[0]);
+		c.addAttribute("ui.label", beginLabel + mech.getReadibleAction() + " : " + mech.getFrames().get(agent)[level]);
 //		c.addAttribute("ui.label", beginLabel + mech.getReadibleAction());
 		c.addAttribute("ui.style", details);
 		return c;

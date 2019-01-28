@@ -42,8 +42,8 @@ public class TestAtDelfi {
     
     String gameFile, levelFile, recordTutorialFile;
 
-    int levelIdx = 0; // level names from 0 to 4 (game_lvlN.txt).
-    int gameIdx = 47;
+    int levelIdx = 1; // level names from 0 to 4 (game_lvlN.txt).
+    int gameIdx = 39;
 
     public TestAtDelfi() {
         // settings        
@@ -58,9 +58,9 @@ public class TestAtDelfi {
 		TestAtDelfi tester = new TestAtDelfi();		
 		
 //		tester.testAllGames(seed);
-//		tester.testOneGame(seed, tester.gameIdx);
+		tester.testOneGame(seed, tester.gameIdx);
 		
-		tester.testOneGame_HPC(seed, Integer.parseInt(args[0]));
+//		tester.testOneGame_HPC(seed, Integer.parseInt(args[0]));
 //		tester.testFirstGames(seed);
 //		tester.testSecondGames(seed);
 //		tester.testThirdGames(seed);
@@ -77,7 +77,7 @@ public class TestAtDelfi {
 
 			AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, gameInfo[1], seed, this.verbose);
 //			atdelfi.playGames();
-			atdelfi.buildGraph();
+			atdelfi.buildGraph("adrienctx.Agent", 0);
 
 		}
 	}
@@ -149,7 +149,7 @@ public class TestAtDelfi {
 
 		AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, this.getGame(this.gameIdx)[1], seed, this.verbose);
 //		atdelfi.playGames();
-		atdelfi.buildGraph();	
+		atdelfi.buildGraph("agents.adrienctx.Agent", levelIdx);	
 		
 //		CriticalPather criticalPather = new GreedyPather(atdelfi.getGameGraph());
 //		

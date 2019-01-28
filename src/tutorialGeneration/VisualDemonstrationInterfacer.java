@@ -854,14 +854,16 @@ public class VisualDemonstrationInterfacer {
 			}
 			if(minPlaythrough == null) {
 				System.out.println("Its null, man.");
-			}
-			String playthroughPath = gameName + "/" + agent + "/" + level + "/" + minPlaythrough.getName();
-			try {
-				int frameNumber = getFrameNumber(mech, playthroughPath);
-				return frameNumber;
-			} catch(Exception e) {
-				e.printStackTrace();
 				return -1;
+			} else {
+				String playthroughPath = gameName + "/" + agent + "/" + level + "/" + minPlaythrough.getName();
+				try {
+					int frameNumber = getFrameNumber(mech, playthroughPath);
+					return frameNumber;
+				} catch(Exception e) {
+					e.printStackTrace();
+					return -1;
+				}
 			}
 		}
 		else {
