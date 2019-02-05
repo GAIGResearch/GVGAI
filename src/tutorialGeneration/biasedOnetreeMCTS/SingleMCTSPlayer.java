@@ -45,6 +45,7 @@ public class SingleMCTSPlayer
     
 
     public boolean done = false;
+    public boolean visualize = false;
     
     File expFile;
     File mainExperimentsFile;
@@ -93,6 +94,10 @@ public class SingleMCTSPlayer
 	    		m_root.numIterations = 5000;
 	    	    m_root.mctsSearch(improved);
 	    	    int action = m_root.mostVisitedAction();
+	    	    if(visualize) {
+	    	    	return action;
+	    	    }
+
 	    	    Types.ACTIONS act = actions[action];
 	    	    a_gameState.advance(act);
 	            try { 

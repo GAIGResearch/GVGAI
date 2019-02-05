@@ -42,8 +42,8 @@ public class TestAtDelfi {
     
     String gameFile, levelFile, recordTutorialFile;
 
-    int levelIdx = 1; // level names from 0 to 4 (game_lvlN.txt).
-    int gameIdx = 39;
+    int levelIdx = 0; // level names from 0 to 4 (game_lvlN.txt).
+    int gameIdx = 30;
 
     public TestAtDelfi() {
         // settings        
@@ -148,8 +148,8 @@ public class TestAtDelfi {
         this.recordTutorialFile = this.generateTutorialPath + games[gameIdx][1] + "_tutorial.txt";
 
 		AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, this.getGame(this.gameIdx)[1], seed, this.verbose);
-//		atdelfi.playGames();
-		atdelfi.buildGraph("agents.adrienctx.Agent", levelIdx);	
+//		atdelfi.testPlayGames();
+		atdelfi.buildGraph("human", levelIdx);	
 		
 //		CriticalPather criticalPather = new GreedyPather(atdelfi.getGameGraph());
 //		

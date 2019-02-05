@@ -95,7 +95,8 @@ public class VisualDemonstrationInterfacer {
 	{
 		InteractionStaticData.saveSpriteGroup = true;
 		InteractionStaticData.itypesJson = new ArrayList<String>();
-		ArcadeMachine.runOneGame(game, level1, false, agentName, "", 0, 0);
+//		ArcadeMachine.runOneGame(game, level1, false, agentName, "", 0, 0);
+		ArcadeMachine.playOneGame(game, level1, "", 0);
 	}
 
 	public HashMap<Integer, TupleRuleFrames> queryVisualDemonstrations(InteractionQueryObject [] iqos) throws FileNotFoundException, IOException, ParseException

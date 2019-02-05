@@ -28,19 +28,26 @@ public class GreedyPather extends CriticalPather {
 		List<Mechanic> currentChoices = new ArrayList<Mechanic>();
 		
 		// get all the mechanics of the avatars
-		for(Node avatar : this.getGraph().getAvatars()) {
-			currentChoices.addAll(avatar.getMechanics());
-		}
+		currentChoices.addAll(this.getGraph().getAvatars().get(0).getMechanics());
+		
 		boolean terminate = false;
+		int count = 0;
+		int earliestFrame = 100000;
+		int floor = 0;
+
 		// terminate when its time or when currentChoices has no choices
 		while(!terminate && currentChoices.size() > 0) {
+			System.out.println(count++);
 			Mechanic earliestMech = null;
-			int earliestFrame = 100000;
 			// loop thru all the mechs
 			for (Mechanic mech : currentChoices) {
 				// if the mech has an earlier frame then the current earliest, replace 
-				if (mech.getFrames().get(agent)[level] < earliestFrame && mech.getFrames().get(agent)[level] != -1) {
+				if (!mech.isVisted() && mech.getFrames().get(agent)[level] < earliestFrame 
+//						&& mech.getFrames().get(agent)[level] != -1 
+						&& mech.getFrames().get(agent)[level] != 0
+						&& mech.getFrames().get(agent)[level] >= floor) {
 					earliestMech = mech;
+					earliestFrame = mech.getFrames().get(agent)[level];
 				}
 			}
 			
@@ -48,17 +55,27 @@ public class GreedyPather extends CriticalPather {
 			if(earliestMech == null) {
 				break;
 			}
+			earliestMech.setVisted(true);
+			floor = earliestFrame;
+			earliestFrame = 100000;
 			
+
 			// reset currentChoices
-			currentChoices = new ArrayList<Mechanic>();
+//			currentChoices = new ArrayList<Mechanic>();
 			for(Mechanic mech : earliestMech.getOutputs()) {
-				if(!mech.isVisted()) {
+				if(!mech.isVisted() 
+//						&& mech.getFrames().get(agent)[level] != -1 
+						&& mech.getFrames().get(agent)[level] != 0
+						&& mech.getFrames().get(agent)[level] >= floor) {
 					currentChoices.add(mech);
 				}
 			}
+//			currentChoices.addAll(this.getGraph().getAvatars().get(0).getMechanics());
+
+			
+			
 			// put this round in the critical path
 			criticalPath.add(earliestMech);
-			earliestMech.setVisted(true);
 			// check if the earliest was a terminal
 			if (earliestMech.isTerminal() && earliestMech.isWin() == isWin) {
 				terminate = true;

@@ -6,6 +6,8 @@ import core.game.StateObservation;
 import ontology.Types;
 import tools.ElapsedCpuTimer;
 
+import tutorialGeneration.biasedOnetreeMCTS.SingleTreeNode;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Diego
@@ -56,7 +58,7 @@ public class SingleMCTSPlayer
     public int run(ElapsedCpuTimer elapsedTimer)
     {
         //Do the search within the available time.
-        m_root.mctsSearch(elapsedTimer);
+        m_root.mctsSearch(true);
 
         //Determine the best action to take and return it.
         int action = m_root.mostVisitedAction();

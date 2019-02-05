@@ -22,13 +22,14 @@ public class SingleTreeNode
     private final double HUGE_NEGATIVE = -100000.0;
     private final double HUGE_POSITIVE =  100000.0;
     
-    private final double BONUS = 10.0;
+    private final double BONUS = 1;
     
-    private final double K_DECAY = 0.25;
+    private final double K_DECAY = 0.00;
     private final double BONUS_DECAY = 0.10;
     // number of MCTS iterations
-    public int numIterations = 5 * 1000000;
+    public int numIterations = 5000;
     
+    public float bonus = 0;
     public double epsilon = 1e-6;
     public double egreedyEpsilon = 0.05;
     public SingleTreeNode parent;
@@ -42,10 +43,11 @@ public class SingleTreeNode
 
     public int num_actions;
     Types.ACTIONS[] actions;
-    public int ROLLOUT_DEPTH = 100;
+    public int ROLLOUT_DEPTH = 50;
+    public int bonus_count = 0;
     
     public double K = Math.sqrt(2);
-//    public double K = 0.35;
+//    public double K = 0;
     public SingleTreeNode bestNode;
     public SingleTreeNode rootNode;
     public StateObservation rootState;
@@ -87,13 +89,14 @@ public class SingleTreeNode
     public void mctsSearch(boolean improved) {
         int numIters = 0;
         bestNode = null;
+        SingleTreeNode.deepest = 0;
         while(numIters < numIterations){
 
-//        	if(numIters % 500 == 0) {
-//        		System.out.println("*********************\n");
-//        		System.out.println("Iteration: " + numIters);
-//        		System.out.println("Deepest Node: " + SingleTreeNode.deepest);
-//        	}
+        	if(numIters % 1000 == 0) {
+        		System.out.println("*********************\n");
+        		System.out.println("Iteration: " + numIters);
+        		System.out.println("Deepest Node: " + SingleTreeNode.deepest);
+        	}
             StateObservation state = rootState.copy();
 
             SingleTreeNode selected = treePolicy(state);
@@ -155,6 +158,7 @@ public class SingleTreeNode
         // add any interactions that occured during this event
         
         SingleTreeNode tn = new SingleTreeNode(this.rootNode, this,bestAction, this.m_rnd, num_actions, actions, interactions);
+        tn.bonus = this.bonus;
         children[bestAction] = tn;
         
         if(state.isGameOver() && state.getGameWinner() == Types.WINNER.PLAYER_WINS) {
@@ -216,6 +220,8 @@ public class SingleTreeNode
         
         if(improved) {
         	delta += getCritPathBonus(ogGameTick, state.getFirstTimeEventsHistory());
+        	// WARNING: For testing with just the bonus as the reward!!!
+//        	delta = getCritPathBonus(ogGameTick, state.getFirstTimeEventsHistory());
         }
         if(delta < bounds[0])
             bounds[0] = delta;
@@ -246,7 +252,6 @@ public class SingleTreeNode
     
     public double getCritPathBonus(int ogGameTick, ArrayList<GameEvent> interactions) {
     	
-    	double bonus = 0.0;
     	ArrayList<GameEvent> critPath = new ArrayList<GameEvent>();
     	// Aliens
 //    	critPath.add(new PlayerAction("ACTION_USE"));
@@ -254,13 +259,43 @@ public class SingleTreeNode
 //    	critPath.add(new Interaction("KillSprite", "alienBlue", "sam"));
     	
     	// Zelda
-    	critPath.add(new PlayerAction("ACTION_USE"));
-    	critPath.add(new Interaction("KillSprite", "monsterQuick", "sword"));
-    	critPath.add(new Interaction("KillSprite", "monsterNormal", "sword"));
-    	critPath.add(new Interaction("KillSprite", "monsterSlow", "sword"));
-    	critPath.add(new Interaction("TransformTo", "nokey",  "key"));
-    	critPath.add(new Interaction("KillSprite", "goal", "withkey"));
+//    	critPath.add(new PlayerAction("ACTION_USE"));
+//    	critPath.add(new Interaction("KillSprite", "monsterQuick", "sword"));
+//    	critPath.add(new Interaction("KillSprite", "monsterNormal", "sword"));
+//    	critPath.add(new Interaction("KillSprite", "monsterSlow", "sword"));
+//    	critPath.add(new Interaction("TransformTo", "nokey",  "key"));
+//    	critPath.add(new Interaction("KillSprite", "goal", "withkey"));
 //    	int indexFloor = 0;
+    	
+    	// Solarfox
+//    	critPath.add(new Interaction("KillSprite","blib","avatar"));
+    	// RealPortals
+
+//    	critPath.add(new PlayerAction("ACTION_USE"));
+//    	critPath.add(new Interaction("TransformTo", "avatarIn", "weaponToggle1"));
+//    	critPath.add(new Interaction("TransformTo", "avatarOut", "weaponToggle2"));
+//    	critPath.add(new Interaction("TransformTo", "wall", "missileOut"));
+//    	critPath.add(new Interaction("TransformTo", "wall", "missileIn"));
+//    	critPath.add(new Interaction("TeleportToExit","avatarIn","portalentry"));
+//    	critPath.add(new Interaction("TeleportToExit","avatarOut","portalentry"));
+//    	critPath.add(new Interaction("StepBack","avatarOut","portalExit"));
+//    	critPath.add(new Interaction("StepBack","avatarIn","portalExit"));
+//    	critPath.add(new Interaction("KillSprite", "key", "avatarIn"));
+//    	critPath.add(new Interaction("KillSprite", "key", "avatarOut"));
+//    	critPath.add(new Interaction("KillIfOtherHasMore", "lock", "avatarOut"));
+//    	critPath.add(new Interaction("KillIfOtherHasMore", "lock", "avatarIn"));
+//    	critPath.add(new Interaction("KillSprite", "goal", "avatarOut"));
+//    	critPath.add(new Interaction("KillSprite", "goal", "avatarIn"));
+
+    	
+    	// Sokoban
+//    	critPath.add(new Interaction("BounceForward", "box", "avatar"));
+//    	critPath.add(new Interaction("KillSprite", "box", "hole"));
+    	
+    	// Plants
+    	critPath.add(new PlayerAction("ACTION_USE"));
+    	critPath.add(new Interaction("TransformTo", "shovel", "marsh"));
+    	critPath.add(new Interaction("TransformTo", "plant", "axe"));
     	
     	// one to one mapping to critPath
     	int[] mechCounter = new int[critPath.size()];
@@ -272,13 +307,21 @@ public class SingleTreeNode
     			
     			if(critPath.get(i).equals(interaction)) {
     				mechCounter[i]++;
-    				if(Integer.parseInt(interaction.gameTick) >= ogGameTick) {
+    				if(Integer.parseInt(interaction.gameTick) >= ogGameTick-1) {
 //    				indexFloor = i;
-    					bonus += BONUS * 2 * (1 - BONUS_DECAY) / mechCounter[i];
+//    					bonus += BONUS * (1.0 / (float)(Math.pow(1.1, Integer.parseInt(interaction.gameTick) - (ogGameTick))));
+//    					if(Integer.parseInt(interaction.gameTick) == rootNode.rootState.getGameTick() + 1) {
+//    						bonus+= 10000;
+//    					}
+    					if(mechCounter[i] < 100)	
+    						bonus += BONUS  * ((1 - BONUS_DECAY) / mechCounter[i]) * (1.0 / (float)(Math.pow(1.1, Integer.parseInt(interaction.gameTick) - (ogGameTick))));
+//    					System.out.println(interaction.toString() + " : " + interaction.gameTick);
+    					this.bonus_count += 1;
     				}
     			}
     		}
     	}
+    	bonus += this.parent.bonus;
     	return bonus;
     }
 
@@ -303,13 +346,17 @@ public class SingleTreeNode
         while(n != null)
         {
             n.nVisits++;
-            n.totValue += result;
+//            n.totValue += result;
+            n.totValue = Math.max(n.totValue, result);
+//            n.totValue = n.totValue / n.nVisits;
             if (result < n.bounds[0]) {
                 n.bounds[0] = result;
             }
             if (result > n.bounds[1]) {
                 n.bounds[1] = result;
             }
+            if(n != rootNode)
+            	n.parent.bonus_count += this.bonus_count;
             n = n.parent;
         }
     }
@@ -325,6 +372,7 @@ public class SingleTreeNode
 
             if(children[i] != null)
             {
+            	
                 if(first == -1)
                     first = children[i].nVisits;
                 else if(first != children[i].nVisits)
@@ -334,10 +382,14 @@ public class SingleTreeNode
 
                 double childValue = children[i].nVisits;
                 childValue = Utils.noise(childValue, this.epsilon, this.m_rnd.nextDouble());     //break ties randomly
+                childValue = children[i].totValue;
                 if (childValue > bestValue) {
                     bestValue = childValue;
                     selected = i;
                 }
+                
+                System.out.println(actions[i] + " - value: " + childValue);
+//                		+ " - critPath hits: " + children[i].bonus_count);
             }
         }
 

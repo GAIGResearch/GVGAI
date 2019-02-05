@@ -69,6 +69,10 @@ public class AtDelfiValidator_HPC {
 		else
 			validator.gameIdx = 39;
 		
+		// fixed game
+		validator.gameIdx = 30;
+		
+		
 		int withoutH = u + t*10;
 		if (withoutH > 79) 
 			validator.levelIdx = 4;
@@ -171,4 +175,11 @@ public class AtDelfiValidator_HPC {
 			}
 //		}
 	}
+	
+//	public void visualize() {
+//		String game = generateTutorialPath + getGame(gameIdx)[1] + ".txt";
+//		String level1 = gamesPath + getGame(gameIdx)[1] + "_lvl" + levelIdx + ".txt";
+//		// 2. This plays a game in a level by the controller.
+//		ArcadeMachine.runOneGame(game, level1, true, "tutorialGeneration.biasedOnetreeMCTS.Agent", recordActionsFile, seed, 0);
+//	}
 }

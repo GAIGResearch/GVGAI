@@ -149,7 +149,7 @@ public class AtDelfi {
 		playthroughCount = 1;
 		for(int i = 0; i <levelCount; i++) {
 			for(int j = 0; j < playthroughCount; j++) {
-				bogs.add(new BunchOfGames(gameFile, levelFile, agents[i], "" + i, "" + j));
+				bogs.add(new BunchOfGames(gameFile, levelFile, "human", "" + i, "" + j));
 			}
 		}
 		try {
@@ -178,7 +178,7 @@ public class AtDelfi {
 		for(int i = 0; i < agents.length; i++) {
 			for(int j = 0; j < levelCount; j++) {
 				for (int k = 0; k < playthroughCount; k++) {
-					BunchOfGames game = new BunchOfGames(gameFile, levelFile, agents[i], "" + j, "" + k);
+					BunchOfGames game = new BunchOfGames(gameFile, levelFile, "human", "" + j, "" + k);
 					bogs.add(game);
 				}
 			}

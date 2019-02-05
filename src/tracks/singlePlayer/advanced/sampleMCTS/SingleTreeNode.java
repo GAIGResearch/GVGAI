@@ -1,16 +1,34 @@
 package tracks.singlePlayer.advanced.sampleMCTS;
 
+import java.util.ArrayList;
 import java.util.Random;
+import java.util.TreeSet;
 
 import core.game.StateObservation;
 import ontology.Types;
 import tools.ElapsedCpuTimer;
 import tools.Utils;
+import video.basics.GameEvent;
+import video.basics.Interaction;
+import video.basics.PlayerAction;
 
 public class SingleTreeNode
 {
-    private final double HUGE_NEGATIVE = -10000000.0;
-    private final double HUGE_POSITIVE =  10000000.0;
+	public static int deepest = 0;
+	public static boolean randomWon = false;
+    public static SingleTreeNode deepestNode;
+
+	
+    private final double HUGE_NEGATIVE = -100000.0;
+    private final double HUGE_POSITIVE =  100000.0;
+    
+    private final double BONUS = 10.0;
+    
+    private final double K_DECAY = 0.05;
+    private final double BONUS_DECAY = 0.10;
+    // number of MCTS iterations
+    public int numIterations = 5 * 1000;
+    
     public double epsilon = 1e-6;
     public double egreedyEpsilon = 0.05;
     public SingleTreeNode parent;
@@ -24,20 +42,29 @@ public class SingleTreeNode
 
     public int num_actions;
     Types.ACTIONS[] actions;
-    public int ROLLOUT_DEPTH = 10;
+    public int ROLLOUT_DEPTH = 100;
+    
     public double K = Math.sqrt(2);
-
+//    public double K = 0.35;
+    public SingleTreeNode bestNode;
+    public SingleTreeNode rootNode;
     public StateObservation rootState;
+    
+    public ArrayList<GameEvent> interactions;
 
     public SingleTreeNode(Random rnd, int num_actions, Types.ACTIONS[] actions) {
-        this(null, -1, rnd, num_actions, actions);
+        this(null,null, -1, rnd, num_actions, actions, new ArrayList<GameEvent>());
+        rootNode = this;
     }
 
-    public SingleTreeNode(SingleTreeNode parent, int childIdx, Random rnd, int num_actions, Types.ACTIONS[] actions) {
+    public SingleTreeNode(SingleTreeNode root, SingleTreeNode parent, int childIdx, Random rnd, int num_actions, Types.ACTIONS[] actions, ArrayList<GameEvent> interactions) {
         this.parent = parent;
+        this.rootNode = root;
         this.m_rnd = rnd;
         this.num_actions = num_actions;
         this.actions = actions;
+        this.interactions = interactions;
+        this.K = Math.sqrt(2);
         children = new SingleTreeNode[num_actions];
         totValue = 0.0;
         this.childIdx = childIdx;
@@ -45,35 +72,50 @@ public class SingleTreeNode
             m_depth = parent.m_depth+1;
         else
             m_depth = 0;
-    }
-
-
-    public void mctsSearch(ElapsedCpuTimer elapsedTimer) {
-
-        double avgTimeTaken = 0;
-        double acumTimeTaken = 0;
-        long remaining = elapsedTimer.remainingTimeMillis();
-        int numIters = 0;
-
-        int remainingLimit = 5;
-        while(remaining > 2*avgTimeTaken && remaining > remainingLimit){
-        //while(numIters < Agent.MCTS_ITERATIONS){
-
-            StateObservation state = rootState.copy();
-
-            ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
-            SingleTreeNode selected = treePolicy(state);
-            double delta = selected.rollOut(state);
-            backUp(selected, delta);
-
-            numIters++;
-            acumTimeTaken += (elapsedTimerIteration.elapsedMillis()) ;
-            //System.out.println(elapsedTimerIteration.elapsedMillis() + " --> " + acumTimeTaken + " (" + remaining + ")");
-            avgTimeTaken  = acumTimeTaken/numIters;
-            remaining = elapsedTimer.remainingTimeMillis();
+        
+        if (m_depth > SingleTreeNode.deepest) {
+        	SingleTreeNode.deepest = m_depth;
+        	SingleTreeNode.deepestNode = this;
         }
     }
 
+    /***
+     * Build a whole MCTS tree
+     * @param elapsedTimer
+     * @param improved
+     */
+    public void mctsSearch(boolean improved) {
+        int numIters = 0;
+        bestNode = null;
+        SingleTreeNode.deepest = 0;
+        while(numIters < numIterations){
+
+        	if(numIters % 500 == 0) {
+        		System.out.println("*********************\n");
+        		System.out.println("Iteration: " + numIters);
+        		System.out.println("Deepest Node: " + SingleTreeNode.deepest);
+        	}
+            StateObservation state = rootState.copy();
+
+            SingleTreeNode selected = treePolicy(state);
+            double delta = selected.rollOut(state, improved);
+            backUp(selected, delta);
+
+            if(bestNode != null) {
+            	break;
+            }
+            numIters++;
+        }
+        System.out.println("Deepest Node: " + SingleTreeNode.deepest);
+//        int won = 0;
+//        if(bestNode != null) {
+//        	won = 1;
+//        }
+//        System.out.println("Game Over\nResult: " + won);
+    }
+    public SingleTreeNode getBestNode() {
+    	return bestNode;
+    }
     public SingleTreeNode treePolicy(StateObservation state) {
 
         SingleTreeNode cur = this;
@@ -84,6 +126,7 @@ public class SingleTreeNode
                 return cur.expand(state);
 
             } else {
+            	cur.K = cur.K * (1 - K_DECAY);
                 SingleTreeNode next = cur.uct(state);
                 cur = next;
             }
@@ -93,7 +136,7 @@ public class SingleTreeNode
     }
 
 
-    public SingleTreeNode expand(StateObservation state) {
+     public SingleTreeNode expand(StateObservation state) {
 
         int bestAction = 0;
         double bestValue = -1;
@@ -108,9 +151,16 @@ public class SingleTreeNode
 
         //Roll the state
         state.advance(actions[bestAction]);
+        ArrayList<GameEvent> interactions = state.getFirstTimeEventsHistory();
 
-        SingleTreeNode tn = new SingleTreeNode(this,bestAction,this.m_rnd,num_actions, actions);
+        // add any interactions that occured during this event
+        
+        SingleTreeNode tn = new SingleTreeNode(this.rootNode, this,bestAction, this.m_rnd, num_actions, actions, interactions);
         children[bestAction] = tn;
+        
+        if(state.isGameOver() && state.getGameWinner() == Types.WINNER.PLAYER_WINS) {
+        	this.rootNode.bestNode = this;
+        }
         return tn;
     }
 
@@ -123,12 +173,12 @@ public class SingleTreeNode
             double hvVal = child.totValue;
             double childValue =  hvVal / (child.nVisits + this.epsilon);
 
-            childValue = Utils.normalise(childValue, bounds[0], bounds[1]);
+            //childValue = Utils.normalise(childValue, bounds[0], bounds[1]);
             //System.out.println("norm child value: " + childValue);
 
             double uctValue = childValue +
                     K * Math.sqrt(Math.log(this.nVisits + 1) / (child.nVisits + this.epsilon));
-
+//            		(K/SingleTreeNode.deepest) * Math.sqrt(Math.log(this.nVisits + 1) / (child.nVisits + this.epsilon));
             uctValue = Utils.noise(uctValue, this.epsilon, this.m_rnd.nextDouble());     //break ties randomly
 
             // small sampleRandom numbers: break ties in unexpanded nodes
@@ -150,9 +200,10 @@ public class SingleTreeNode
     }
 
 
-    public double rollOut(StateObservation state)
+    public double rollOut(StateObservation state, boolean improved)
     {
-        int thisDepth = this.m_depth;
+    	int ogGameTick = state.getGameTick();
+        int thisDepth = 0;
 
         while (!finishRollout(state,thisDepth)) {
 
@@ -163,13 +214,15 @@ public class SingleTreeNode
 
 
         double delta = value(state);
-
+        
+        if(improved) {
+        	delta += getCritPathBonus(ogGameTick, state.getFirstTimeEventsHistory());
+        }
         if(delta < bounds[0])
             bounds[0] = delta;
         if(delta > bounds[1])
             bounds[1] = delta;
-
-        //double normDelta = utils.normalise(delta ,lastBounds[0], lastBounds[1]);
+        
 
         return delta;
     }
@@ -184,9 +237,55 @@ public class SingleTreeNode
             rawScore += HUGE_NEGATIVE;
 
         if(gameOver && win == Types.WINNER.PLAYER_WINS)
-            rawScore += HUGE_POSITIVE;
+        {    
+        	rawScore += HUGE_POSITIVE;
+        	
+    	}
 
         return rawScore;
+    }
+    
+    public double getCritPathBonus(int ogGameTick, ArrayList<GameEvent> interactions) {
+    	
+    	double bonus = 0.0;
+    	ArrayList<GameEvent> critPath = new ArrayList<GameEvent>();
+    	// Aliens
+//    	critPath.add(new PlayerAction("ACTION_USE"));
+//    	critPath.add(new Interaction("KillBoth", "base", "sam"));
+//    	critPath.add(new Interaction("KillSprite", "alienBlue", "sam"));
+    	
+    	// Zelda
+//    	critPath.add(new PlayerAction("ACTION_USE"));
+//    	critPath.add(new Interaction("KillSprite", "monsterQuick", "sword"));
+//    	critPath.add(new Interaction("KillSprite", "monsterNormal", "sword"));
+//    	critPath.add(new Interaction("KillSprite", "monsterSlow", "sword"));
+    	critPath.add(new Interaction("TransformTo", "nokey",  "key"));
+    	critPath.add(new Interaction("KillSprite", "goal", "withkey"));
+//    	int indexFloor = 0;
+    	
+    	// Solarfox
+    	
+    	// RealPortals
+    	
+    	// one to one mapping to critPath
+    	int[] mechCounter = new int[critPath.size()];
+    	
+    	Object[] interactionArray = interactions.toArray();
+    	for(int i = 0; i < critPath.size(); i++) {
+    		for(int j = 0; j < interactionArray.length; j++) {
+    			GameEvent interaction = (GameEvent) interactionArray[j];
+    			
+    			if(critPath.get(i).equals(interaction)) {
+    				mechCounter[i]++;
+    				if(Integer.parseInt(interaction.gameTick) >= ogGameTick) {
+//    				indexFloor = i;
+    					bonus += BONUS * 2 * (1 - BONUS_DECAY) / mechCounter[i];
+    					System.out.println("Bonus added!");
+    				}
+    			}
+    		}
+    	}
+    	return bonus;
     }
 
     public boolean finishRollout(StateObservation rollerState, int depth)
@@ -194,8 +293,12 @@ public class SingleTreeNode
         if(depth >= ROLLOUT_DEPTH)      //rollout end condition.
             return true;
 
-        if(rollerState.isGameOver())               //end of game
-            return true;
+        if(rollerState.isGameOver())  {             //end of game
+            if(rollerState.getGameWinner() == Types.WINNER.PLAYER_WINS) {
+            	SingleTreeNode.randomWon = true;
+            }
+        	return true;
+        }
 
         return false;
     }

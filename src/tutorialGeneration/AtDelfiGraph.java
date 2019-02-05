@@ -770,6 +770,7 @@ public class AtDelfiGraph {
 			for (Mechanic mech : criticalPath) {
 				MultiNode mechNode = findVisualGraphNode(this.mechanicGraph, mech.getId());
 				mechNode.changeAttribute("ui.style", this.critPathAttributes);
+				System.out.println(mech);
 			}
 		}
 	}
