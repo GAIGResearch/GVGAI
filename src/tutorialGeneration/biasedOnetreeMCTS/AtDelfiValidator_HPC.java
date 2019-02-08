@@ -14,6 +14,9 @@ import core.vgdl.VGDLRegistry;
 import ontology.Types;
 import tools.Utils;
 import tracks.ArcadeMachine;
+import video.basics.GameEvent;
+import video.basics.Interaction;
+import video.basics.PlayerAction;
 import video.constants.InteractionStaticData;
 
 public class AtDelfiValidator_HPC {
@@ -62,15 +65,21 @@ public class AtDelfiValidator_HPC {
 		int u=id%10;
 	    int t=(id/10)%10;
 	    
-		if(id > 199) 
-			validator.gameIdx = 47;
-		else if(id > 99)
+	    if(id > 499)
+			validator.gameIdx = 4;
+	    else if(id > 399)
+			validator.gameIdx = 30;
+	    else if(id > 299)
 			validator.gameIdx = 34;
-		else
+	    else if(id > 199) 
 			validator.gameIdx = 39;
+		else if(id > 99)
+			validator.gameIdx = 42;
+		else
+			validator.gameIdx = 47;
 		
 		// fixed game
-		validator.gameIdx = 30;
+//		validator.gameIdx = 4;
 		
 		
 		int withoutH = u + t*10;
@@ -84,7 +93,7 @@ public class AtDelfiValidator_HPC {
 			validator.levelIdx = 1;
 		else
 			validator.levelIdx = 0;
-		validator.runXperiments(1, false, seed, false, id);
+		validator.runXperiments(1, true, seed, false, id);
 		
 //		
 //		try {
@@ -142,7 +151,6 @@ public class AtDelfiValidator_HPC {
 		// run x amount of experiments //
 		File mainFile = new File("experiments/main_file_" + gameIdx + "_" + id +".txt");
 		int winning = 0;
-//		for(int i = 0; i < x; i++) {
 			try{
 				File expFile = new File("experiments/experiment_" + gameIdx + "_" + id + ".txt");
 				expFile.createNewFile();
@@ -165,16 +173,68 @@ public class AtDelfiValidator_HPC {
 				if(!seeded)
 					seed = new Random().nextInt();
 		        SingleMCTSPlayer player = new SingleMCTSPlayer(new Random(seed), num_actions, actions, improved, expFile, mainFile);
+		        player.critPath = new ArrayList<GameEvent>();
+		        setupCritPath(player.critPath);
 		        
 		        player.init(root);
-		        winning += player.run(id);
-//		        System.out.println("Complete. Wins: " + winning + " / " + (id+1));
-				
+		        winning += player.run(id);				
 			}catch(Exception e) {
 				e.printStackTrace();
 			}
-//		}
 	}
+	
+	public void setupCritPath(ArrayList<GameEvent> critPath) {
+		if(gameIdx == 47) {
+			// zelda
+        	critPath.add(new PlayerAction("ACTION_USE"));
+        	critPath.add(new Interaction("KillSprite", "monsterQuick", "sword"));
+        	critPath.add(new Interaction("KillSprite", "monsterNormal", "sword"));
+        	critPath.add(new Interaction("KillSprite", "monsterSlow", "sword"));
+        	critPath.add(new Interaction("TransformTo", "nokey",  "key"));
+        	critPath.add(new Interaction("KillSprite", "goal", "withkey"));		        	
+        } else if(gameIdx == 42) {
+        	// survivezombies
+        	critPath.add(new Interaction("SubtractHealthPoints", "avatar", "zombie"));
+        	critPath.add(new Interaction("KillSprite", "avatar", "zombie"));
+        	critPath.add(new Interaction("StepBack", "avatar", "wall"));
+        	critPath.add(new Interaction("AddHealthPoints", "avatar", "honey"));
+        } else if(gameIdx == 39) {
+        	// solarfox
+        	critPath.add(new Interaction("KillSprite","blib","avatar"));
+        } else if(gameIdx == 34) {
+        	// realportals
+        	critPath.add(new PlayerAction("ACTION_USE"));
+        	critPath.add(new Interaction("TransformTo", "avatarIn", "weaponToggle1"));
+        	critPath.add(new Interaction("TransformTo", "avatarOut", "weaponToggle2"));
+        	critPath.add(new Interaction("TransformTo", "wall", "missileOut"));
+        	critPath.add(new Interaction("TransformTo", "wall", "missileIn"));
+        	critPath.add(new Interaction("TeleportToExit","avatarIn","portalentry"));
+        	critPath.add(new Interaction("TeleportToExit","avatarOut","portalentry"));
+        	critPath.add(new Interaction("StepBack","avatarOut","portalExit"));
+        	critPath.add(new Interaction("StepBack","avatarIn","portalExit"));
+        	critPath.add(new Interaction("KillSprite", "key", "avatarIn"));
+        	critPath.add(new Interaction("KillSprite", "key", "avatarOut"));
+        	critPath.add(new Interaction("KillIfOtherHasMore", "lock", "avatarOut"));
+        	critPath.add(new Interaction("KillIfOtherHasMore", "lock", "avatarIn"));
+        	critPath.add(new Interaction("KillSprite", "goal", "avatarOut"));
+        	critPath.add(new Interaction("KillSprite", "goal", "avatarIn"));
+        } else if(gameIdx == 30) {
+        	// plants
+        	critPath.add(new PlayerAction("ACTION_USE"));
+        	critPath.add(new Interaction("TransformTo", "shovel", "marsh"));
+        	critPath.add(new Interaction("TransformTo", "plant", "axe"));
+        } else if(gameIdx == 4)
+        {
+        	// boulderdash
+        	critPath.add(new Interaction("StepBack", "avatar", "wall"));
+        	critPath.add(new Interaction("KillIfOtherHasMore", "exitdoor", "avatar"));
+        	critPath.add(new Interaction("StepBack", "avatar", "boulder"));
+        	critPath.add(new Interaction("CollectResource", "diamond", "avatar"));
+        	critPath.add(new Interaction("KillSprite", "dirt", "avatar"));
+        }
+	}
+	
+	
 	
 //	public void visualize() {
 //		String game = generateTutorialPath + getGame(gameIdx)[1] + ".txt";

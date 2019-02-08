@@ -18,11 +18,15 @@ public class SingleTreeNode
 	public static boolean randomWon = false;
     public static SingleTreeNode deepestNode;
 
+	private boolean mixmax = false;
+	
+	private boolean verbose = true;
 	
     private final double HUGE_NEGATIVE = -100000.0;
     private final double HUGE_POSITIVE =  100000.0;
     
     private final double BONUS = 1;
+    private final double Q = 0.125;
     
     private final double K_DECAY = 0.00;
     private final double BONUS_DECAY = 0.10;
@@ -53,6 +57,8 @@ public class SingleTreeNode
     public StateObservation rootState;
     
     public ArrayList<GameEvent> interactions;
+    
+    public ArrayList<GameEvent> critPath;
 
     public SingleTreeNode(Random rnd, int num_actions, Types.ACTIONS[] actions) {
         this(null,null, -1, rnd, num_actions, actions, new ArrayList<GameEvent>());
@@ -86,13 +92,13 @@ public class SingleTreeNode
      * @param elapsedTimer
      * @param improved
      */
-    public void mctsSearch(boolean improved) {
+    public void mctsSearch(boolean improved, ArrayList<GameEvent> critPath) {
         int numIters = 0;
         bestNode = null;
         SingleTreeNode.deepest = 0;
         while(numIters < numIterations){
 
-        	if(numIters % 1000 == 0) {
+        	if(numIters % 1000 == 0 && verbose) {
         		System.out.println("*********************\n");
         		System.out.println("Iteration: " + numIters);
         		System.out.println("Deepest Node: " + SingleTreeNode.deepest);
@@ -100,6 +106,7 @@ public class SingleTreeNode
             StateObservation state = rootState.copy();
 
             SingleTreeNode selected = treePolicy(state);
+            selected.critPath = critPath;
             double delta = selected.rollOut(state, improved);
             backUp(selected, delta);
 
@@ -228,6 +235,7 @@ public class SingleTreeNode
         if(delta > bounds[1])
             bounds[1] = delta;
         
+//        this.totValue = delta;
 
         return delta;
     }
@@ -252,7 +260,7 @@ public class SingleTreeNode
     
     public double getCritPathBonus(int ogGameTick, ArrayList<GameEvent> interactions) {
     	
-    	ArrayList<GameEvent> critPath = new ArrayList<GameEvent>();
+//    	ArrayList<GameEvent> critPath = new ArrayList<GameEvent>();
     	// Aliens
 //    	critPath.add(new PlayerAction("ACTION_USE"));
 //    	critPath.add(new Interaction("KillBoth", "base", "sam"));
@@ -269,8 +277,14 @@ public class SingleTreeNode
     	
     	// Solarfox
 //    	critPath.add(new Interaction("KillSprite","blib","avatar"));
+    	
+    	// SurviveZombies
+//    	critPath.add(new Interaction("SubtractHealthPoints", "avatar", "zombie"));
+//    	critPath.add(new Interaction("KillSprite", "avatar", "zombie"));
+//    	critPath.add(new Interaction("StepBack", "avatar", "wall"));
+//    	critPath.add(new Interaction("AddHealthPoints", "avatar", "honey"));
+    	
     	// RealPortals
-
 //    	critPath.add(new PlayerAction("ACTION_USE"));
 //    	critPath.add(new Interaction("TransformTo", "avatarIn", "weaponToggle1"));
 //    	critPath.add(new Interaction("TransformTo", "avatarOut", "weaponToggle2"));
@@ -345,10 +359,29 @@ public class SingleTreeNode
         SingleTreeNode n = node;
         while(n != null)
         {
-            n.nVisits++;
+        	if(!mixmax){
+        		n.nVisits++;
 //            n.totValue += result;
-            n.totValue = Math.max(n.totValue, result);
+            	n.totValue = Math.max(n.totValue, result);
 //            n.totValue = n.totValue / n.nVisits;
+        	}
+        	else {
+        		double all = 0;
+        		double max = 0;
+        		
+        		for(SingleTreeNode child : n.children) {
+        			if(child != null) {
+        				all += child.totValue;	
+        				max = Math.max(max, child.totValue);
+        			}
+        		}
+        		double avg = 0;
+        		if(n.children.length > 0)
+        			avg = all / n.children.length;
+        		
+        		n.totValue = Q * max + (1-Q) * avg;
+        	}
+        	
             if (result < n.bounds[0]) {
                 n.bounds[0] = result;
             }

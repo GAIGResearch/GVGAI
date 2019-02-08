@@ -47,6 +47,7 @@ public class SingleMCTSPlayer
     public boolean done = false;
     public boolean visualize = false;
     
+    public ArrayList<GameEvent> critPath;
     File expFile;
     File mainExperimentsFile;
     
@@ -82,17 +83,19 @@ public class SingleMCTSPlayer
     public int run(int number)
     {	        
     	if	(oneTree) {
-    		m_root.mctsSearch(improved);
+    		m_root.mctsSearch(improved, critPath);
     	} else {
     		StateObservation a_gameState = m_root.rootState;
     		ArrayList<ACTIONS> moves = new ArrayList<ACTIONS>();
     		int count = 1;
+			ArrayList<String> buffer = new ArrayList<String>();
+
     		while (!a_gameState.isGameOver() && a_gameState.getGameTick() < 1000) {
         		SingleTreeNode.deepest = 0;
         		SingleTreeNode.deepestNode = null;
 	    	    init(a_gameState);
 	    		m_root.numIterations = 5000;
-	    	    m_root.mctsSearch(improved);
+	    	    m_root.mctsSearch(improved, critPath);
 	    	    int action = m_root.mostVisitedAction();
 	    	    if(visualize) {
 	    	    	return action;
@@ -100,28 +103,18 @@ public class SingleMCTSPlayer
 
 	    	    Types.ACTIONS act = actions[action];
 	    	    a_gameState.advance(act);
-	            try { 
-	            	  
-	                // Open given file in append mode. 
-	                BufferedWriter out = new BufferedWriter( 
-	                       new FileWriter(expFile, true)); 
-	                out.write(count + "," + act);
-	                
-	    			ArrayList<GameEvent> events = a_gameState.getFirstTimeEventsHistory();
-	    			String ev = "";
-	    			for (GameEvent event : events) {
-	    				if(Integer.parseInt(event.gameTick) == count-1) {
-	    					ev += "," + event.toString();
-	    				}
-	    			}
-	    			ev += "\n";
-	    			out.write(ev);
-	                out.close(); 
-	            } 
-	            catch (IOException e) { 
-	                System.out.println("exception occured" + e); 
-	            }
-	    	    
+	    	    String oneTick = count + "," + act;
+	    	    ArrayList<GameEvent> events = a_gameState.getFirstTimeEventsHistory();
+    			String ev = "";
+    			for (GameEvent event : events) {
+    				if(Integer.parseInt(event.gameTick) == count-1) {
+    					ev += "," + event.toString();
+    				}
+    			}
+    			ev += "\n";		
+    			oneTick += ev;    			
+    			buffer.add(oneTick);
+    			
 	    	    count++;
     		}
     		
@@ -135,7 +128,9 @@ public class SingleMCTSPlayer
                 // Open given file in append mode. 
                 BufferedWriter out = new BufferedWriter( 
                        new FileWriter(expFile, true)); 
-
+                for(String line : buffer) {
+                	out.write(line);
+                }
         		if (a_gameState.getGameWinner() == Types.WINNER.PLAYER_WINS) {
         			out.write("Won game!\n");
         		} else {
@@ -151,6 +146,7 @@ public class SingleMCTSPlayer
                 // Open given file in append mode. 
                 BufferedWriter out = new BufferedWriter( 
                        new FileWriter(mainExperimentsFile, true)); 
+
         		if (a_gameState.getGameWinner() == Types.WINNER.PLAYER_WINS) {
         			out.write(number+",1," + a_gameState.getGameScore() +  "\n");
                     out.close(); 
