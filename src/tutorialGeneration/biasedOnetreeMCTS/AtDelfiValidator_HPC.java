@@ -30,6 +30,8 @@ public class AtDelfiValidator_HPC {
 	String[][] games = Utils.readAtDelfiGames(atDelfiGamesCollection);
     int levelIdx = 4; // level names from 0 to 4 (game_lvlN.txt).
     int gameIdx = 47;
+    
+//    public static int gameID;
 	
 	public StateObservation startup(int randomSeed, String game_file, String level_file) throws IOException {
 		VGDLFactory.GetInstance().init(); // This always first thing to do.
@@ -79,7 +81,7 @@ public class AtDelfiValidator_HPC {
 			validator.gameIdx = 47;
 		
 		// fixed game
-//		validator.gameIdx = 4;
+		validator.gameIdx = 34;
 		
 		
 		int withoutH = u + t*10;
@@ -174,6 +176,7 @@ public class AtDelfiValidator_HPC {
 					seed = new Random().nextInt();
 		        SingleMCTSPlayer player = new SingleMCTSPlayer(new Random(seed), num_actions, actions, improved, expFile, mainFile);
 		        player.critPath = new ArrayList<GameEvent>();
+//		        AtDelfiValidator_HPC.gameID = gameIdx;
 		        setupCritPath(player.critPath);
 		        
 		        player.init(root);
@@ -186,10 +189,10 @@ public class AtDelfiValidator_HPC {
 	public void setupCritPath(ArrayList<GameEvent> critPath) {
 		if(gameIdx == 47) {
 			// zelda
-        	critPath.add(new PlayerAction("ACTION_USE"));
-        	critPath.add(new Interaction("KillSprite", "monsterQuick", "sword"));
-        	critPath.add(new Interaction("KillSprite", "monsterNormal", "sword"));
-        	critPath.add(new Interaction("KillSprite", "monsterSlow", "sword"));
+//        	critPath.add(new PlayerAction("ACTION_USE"));
+//        	critPath.add(new Interaction("KillSprite", "monsterQuick", "sword"));
+//        	critPath.add(new Interaction("KillSprite", "monsterNormal", "sword"));
+//        	critPath.add(new Interaction("KillSprite", "monsterSlow", "sword"));
         	critPath.add(new Interaction("TransformTo", "nokey",  "key"));
         	critPath.add(new Interaction("KillSprite", "goal", "withkey"));		        	
         } else if(gameIdx == 42) {
@@ -218,6 +221,14 @@ public class AtDelfiValidator_HPC {
         	critPath.add(new Interaction("KillIfOtherHasMore", "lock", "avatarIn"));
         	critPath.add(new Interaction("KillSprite", "goal", "avatarOut"));
         	critPath.add(new Interaction("KillSprite", "goal", "avatarIn"));
+        	
+        	// levels > 0
+        	critPath.add(new Interaction("TeleportToExit","bolderm","portalentry"));
+        	critPath.add(new Interaction("TransformTo","bolder","avatar"));
+        	critPath.add(new Interaction("KillBoth", "water", "bolderm"));
+
+
+
         } else if(gameIdx == 30) {
         	// plants
         	critPath.add(new PlayerAction("ACTION_USE"));

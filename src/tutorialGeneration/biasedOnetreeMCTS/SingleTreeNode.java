@@ -86,7 +86,7 @@ public class SingleTreeNode
         	SingleTreeNode.deepestNode = this;
         }
     }
-
+ 
     /***
      * Build a whole MCTS tree
      * @param elapsedTimer
@@ -307,9 +307,9 @@ public class SingleTreeNode
 //    	critPath.add(new Interaction("KillSprite", "box", "hole"));
     	
     	// Plants
-    	critPath.add(new PlayerAction("ACTION_USE"));
-    	critPath.add(new Interaction("TransformTo", "shovel", "marsh"));
-    	critPath.add(new Interaction("TransformTo", "plant", "axe"));
+//    	critPath.add(new PlayerAction("ACTION_USE"));
+//    	critPath.add(new Interaction("TransformTo", "shovel", "marsh"));
+//    	critPath.add(new Interaction("TransformTo", "plant", "axe"));
     	
     	// one to one mapping to critPath
     	int[] mechCounter = new int[critPath.size()];
@@ -368,18 +368,24 @@ public class SingleTreeNode
         	else {
         		double all = 0;
         		double max = 0;
-        		
+        		boolean allNull = true;
         		for(SingleTreeNode child : n.children) {
         			if(child != null) {
         				all += child.totValue;	
         				max = Math.max(max, child.totValue);
+        				allNull = false;
         			}
         		}
+
         		double avg = 0;
         		if(n.children.length > 0)
         			avg = all / n.children.length;
         		
         		n.totValue = Q * max + (1-Q) * avg;
+        		
+        		if(allNull) {
+        			n.totValue = result;
+        		}
         	}
         	
             if (result < n.bounds[0]) {

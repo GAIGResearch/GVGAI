@@ -221,7 +221,7 @@ public class FrameInteractionAssociation
 	public JSONArray retrieveInteractionFile(String interactionFileName) throws FileNotFoundException, IOException, ParseException
 	{
 		JSONParser parser = new JSONParser();
-
+		System.out.println(interactionFileName);
 		JSONArray interactionArray = (JSONArray) parser.parse(new FileReader(interactionFileName));
 		
 		return interactionArray;
@@ -269,7 +269,7 @@ public class FrameInteractionAssociation
 	
 	public static void main(String[] args) {
 		try {
-			FrameInteractionAssociation fia = new FrameInteractionAssociation("aliens/adrienctx.Agent/0/0/interactions/interaction.json");
+			FrameInteractionAssociation fia = new FrameInteractionAssociation("realportals/human/1/0/interactions/interaction.json");
 			ArrayList<JSONObject> uniques = fia.getUniqueInteractions();
 			
 			for(JSONObject unique : uniques) {

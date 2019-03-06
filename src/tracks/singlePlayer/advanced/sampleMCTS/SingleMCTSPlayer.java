@@ -62,7 +62,7 @@ public class SingleMCTSPlayer
     public int run(ElapsedCpuTimer elapsedTimer)
     {
         //Do the search within the available time.
-        m_root.mctsSearch(true, critPath);
+        m_root.mctsSearch(false, critPath);
 
         //Determine the best action to take and return it.
         int action = m_root.mostVisitedAction();

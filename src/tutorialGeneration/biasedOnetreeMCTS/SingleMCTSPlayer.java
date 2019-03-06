@@ -57,7 +57,7 @@ public class SingleMCTSPlayer
         this.actions = actions;
         this.improved = improved;
         m_rnd = a_rnd;
-        
+        this.critPath = new ArrayList<GameEvent>();
         this.expFile = expFile;
         this.mainExperimentsFile = mainExperimentsFile;
     }

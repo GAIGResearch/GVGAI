@@ -42,8 +42,8 @@ public class TestAtDelfi {
     
     String gameFile, levelFile, recordTutorialFile;
 
-    int levelIdx = 0; // level names from 0 to 4 (game_lvlN.txt).
-    int gameIdx = 4;
+    int levelIdx = 2; // level names from 0 to 4 (game_lvlN.txt).
+    int gameIdx = 30;
 
     public TestAtDelfi() {
         // settings        
