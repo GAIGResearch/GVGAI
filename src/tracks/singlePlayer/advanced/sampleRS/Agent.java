@@ -11,23 +11,22 @@ import java.util.*;
 
 public class Agent extends AbstractPlayer {
 
-    // variable
+    // Parameters
     private int SIMULATION_DEPTH = 10;
-    private double DISCOUNT = 1; //0.99;
+    private StateHeuristic heuristic;
 
-    // constants
+    // Constants
     private final long BREAK_MS = 10;
     public static final double epsilon = 1e-6;
 
+    // Class vars
     private ArrayList<Individual> population;
     private int NUM_INDIVIDUALS;
     private HashMap<Integer, Types.ACTIONS> action_mapping;
-    private int N_ACTIONS;
-
-    private ElapsedCpuTimer timer;
     private Random randomGenerator;
 
-    private StateHeuristic heuristic;
+    // Budget
+    private ElapsedCpuTimer timer;
     private double acumTimeTakenEval = 0,avgTimeTakenEval = 0;
     private int numEvals = 0;
     private long remaining;
@@ -59,8 +58,7 @@ public class Agent extends AbstractPlayer {
         init_pop(stateObs);
 
         // RETURN ACTION
-        Types.ACTIONS best = get_best_action(population);
-        return best;
+        return get_best_action(population);
     }
 
 
@@ -83,6 +81,7 @@ public class Agent extends AbstractPlayer {
             if (! st.isGameOver()) {
                 ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
                 st.advance(action_mapping.get(individual.actions[i]));
+
                 acum += elapsedTimerIteration.elapsedMillis();
                 avg = acum / (i+1);
                 remaining = timer.remainingTimeMillis();
@@ -92,33 +91,14 @@ public class Agent extends AbstractPlayer {
             }
         }
 
-        StateObservation first = st.copy();
-        double value = heuristic.evaluateState(first);
-
-        // Apply discount factor
-        value *= Math.pow(DISCOUNT,i);
-
-        individual.value = value;
+        individual.value = heuristic.evaluateState(st);
 
         numEvals++;
         acumTimeTakenEval += (elapsedTimerIterationEval.elapsedMillis());
         avgTimeTakenEval = acumTimeTakenEval / numEvals;
         remaining = timer.remainingTimeMillis();
 
-        return value;
-    }
-
-
-    /**
-     * Insert a new individual into the population at the specified position by replacing the old one.
-     * @param newind - individual to be inserted into population
-     * @param pop - population
-     * @param idx - position where individual should be inserted
-     * @param stateObs - current game state
-     */
-    private void add_individual(Individual newind, Individual[] pop, int idx, StateObservation stateObs) {
-        evaluate(newind, heuristic, stateObs);
-        pop[idx] = newind.copy();
+        return individual.value;
     }
 
     /**
@@ -129,7 +109,7 @@ public class Agent extends AbstractPlayer {
 
         double remaining;
 
-        N_ACTIONS = stateObs.getAvailableActions().size() + 1;
+        int n_ACTIONS = stateObs.getAvailableActions().size() + 1;
         action_mapping = new HashMap<>();
         int k = 0;
         for (Types.ACTIONS action : stateObs.getAvailableActions()) {
@@ -142,7 +122,7 @@ public class Agent extends AbstractPlayer {
 
         population = new ArrayList<>();
         do {
-            Individual newInd = new Individual(SIMULATION_DEPTH, N_ACTIONS, randomGenerator);
+            Individual newInd = new Individual(SIMULATION_DEPTH, n_ACTIONS, randomGenerator);
             evaluate(newInd, heuristic, stateObs);
             population.add(newInd);
             remaining = timer.remainingTimeMillis();
@@ -151,20 +131,18 @@ public class Agent extends AbstractPlayer {
         } while(remaining > avgTimeTakenEval && remaining > BREAK_MS);
 
         if (NUM_INDIVIDUALS > 1)
-            Collections.sort(population, new Comparator<Individual>() {
-                @Override
-                public int compare(Individual o1, Individual o2) {
-                    if (o1 == null && o2 == null) {
-                        return 0;
-                    }
-                    if (o1 == null) {
-                        return 1;
-                    }
-                    if (o2 == null) {
-                        return -1;
-                    }
-                    return o1.compareTo(o2);
-                }});
+            population.sort((o1, o2) -> {
+                if (o1 == null && o2 == null) {
+                    return 0;
+                }
+                if (o1 == null) {
+                    return 1;
+                }
+                if (o2 == null) {
+                    return -1;
+                }
+                return o1.compareTo(o2);
+            });
     }
 
     /**

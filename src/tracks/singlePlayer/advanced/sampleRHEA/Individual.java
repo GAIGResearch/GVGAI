@@ -4,18 +4,16 @@ import java.util.Random;
 public class Individual implements Comparable{
 
     protected int[] actions; // actions in individual. length of individual = actions.length
-    protected int n; // number of legal actions
+    private int nLegalActions; // number of legal actions
     protected double value;
     private Random gen;
 
-    private boolean MUT_BIAS = false;
-
-    public Individual(int L, int n, Random gen) {
+    Individual(int L, int nLegalActions, Random gen) {
         actions = new int[L];
         for (int i = 0; i < L; i++) {
-            actions[i] = gen.nextInt(n);
+            actions[i] = gen.nextInt(nLegalActions);
         }
-        this.n = n;
+        this.nLegalActions = nLegalActions;
         this.gen = gen;
     }
 
@@ -25,24 +23,23 @@ public class Individual implements Comparable{
 
     /**
      * Returns new individual
-     * @param MUT
-     * @return
+     * @param MUT - number of genes to mutate
+     * @return - new individual, mutated from this
      */
-    public Individual mutate (int MUT) {
+    Individual mutate(int MUT) {
         Individual b = this.copy();
         b.setActions(actions);
 
         int count = 0;
-        if (n > 1) { // make sure you can actually mutate
+        if (nLegalActions > 1) { // make sure you can actually mutate
             while (count < MUT) {
-
                 int a; // index of action to mutate
 
                 // random mutation of one action
                 a = gen.nextInt(b.actions.length);
 
                 int s;
-                s = gen.nextInt(n); // find new action
+                s = gen.nextInt(nLegalActions); // find new action
                 b.actions[a] = s;
 
                 count++;
@@ -54,24 +51,26 @@ public class Individual implements Comparable{
 
     /**
      * Modifies individual
-     * @param cross
-     * @param CROSSOVER_TYPE
+     * @param CROSSOVER_TYPE - type of crossover
      */
-    public void crossover (Individual[] cross, int CROSSOVER_TYPE) {
+    public void crossover (Individual parent1, Individual parent2, int CROSSOVER_TYPE) {
         if (CROSSOVER_TYPE == Agent.POINT1_CROSS) {
             // 1-point
             int p = gen.nextInt(actions.length - 3) + 1;
             for ( int i = 0; i < actions.length; i++) {
                 if (i < p)
-                    actions[i] = cross[0].actions[i];
+                    actions[i] = parent1.actions[i];
                 else
-                    actions[i] = cross[1].actions[i];
+                    actions[i] = parent2.actions[i];
             }
 
         } else if (CROSSOVER_TYPE == Agent.UNIFORM_CROSS) {
             // uniform
             for (int i = 0; i < actions.length; i++) {
-                actions[i] = cross[gen.nextInt(cross.length)].actions[i];
+                if (gen.nextFloat() >= 0.5)
+                    actions[i] = parent1.actions[i];
+                else
+                    actions[i] = parent2.actions[i];
             }
         }
     }
@@ -80,13 +79,13 @@ public class Individual implements Comparable{
     public int compareTo(Object o) {
         Individual a = this;
         Individual b = (Individual)o;
-        if (a.value < b.value) return 1;
-        else if (a.value > b.value) return -1;
-        else return 0;
+        return Double.compare(b.value, a.value);
     }
 
     @Override
     public boolean equals(Object o) {
+        if (!(o instanceof Individual)) return false;
+
         Individual a = this;
         Individual b = (Individual)o;
 
@@ -98,7 +97,7 @@ public class Individual implements Comparable{
     }
 
     public Individual copy () {
-        Individual a = new Individual(this.actions.length, this.n, this.gen);
+        Individual a = new Individual(this.actions.length, this.nLegalActions, this.gen);
         a.value = this.value;
         a.setActions(this.actions);
 
@@ -107,9 +106,8 @@ public class Individual implements Comparable{
 
     @Override
     public String toString() {
-        String s = "" + value + ": ";
-        for (int i = 0; i < actions.length; i++)
-            s += actions[i] + " ";
-        return s;
+        StringBuilder s = new StringBuilder("" + value + ": ");
+        for (int action : actions) s.append(action).append(" ");
+        return s.toString();
     }
 }

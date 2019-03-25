@@ -5,16 +5,16 @@ import java.util.Random;
 public class Individual implements Comparable{
 
     protected int[] actions; // actions in individual. length of individual = actions.length
-    protected int n; // number of legal actions
+    private int nLegalActions; // number of legal actions
     protected double value;
     private Random gen;
 
-    public Individual(int L, int n, Random gen) {
+    Individual(int L, int nLegalActions, Random gen) {
         actions = new int[L];
         for (int i = 0; i < L; i++) {
-            actions[i] = gen.nextInt(n);
+            actions[i] = gen.nextInt(nLegalActions);
         }
-        this.n = n;
+        this.nLegalActions = nLegalActions;
         this.gen = gen;
     }
 
@@ -26,13 +26,13 @@ public class Individual implements Comparable{
     public int compareTo(Object o) {
         Individual a = this;
         Individual b = (Individual)o;
-        if (a.value < b.value) return 1;
-        else if (a.value > b.value) return -1;
-        else return 0;
+        return Double.compare(b.value, a.value);
     }
 
     @Override
     public boolean equals(Object o) {
+        if (!(o instanceof Individual)) return false;
+
         Individual a = this;
         Individual b = (Individual)o;
 
@@ -44,18 +44,16 @@ public class Individual implements Comparable{
     }
 
     public Individual copy () {
-        Individual a = new Individual(this.actions.length, this.n, this.gen);
+        Individual a = new Individual(this.actions.length, this.nLegalActions, this.gen);
         a.value = this.value;
         a.setActions(this.actions);
-
         return a;
     }
 
     @Override
     public String toString() {
-        String s = "" + value + ": ";
-        for (int i = 0; i < actions.length; i++)
-            s += actions[i] + " ";
-        return s;
+        StringBuilder s = new StringBuilder("" + value + ": ");
+        for (int action : actions) s.append(action).append(" ");
+        return s.toString();
     }
 }

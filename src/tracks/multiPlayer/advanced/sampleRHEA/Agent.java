@@ -9,46 +9,41 @@ import tracks.multiPlayer.tools.heuristics.WinScoreHeuristic;
 
 import java.util.*;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class Agent extends AbstractMultiPlayer {
 
-    // variable
+    // Parameters
     private int POPULATION_SIZE = 10;
     private int SIMULATION_DEPTH = 10;
     private int CROSSOVER_TYPE = UNIFORM_CROSS;
-    private double DISCOUNT = 1; //0.99;
-
-    // set
     private boolean REEVALUATE = false;
-    //    private boolean REPLACE = false;
     private int MUTATION = 1;
     private int TOURNAMENT_SIZE = 2;
-    private int NO_PARENTS = 2;
-    private int RESAMPLE = 1;
     private int ELITISM = 1;
+    private StateHeuristicMulti heuristic;
 
-    // constants
+    // Constants
     private final long BREAK_MS = 10;
     public static final double epsilon = 1e-6;
     static final int POINT1_CROSS = 0;
     static final int UNIFORM_CROSS = 1;
 
+    // Class vars
     private Individual[] population, nextPop;
     private int NUM_INDIVIDUALS;
     private int[] N_ACTIONS;
     private HashMap<Integer, Types.ACTIONS>[] action_mapping;
-
-    private ElapsedCpuTimer timer;
     private Random randomGenerator;
 
-    private StateHeuristicMulti heuristic;
+    // Budget
+    private ElapsedCpuTimer timer;
     private double acumTimeTakenEval = 0,avgTimeTakenEval = 0, avgTimeTaken = 0, acumTimeTaken = 0;
     private int numEvals = 0, numIters = 0;
     private boolean keepIterating = true;
     private long remaining;
 
-
-    //Multiplayer game parameters
-    int playerID, opponentID, noPlayers;
+    //Multiplayer game vars
+    private int playerID, noPlayers;
 
     /**
      * Public constructor with state observation and time due.
@@ -64,7 +59,6 @@ public class Agent extends AbstractMultiPlayer {
         // Get multiplayer game parameters
         this.playerID = playerID;
         noPlayers = stateObs.getNoPlayers();
-        opponentID = (playerID+1)%noPlayers;
     }
 
     @Override
@@ -91,8 +85,7 @@ public class Agent extends AbstractMultiPlayer {
         }
 
         // RETURN ACTION
-        Types.ACTIONS best = get_best_action(population);
-        return best;
+        return get_best_action(population);
     }
 
     /**
@@ -125,20 +118,17 @@ public class Agent extends AbstractMultiPlayer {
 
                 } else {keepIterating = false; break;}
             }
-            Arrays.sort(nextPop, new Comparator<Individual>() {
-                @Override
-                public int compare(Individual o1, Individual o2) {
-                    if (o1 == null && o2 == null) {
-                        return 0;
-                    }
-                    if (o1 == null) {
-                        return 1;
-                    }
-                    if (o2 == null) {
-                        return -1;
-                    }
-                    return o1.compareTo(o2);
+            Arrays.sort(nextPop, (o1, o2) -> {
+                if (o1 == null && o2 == null) {
+                    return 0;
                 }
+                if (o1 == null) {
+                    return 1;
+                }
+                if (o2 == null) {
+                    return -1;
+                }
+                return o1.compareTo(o2);
             });
         } else if (NUM_INDIVIDUALS == 1){
             Individual newind = new Individual(SIMULATION_DEPTH, N_ACTIONS[playerID], randomGenerator).mutate(MUTATION);
@@ -191,20 +181,14 @@ public class Agent extends AbstractMultiPlayer {
             }
         }
 
-        StateObservationMulti first = st.copy();
-        double value = heuristic.evaluateState(first, playerID);
-
-        // Apply discount factor
-        value *= Math.pow(DISCOUNT,i);
-
-        individual.value = value;
+        individual.value = heuristic.evaluateState(st, playerID);
 
         numEvals++;
         acumTimeTakenEval += (elapsedTimerIterationEval.elapsedMillis());
         avgTimeTakenEval = acumTimeTakenEval / numEvals;
         remaining = timer.remainingTimeMillis();
 
-        return value;
+        return individual.value;
     }
 
     /**
@@ -215,14 +199,7 @@ public class Agent extends AbstractMultiPlayer {
         if (NUM_INDIVIDUALS > 1) {
             newind = new Individual(SIMULATION_DEPTH, N_ACTIONS[playerID], randomGenerator);
             Individual[] tournament = new Individual[TOURNAMENT_SIZE];
-            Individual[] parents = new Individual[NO_PARENTS];
-
-            ArrayList<Individual> list = new ArrayList<>();
-            if (NUM_INDIVIDUALS > TOURNAMENT_SIZE) {
-                list.addAll(Arrays.asList(population).subList(ELITISM, NUM_INDIVIDUALS));
-            } else {
-                list.addAll(Arrays.asList(population));
-            }
+            ArrayList<Individual> list = new ArrayList<>(Arrays.asList(population));
 
             //Select a number of random distinct individuals for tournament and sort them based on value
             for (int i = 0; i < TOURNAMENT_SIZE; i++) {
@@ -233,11 +210,8 @@ public class Agent extends AbstractMultiPlayer {
             Arrays.sort(tournament);
 
             //get best individuals in tournament as parents
-            if (NO_PARENTS <= TOURNAMENT_SIZE) {
-                for (int i = 0; i < NO_PARENTS; i++) {
-                    parents[i] = list.get(i);
-                }
-                newind.crossover(parents, CROSSOVER_TYPE);
+            if (TOURNAMENT_SIZE >= 2) {
+                newind.crossover(tournament[0], tournament[1], CROSSOVER_TYPE);
             } else {
                 System.out.println("WARNING: Number of parents must be LESS than tournament size.");
             }
@@ -292,20 +266,18 @@ public class Agent extends AbstractMultiPlayer {
         }
 
         if (NUM_INDIVIDUALS > 1)
-            Arrays.sort(population, new Comparator<Individual>() {
-                @Override
-                public int compare(Individual o1, Individual o2) {
-                    if (o1 == null && o2 == null) {
-                        return 0;
-                    }
-                    if (o1 == null) {
-                        return 1;
-                    }
-                    if (o2 == null) {
-                        return -1;
-                    }
-                    return o1.compareTo(o2);
-                }});
+            Arrays.sort(population, (o1, o2) -> {
+                if (o1 == null && o2 == null) {
+                    return 0;
+                }
+                if (o1 == null) {
+                    return 1;
+                }
+                if (o2 == null) {
+                    return -1;
+                }
+                return o1.compareTo(o2);
+            });
         for (int i = 0; i < NUM_INDIVIDUALS; i++) {
             if (population[i] != null)
                 nextPop[i] = population[i].copy();

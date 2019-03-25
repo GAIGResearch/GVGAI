@@ -11,29 +11,29 @@ import java.util.*;
 
 public class Agent extends AbstractMultiPlayer {
 
-    // variable
+    // Parameters
     private int SIMULATION_DEPTH = 10;
-    private double DISCOUNT = 1; //0.99;
+    private StateHeuristicMulti heuristic;
 
-    // constants
+    // Constants
     private final long BREAK_MS = 10;
     public static final double epsilon = 1e-6;
 
+    // Class vars
     private ArrayList<Individual> population;
     private int NUM_INDIVIDUALS;
     private int[] N_ACTIONS;
     private HashMap<Integer, Types.ACTIONS>[] action_mapping;
-
-    private ElapsedCpuTimer timer;
     private Random randomGenerator;
 
-    private StateHeuristicMulti heuristic;
+    // Budget
+    private ElapsedCpuTimer timer;
     private double acumTimeTakenEval = 0,avgTimeTakenEval = 0;
     private int numEvals = 0;
     private long remaining;
 
-
-    int playerID, opponentID, noPlayers;
+    // Multi-player vars
+    private int playerID, noPlayers;
 
     /**
      * Public constructor with state observation and time due.
@@ -49,7 +49,6 @@ public class Agent extends AbstractMultiPlayer {
         // Get multiplayer game parameters
         this.playerID = playerID;
         noPlayers = stateObs.getNoPlayers();
-        opponentID = (playerID+1)%noPlayers;
 
         // INITIALISE POPULATION
         init_pop(stateObs);
@@ -67,8 +66,7 @@ public class Agent extends AbstractMultiPlayer {
         init_pop(stateObs);
 
         // RETURN ACTION
-        Types.ACTIONS best = get_best_action(population);
-        return best;
+        return get_best_action(population);
     }
 
 
@@ -109,33 +107,14 @@ public class Agent extends AbstractMultiPlayer {
             }
         }
 
-        StateObservationMulti first = st.copy();
-        double value = heuristic.evaluateState(first, playerID);
-
-        // Apply discount factor
-        value *= Math.pow(DISCOUNT,i);
-
-        individual.value = value;
+        individual.value = heuristic.evaluateState(st, playerID);
 
         numEvals++;
         acumTimeTakenEval += (elapsedTimerIterationEval.elapsedMillis());
         avgTimeTakenEval = acumTimeTakenEval / numEvals;
         remaining = timer.remainingTimeMillis();
 
-        return value;
-    }
-
-
-    /**
-     * Insert a new individual into the population at the specified position by replacing the old one.
-     * @param newind - individual to be inserted into population
-     * @param pop - population
-     * @param idx - position where individual should be inserted
-     * @param stateObs - current game state
-     */
-    private void add_individual(Individual newind, Individual[] pop, int idx, StateObservationMulti stateObs) {
-        evaluate(newind, heuristic, stateObs);
-        pop[idx] = newind.copy();
+        return individual.value;
     }
 
     /**
@@ -174,20 +153,18 @@ public class Agent extends AbstractMultiPlayer {
         } while(remaining > avgTimeTakenEval && remaining > BREAK_MS);
 
         if (NUM_INDIVIDUALS > 1)
-            Collections.sort(population, new Comparator<Individual>() {
-                @Override
-                public int compare(Individual o1, Individual o2) {
-                    if (o1 == null && o2 == null) {
-                        return 0;
-                    }
-                    if (o1 == null) {
-                        return 1;
-                    }
-                    if (o2 == null) {
-                        return -1;
-                    }
-                    return o1.compareTo(o2);
-                }});
+            population.sort((o1, o2) -> {
+                if (o1 == null && o2 == null) {
+                    return 0;
+                }
+                if (o1 == null) {
+                    return 1;
+                }
+                if (o2 == null) {
+                    return -1;
+                }
+                return o1.compareTo(o2);
+            });
     }
 
     /**
