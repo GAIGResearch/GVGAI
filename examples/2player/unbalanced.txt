@@ -1,0 +1,67 @@
+GameSpace key_handler=PULSE square_size=60 no_players=2
+    SpriteSet
+        ground >
+            groundZone1 > Immovable img=newset/tile1 autotiling=False hidden=True
+            groundCenter > Immovable img=newset/floor1 autotiling=False hidden=True
+            groundZone2 > Immovable img=newset/tile4 autotiling=False hidden=True
+            groundNoBlocks > Immovable img=oryx/grass autotiling=True hidden=True
+        doors >
+            exit > Door color=GREEN img=oryx/doorclosed1
+            exitOpen > Door color=GREEN img=oryx/doorOpen1
+        moving >
+            avatar >
+                player1 > MovingAvatar img=oryx/queen1
+                player2 > MovingAvatar img=oryx/rogue
+
+        box > Passive
+            pushBlockBalanced > img=newset/block2 autotiling=False shrinkfactor=0.7
+            pushBlockPlayer1 > img=newset/blockB autotiling=False shrinkfactor=0.7
+            pushBlockPlayer2 > img=newset/blockG autotiling=False shrinkfactor=0.7
+
+        noMoveBlock > Immovable invisible=True img=newset/block2 autotiling=False shrinkfactor=0.7
+
+        wall > Immovable img=oryx/wall1
+
+        zone > Passive invisible=True
+            zoneArea1 > color=BLUE shrinkfactor=0.4
+            zoneAreaC > color=WHITE shrinkfactor=0.4
+            zoneArea2 > color=GREEN shrinkfactor=0.4
+
+
+    LevelMapping
+            1 > zoneArea1 groundZone1
+            c > zoneAreaC groundCenter
+            2 > zoneArea2 groundZone2
+            n > noMoveBlock groundNoBlocks
+            A > player1 zoneArea1 groundZone1
+            B > player2 zoneArea2 groundZone2
+            p > pushBlockBalanced zoneAreaC groundCenter
+            w > wall groundCenter
+
+    InteractionSet
+        pushBlockPlayer1 TIME > timer=2 repeating=True addHealthPoints value=0 scoreChange=1,-1
+        pushBlockPlayer2 TIME > timer=2 repeating=True addHealthPoints value=0 scoreChange=-1,1
+
+        avatar wall > stepBack pixelPerfect=True
+        player1 player2 > stepBack pixelPerfect=True
+        player2 player1 > stepBack pixelPerfect=True
+
+        box avatar box box box > bounceForward
+        box avatar box box > bounceForward
+        box avatar box > bounceForward
+        box avatar noMoveBlock > undoAll
+        box avatar > bounceForward
+        box wall > undoAll
+        #box wall box > undoAll
+
+        pushBlockBalanced zoneArea1 > transformTo stype=pushBlockPlayer2 scoreChange=0,10
+        pushBlockBalanced zoneArea2 > transformTo stype=pushBlockPlayer1 scoreChange=10,0
+        pushBlockPlayer1 zoneAreaC > transformTo stype=pushBlockBalanced scoreChange=0,20
+        pushBlockPlayer1 zoneArea1 > transformTo stype=pushBlockPlayer2 scoreChange=0,30
+        pushBlockPlayer2 zoneAreaC > transformTo stype=pushBlockBalanced scoreChange=20,0
+        pushBlockPlayer2 zoneArea2 > transformTo stype=pushBlockPlayer1 scoreChange=30,0
+
+    TerminationSet
+        MultiSpriteCounter      stype1=pushBlockBalanced stype2=pushBlockPlayer1  limit=0 win=False,True
+        MultiSpriteCounter      stype1=pushBlockBalanced stype2=pushBlockPlayer2  limit=0 win=True,False
+        Timeout                 limit=1000                                        count_score=True

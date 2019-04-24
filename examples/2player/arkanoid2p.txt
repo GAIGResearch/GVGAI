@@ -1,0 +1,60 @@
+BasicGame square_size=25 no_players=2
+
+    SpriteSet
+        background > Immovable img=oryx/space1 hidden=True
+        avatar > FlakAvatar stype=ballStart physicstype=CONT wMult=4 friction=0.2 mass=0.2 healthPoints=3 limitHealthPoints=3
+            avatarA > img=oryx/floor3
+            avatarB > img=oryx/floor1
+
+        balls > Missile orientation=UP speed=20 physicstype=CONT img=oryx/bullet2 shrinkfactor=2 singleton=True
+            ballStart >
+            ball >
+
+        ballLost > Passive invisible=True hidden=True
+
+        brick > Passive img=newset/blockG
+            brick2 > wMult=2
+            brick1 >
+
+        toughBrick > Passive wMult=2
+            tbrick1 > img=oryx/floor2
+            tbrick2 > img=oryx/floor2_1
+
+        block > Passive img=newset/block2
+            longwall > wMult=2
+            wall >
+
+    TerminationSet
+        SpriteCounter stype=avatar limit=1 win=False,False
+        SpriteCounter stype=brick limit=0 win=True,True
+           
+    InteractionSet
+
+        avatar avatar > stepBack
+
+        ballStart brick block > transformToAll stype=ballStart stypeTo=ball
+
+        brick ball > killSprite scoreChange=2
+        tbrick2 ball > killSprite scoreChange=5
+
+        ball avatar > bounceDirection
+        ball block > wallBounce
+        avatar block > wallStop
+
+        ball EOS > subtractHealthPoints stype=avatarA value=1
+        ball EOS > subtractHealthPoints stype=avatarB value=1
+        ball EOS > transformTo stype=ballLost
+        ball brick > wallBounce
+
+        tbrick1 ball > transformTo stype=tbrick2
+
+    LevelMapping
+        . > background
+        o > background ball
+        m > background brick2
+        n > background brick1
+        b > background longwall
+        w > background wall
+        t > background tbrick1
+        A > background avatarA
+        B > background avatarB

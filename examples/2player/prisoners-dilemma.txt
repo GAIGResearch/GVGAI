@@ -1,0 +1,125 @@
+BasicGame no_players=2 square_size=30
+    SpriteSet
+        floor > Immovable img=oryx/backGrey hidden=True
+
+        bullet > Missile shrinkfactor=0.5
+            bulletA > singleton=True orientation=RIGHT
+                agreeAb > img=oryx/planet1
+                    agreeA0b > speed=0.6
+                    agreeA1b > speed=0.4
+                    agreeA2b > speed=0.2
+                disagreeAb > img=oryx/scroll1
+                    disagreeA0b > speed=0.6
+                    disagreeA1b > speed=0.4
+                    disagreeA2b > speed=0.2
+            bulletB > singleton=True orientation=LEFT
+                agreeBb > img=oryx/planet1
+                    agreeB0b > speed=0.6
+                    agreeB1b > speed=0.4
+                    agreeB2b > speed=0.2
+                disagreeBb > img=oryx/scroll1
+                    disagreeB0b > speed=0.6
+                    disagreeB1b > speed=0.4
+                    disagreeB2b > speed=0.2
+
+        choice > Flicker shrinkfactor=0.5
+            choiceA > singleton=True hidden=False,True invisible=False,True
+                agreeA > img=oryx/planet1
+                disagreeA > img=oryx/scroll1
+            choiceB > singleton=True hidden=True,False invisible=True,False
+                agreeB > img=oryx/planet1
+                disagreeB > img=oryx/scroll1
+
+        avatar > #frameRate=16
+            avatarA > ShootOnlyAvatar stype=agreeA,disagreeA img=newset/bandit1 orientation=RIGHT
+            avatarB > ShootOnlyAvatar stype=agreeB,disagreeB img=newset/bandit1h orientation=LEFT
+
+        buzzer > Immovable shrinkfactor=0.5
+            buzzerA > hidden=False,True invisible=False,True
+                buzzerAgreeA > img=oryx/planet1
+                buzzerDisagreeA > img=oryx/scroll1
+            buzzerB > hidden=True,False invisible=True,False
+                buzzerAgreeB > img=oryx/planet1
+                buzzerDisagreeB > img=oryx/scroll1
+
+        timer >
+            timer1 > Immovable invisible=True hidden=True
+                timer10 >
+                timer11 >
+                timer12 >
+            timer2 > Immovable invisible=True hidden=True
+                timer20 >
+                timer21 >
+                timer22 >
+        choose > Immovable invisible=True hidden=True
+            choose0 >
+            choose1 >
+            choose2 >
+
+        wall > Immovable img=oryx/wall3 autotiling=True
+
+
+    LevelMapping
+        . > floor
+        A > avatarA floor
+        B > avatarB floor
+
+        0 > timer10 floor buzzerAgreeA
+        1 > timer10 floor buzzerAgreeB
+
+        2 > timer20 floor buzzerAgreeA
+        3 > timer20 floor buzzerAgreeB
+
+        4 > timer11 floor buzzerAgreeA
+        5 > timer11 floor buzzerAgreeB
+
+        6 > timer21 floor buzzerAgreeA
+        7 > timer21 floor buzzerAgreeB
+
+        8 > timer12 floor buzzerAgreeA
+        9 > timer12 floor buzzerAgreeB
+
+        a > timer22 floor buzzerAgreeA
+        b > timer22 floor buzzerAgreeB
+
+        w > floor wall
+
+    InteractionSet
+        timer10 TIME > spawn stype=choose0 timer=50 repeating=True
+        timer20 TIME > spawn stype=choose0 timer=20 repeating=True
+        timer11 TIME > spawn stype=choose1 timer=50 repeating=True
+        timer21 TIME > spawn stype=choose1 timer=20 repeating=True
+        timer22 TIME > spawn stype=choose2 timer=50 repeating=True
+        timer22 TIME > spawn stype=choose2 timer=20 repeating=True
+
+        bullet wall > killSprite
+
+        buzzerA agreeA > transformTo stype=buzzerAgreeA killSecond=True
+        buzzerA disagreeA > transformTo stype=buzzerDisagreeA killSecond=True
+
+        buzzerB agreeB > transformTo stype=buzzerAgreeB killSecond=True
+        buzzerB disagreeB > transformTo stype=buzzerDisagreeB killSecond=True
+
+        choose0 buzzerAgreeA > spawn stype=agreeA0b
+        choose0 buzzerDisagreeA > spawn stype=disagreeA0b
+        choose1 buzzerAgreeA > spawn stype=agreeA1b
+        choose1 buzzerDisagreeA > spawn stype=disagreeA1b
+        choose2 buzzerAgreeA > spawn stype=agreeA2b
+        choose2 buzzerDisagreeA > spawn stype=disagreeA2b
+
+        choose0 buzzerAgreeB > spawn stype=agreeB0b
+        choose0 buzzerDisagreeB > spawn stype=disagreeB0b
+        choose1 buzzerAgreeB > spawn stype=agreeB1b
+        choose1 buzzerDisagreeB > spawn stype=disagreeB1b
+        choose2 buzzerAgreeB > spawn stype=agreeB2b
+        choose2 buzzerDisagreeB > spawn stype=disagreeB2b
+
+        choose buzzer > killSprite
+
+        agreeAb disagreeBb > killBoth scoreChange=-3,0
+        agreeAb agreeBb > killBoth scoreChange=-1,-1
+        disagreeAb agreeBb > killBoth scoreChange=0,-3
+        disagreeAb disagreeBb > killBoth scoreChange=-2,-2
+
+    TerminationSet
+        Timeout limit=500 count_score=True

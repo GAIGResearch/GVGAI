@@ -1,0 +1,63 @@
+#add reward buttons
+
+BasicGame key_handler=Pulse no_players=2
+    SpriteSet
+        floor > Immovable hidden=True img=oryx/floor2
+
+        button > Immovable
+            button1 > img=newset/blockR
+            button2 > img=newset/blockB
+        reward > Resource
+            r1 > img=oryx/coins1
+                r1hid > hidden=True invisible=True
+                reward1 > hidden=False invisible=False
+            r2 > img=oryx/coins3
+                r2hid > hidden=True invisible=True
+                reward2 > hidden=False invisible=False
+
+
+        base > Immovable img=newset/block3
+        castle > Immovable img=oryx/cloak3 healthPoints=20 color=RED
+
+        avatar > frameRate=16
+            avatar1 > ShootAvatar stype=base img=newset/girl3
+            avatar2 > ShootAvatar stype=bullet img=newset/cop2
+        bullet > Missile img=oryx/bullet1 timeToLive=5
+
+
+        wall > Immovable img=oryx/wall3 autotiling=True
+        
+    InteractionSet
+        avatar avatar wall castle base > stepBack
+        avatar1 r2 button2 > stepBack
+        avatar2 r1 button1 > stepBack
+        bullet wall > killSprite
+        base wall castle > killSprite
+        base bullet > killBoth
+        castle bullet > subtractHealthPoints value=1
+        base base > killSprite
+
+        button1 avatar1 > transformToAll stype=r1hid stypeTo=reward1
+        button1 avatar1 > killSprite
+        button2 avatar2 > transformToAll stype=r2hid stypeTo=reward2
+        button2 avatar2 > killSprite
+
+        reward1 avatar1 > killSprite scoreChange=100,0
+        reward2 avatar2 > killSprite scoreChange=0,100
+
+    TerminationSet
+        SpriteCounter stype=castle   limit=0 win=False,True
+        Timeout limit=1500 win=True,False
+    
+    LevelMapping
+        . > floor
+        A > avatar1 floor
+        B > avatar2 floor
+        c > castle floor
+        b > base floor
+
+        1 > button1 floor
+        2 > button2 floor
+
+        r > r1hid floor
+        f > r2hid floor

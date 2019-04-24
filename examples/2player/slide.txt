@@ -1,0 +1,105 @@
+BasicGame square_size=50 key_handler=Pulse no_players=2
+    SpriteSet
+        floor > Immovable hidden=True img=oryx/backGrey
+        wall > Immovable img=oryx/wall1
+
+        aux > Immovable hidden=True invisible=True
+            auxA >
+                upA > color=RED
+                downA > color=BLUE
+                leftA > color=GREEN
+                rightA > color=YELLOW
+            auxB >
+                upB > color=RED
+                downB > color=BLUE
+                leftB > color=GREEN
+                rightB > color=YELLOW
+
+        exit > Immovable img=newset/flag2
+            exit1 >
+            exit2 >
+        winner > Immovable hidden=True invisible=True
+
+        avatar >
+            avatar1 > img=newset/blockB3
+                avatarA > MovingAvatar
+                avatarAM > MissileAvatar
+                    avatarAU > orientation=UP
+                    avatarAD > orientation=DOWN
+                    avatarAL > orientation=LEFT
+                    avatarAR > orientation=RIGHT
+            avatar2 > img=newset/blockR3
+                avatarB > MovingAvatar
+                avatarBM > MissileAvatar
+                    avatarBU > orientation=UP
+                    avatarBD > orientation=DOWN
+                    avatarBL > orientation=LEFT
+                    avatarBR > orientation=RIGHT
+
+        trap > Immovable img=oryx/spike3
+
+    LevelMapping
+        . > floor
+        A > avatarA floor
+        B > avatarB floor
+        u > upA floor
+        d > downA floor
+        l > leftA floor
+        r > rightA floor
+        0 > leftB floor
+        1 > upB floor
+        2 > rightB floor
+        3 > downB floor
+        e > exit1 exit2 floor
+        t > trap floor
+		
+    InteractionSet
+        avatarAM wall > setSpeedForAll stype=avatar1 value=0
+        avatarAM wall > transformTo stype=avatarA
+        wall avatarA > spawnRight stype=rightA stepBack=True
+        wall avatarA > spawnAbove stype=upA stepBack=True
+        wall avatarA > spawnBelow stype=downA stepBack=True
+        wall avatarA > spawnLeft stype=leftA stepBack=True
+        avatar1 wall > stepBack
+
+        avatarBM wall > setSpeedForAll stype=avatar2 value=0
+        avatarBM wall > transformTo stype=avatarB
+        wall avatarB > spawnRight stype=rightB stepBack=True
+        wall avatarB > spawnAbove stype=upB stepBack=True
+        wall avatarB > spawnBelow stype=downB stepBack=True
+        wall avatarB > spawnLeft stype=leftB stepBack=True
+        avatar2 wall > stepBack
+
+        avatarA upA > transformTo stype=avatarAU killSecond=True
+        avatarA downA > transformTo stype=avatarAD killSecond=True
+        avatarA leftA > transformTo stype=avatarAL killSecond=True
+        avatarA rightA > transformTo stype=avatarAR killSecond=True
+
+        avatar1 auxA > killAll stype=upA
+        avatar1 auxA > killAll stype=downA
+        avatar1 auxA > killAll stype=leftA
+        avatar1 auxA > killAll stype=rightA
+
+        avatarB upB > transformTo stype=avatarBU killSecond=True
+        avatarB downB > transformTo stype=avatarBD killSecond=True
+        avatarB leftB > transformTo stype=avatarBL killSecond=True
+        avatarB rightB > transformTo stype=avatarBR killSecond=True
+
+        avatar2 auxB > killAll stype=upB
+        avatar2 auxB > killAll stype=downB
+        avatar2 auxB > killAll stype=leftB
+        avatar2 auxB > killAll stype=rightB
+
+        avatar eos > stepBack
+
+        avatar1 exit1 > spawn stype=winner
+        exit1 avatar1 > killSprite
+        avatar2 exit2 > spawn stype=winner
+        exit2 avatar2 > killSprite
+
+        avatar trap > killSprite
+
+    TerminationSet
+        MultiSpriteCounter stype1=winner limit=2 win=True,True
+        SpriteCounter stype=avatar limit=1 win=False,False
+        Timeout limit=1000 win=False,False

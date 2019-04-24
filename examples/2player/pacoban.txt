@@ -1,0 +1,94 @@
+BasicGame key_handler=Pulse no_players=2 square_size=20 obs=wall
+    SpriteSet
+        floor > Immovable img=oryx/floor3
+        food > Immovable
+            fruit > color=PINK img=newset/cherries2
+            pellet > color=LIGHTYELLOW shrinkfactor=0.5 img=oryx/gold2
+            power  > Resource color=LIGHTGREEN shrinkfactor=0.8 img=oryx/orb2
+        nest > SpawnPoint img=portal portal=True invisible=True
+            redspawn > stype=redOk
+            orangespawn > stype=orangeOk
+            bluespawn > stype=blueOk
+            pinkspawn > stype=pinkOk
+
+        wall > Immovable img=oryx/wall3 autotiling=True
+
+        moving >
+            ghost >
+                red > singleton=True
+                    redOk > RandomPathAltChaser stype1=hungryA,hungryB stype2=poweredA,poweredB cooldown=4 img=oryx/ghost3 cons=4
+                    redSc > Fleeing stype=pacman maxDistance=500 cooldown=2 img=oryx/ghost1
+                blue > singleton=True
+                    blueOk > RandomPathAltChaser stype1=hungryA,hungryB stype2=poweredA,poweredB cooldown=4 img=oryx/ghost4 cons=4
+                    blueSc > Fleeing stype=pacman maxDistance=500 cooldown=2 img=oryx/ghost1
+                pink > singleton=True
+                    pinkOk > RandomPathAltChaser stype1=hungryA,hungryB stype2=poweredA,poweredB cooldown=4 img=oryx/ghost5 cons=4
+                    pinkSc > Fleeing stype=pacman maxDistance=500 cooldown=2 img=oryx/ghost1
+                orange > singleton=True
+                    orangeOk > RandomPathAltChaser stype1=hungryA,hungryB stype2=poweredA,poweredB cooldown=4 img=oryx/ghost6 cons=4
+                    orangeSc > Fleeing stype=pacman maxDistance=500 cooldown=2 img=oryx/ghost1
+            pacman > OrientedAvatar  rotateInPlace=false speed=1
+                avatarA >
+                    hungryA  > color=YELLOW img=newset/pacman
+                    poweredA > color=ORANGE img=oryx/bullet1
+                avatarB >
+                    hungryB  > color=YELLOW img=newset/pacman
+                    poweredB > color=ORANGE img=oryx/bullet1
+
+    InteractionSet
+        wall pacman > bounceForward
+        wall wall > undoAll
+        wall EOS > killSprite
+        pacman pacman > stepBack
+        ghost wall > stepBack
+
+        pacman EOS  > wrapAround
+
+        ghost EOS ghost > stepBack
+
+        hungryA ghost  > killSprite scoreChange=-1,0
+        hungryB ghost  > killSprite scoreChange=0,-1
+
+        power hungryA hungryB > transformToAll stype=redOk stypeTo=redSc
+        power hungryA hungryB > transformToAll stype=pinkOk stypeTo=pinkSc
+        power hungryA hungryB > transformToAll stype=blueOk stypeTo=blueSc
+        power hungryA hungryB > transformToAll stype=orangeOk stypeTo=orangeSc
+
+        power hungryA hungryB > addTimer timer=200 ftype=transformToAll stype=redSc stypeTo=redOk killSecond=True
+        power hungryA hungryB > addTimer timer=200 ftype=transformToAll stype=pinkSc stypeTo=pinkOk killSecond=True
+        power hungryA hungryB > addTimer timer=200 ftype=transformToAll stype=blueSc stypeTo=blueOk killSecond=True
+        power hungryA hungryB > addTimer timer=200 ftype=transformToAll stype=orangeSc stypeTo=orangeOk killSecond=True
+
+        hungryA power > addTimer timer=200 ftype=transformToAll stype=poweredA stypeTo=hungryA
+        hungryB power > addTimer timer=200 ftype=transformToAll stype=poweredB stypeTo=hungryB
+        hungryA power > transformTo stype=poweredA
+        hungryB power > transformTo stype=poweredB
+
+        power avatarA > killSprite scoreChange=10,0
+        power avatarB > killSprite scoreChange=0,10
+        pellet avatarA > killSprite scoreChange=1,0
+        pellet avatarB > killSprite scoreChange=0,1
+        fruit avatarA > killSprite scoreChange=5,0
+        fruit avatarB > killSprite scoreChange=0,5
+
+        ghost poweredA > killSprite scoreChange=40,0
+        ghost poweredB > killSprite scoreChange=0,40
+
+    LevelMapping
+        + > floor
+        0 > floor power
+        . > floor pellet
+        A > floor hungryA
+        B > floor hungryB
+        1 > floor redspawn
+        2 > floor orangespawn
+        3 > floor bluespawn
+        4 > floor pinkspawn
+        f > floor fruit
+        w > floor wall
+        
+    TerminationSet
+        SpriteCounter stype=food   count_score=True
+        SpriteCounter stype=avatarA win=False,True
+        SpriteCounter stype=avatarB win=True,False
+        Timeout limit=2000 count_score=True

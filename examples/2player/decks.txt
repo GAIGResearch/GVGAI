@@ -1,0 +1,205 @@
+BasicGame no_players=2 key_handler=Pulse
+    SpriteSet
+        floor > Immovable img=oryx/backGrey hidden=True
+
+        avatar > frameRate=16
+            avatarA > img=newset/girl3
+                avA > MovingAvatar
+                S5 > ShootAvatar stype=shootS5
+                H10 > ShootAvatar stype=shootH10
+                D2 > ShootAvatar stype=shootD2
+                C3 > ShootAvatar stype=shootC3
+                JA > ShootAvatar stype=shootJA
+            avatarB > img=newset/man3
+                avB > MovingAvatar
+                S10 > ShootAvatar stype=shootS10
+                H2 > ShootAvatar stype=shootH2
+                D3 > ShootAvatar stype=shootD3
+                C5 > ShootAvatar stype=shootC5
+                JB > ShootAvatar stype=shootJB
+
+        deck > Resource
+            deckA > shrinkfactor=0.5
+                deckA0 > img=newset/s5 #spades 5
+                deckA1 > img=newset/h10 #hearts 10
+                deckA2 > img=newset/d2 #diamonds 2
+                deckA3 > img=newset/c3 #clubs 3
+                jokerA0 > img=newset/block1
+                jokerA1 > img=newset/block1
+                jokerA2 > img=newset/block1
+                jokerA3 > img=newset/block1
+                #deckA4 > #stars 7
+            deckB > shrinkfactor=0.5
+                deckB0 > img=newset/s10 #spades 10
+                deckB1 > img=newset/h2 #hearts 2
+                deckB2 > img=newset/d3 #diamonds 3
+                deckB3 > img=newset/c5 #clubs 5
+                jokerB0 > img=newset/block1
+                jokerB1 > img=newset/block1
+                jokerB2 > img=newset/block1
+                jokerB3 > img=newset/block1
+                #deckB4 > #stars 7
+
+        play > Immovable
+            playStart > img=newset/block2
+            playS5 > img=newset/s5
+            playH10 > img=newset/h10
+            playD2 > img=newset/d2
+            playC3 > img=newset/c3
+            playS10 > img=newset/s10
+            playH2 > img=newset/h2
+            playD3 > img=newset/d3
+            playC5 > img=newset/c5
+            joker > img=newset/block1
+
+        play > Flicker
+            shootS5 > img=newset/blockB
+            shootH10 > img=newset/blockR
+            shootD2 > img=newset/blockY
+            shootC3 > img=newset/blockG
+            shootS10 > img=newset/blockB
+            shootH2 > img=newset/blockR
+            shootD3 > img=newset/blockY
+            shootC5 > img=newset/blockG
+            shootJA > img=newset/block1
+            shootJB > img=newset/block1
+
+        aux > Immovable hidden=True invisible=True
+            joA0 >
+            joA1 >
+            joA2 >
+            joA3 >
+            joB0 >
+            joB1 >
+            joB2 >
+            joB3 >
+
+        npc > RandomNPC color=RED speed=0.5 cons=10 cooldown=5 img=oryx/genie1
+
+        wall > Immovable img=oryx/wall3 autotiling=True
+
+    LevelMapping
+        . > floor
+        + > floor playStart
+        A > floor avA
+        B > floor avB
+        0 > deckA0
+        1 > deckA1
+        2 > deckA2
+        3 > deckA3
+        4 > deckB0
+        5 > deckB1
+        6 > deckB2
+        7 > deckB3
+        n > floor npc
+
+    InteractionSet
+        avatar avatar wall play > stepBack
+
+        #--------- change card to play
+        avatarA deckA0 > transformTo stype=S5
+        avatarA deckA1 > transformTo stype=H10
+        avatarA deckA2 > transformTo stype=D2
+        avatarA deckA3 > transformTo stype=C3
+        avatarA jokerA0 > spawn stype=joA0
+        avatarA jokerA1 > spawn stype=joA1
+        avatarA jokerA2 > spawn stype=joA2
+        avatarA jokerA3 > spawn stype=joA3
+        avatarA joA0 joA1 joA2 joA3 > transformTo stype=JA
+        jokerA0 joA0 > transformTo stype=deckA0 killSecond=True
+        jokerA1 joA1 > transformTo stype=deckA1 killSecond=True
+        jokerA2 joA2 > transformTo stype=deckA2 killSecond=True
+        jokerA3 joA3 > transformTo stype=deckA3 killSecond=True
+
+        avatarB deckB0 > transformTo stype=S10
+        avatarB deckB1 > transformTo stype=H2
+        avatarB deckB2 > transformTo stype=D3
+        avatarB deckB3 > transformTo stype=C5
+        avatarB jokerB0 > spawn stype=joB0
+        avatarB jokerB1 > spawn stype=joB1
+        avatarB jokerB2 > spawn stype=joB2
+        avatarB jokerB3 > spawn stype=joB3
+        avatarB joB0 joB1 joB2 joB3 > transformTo stype=JB
+        jokerB0 joB0 > transformTo stype=deckB0 killSecond=True
+        jokerB1 joB1 > transformTo stype=deckB1 killSecond=True
+        jokerB2 joB2 > transformTo stype=deckB2 killSecond=True
+        jokerB3 joB3 > transformTo stype=deckB3 killSecond=True
+
+        avatar aux > stepBack
+
+
+        #--------- play correct card at beginning (all) or on joker (all)
+        playStart shootS5 > transformTo stype=playS5 killSecond=True
+        playStart shootH10 > transformTo stype=playH10 killSecond=True
+        playStart shootD2 > transformTo stype=playD2 killSecond=True
+        playStart shootC3 > transformTo stype=playC3 killSecond=True
+        playStart shootJA > transformTo stype=joker killSecond=True
+
+        playStart shootS10 > transformTo stype=playS10 killSecond=True
+        playStart shootH2 > transformTo stype=playH2 killSecond=True
+        playStart shootD3 > transformTo stype=playD3 killSecond=True
+        playStart shootC5 > transformTo stype=playC5 killSecond=True
+        playStart shootJB > transformTo stype=joker killSecond=True
+
+        joker shootS5 > transformTo stype=playS5 killSecond=True
+        joker shootH10 > transformTo stype=playH10 killSecond=True
+        joker shootD2 > transformTo stype=playD2 killSecond=True
+        joker shootC3 > transformTo stype=playC3 killSecond=True
+        shootJA joker > killSprite scoreChange=100,0
+
+        joker shootS10 > transformTo stype=playS5 killSecond=True
+        joker shootH2 > transformTo stype=playH10 killSecond=True
+        joker shootD3 > transformTo stype=playD2 killSecond=True
+        joker shootC5 > transformTo stype=playC3 killSecond=True
+        shootJB joker > killSprite scoreChange=0,100
+
+        #--------- play correct card on specific cards (-1 for playing same card)
+        shootS5 playS5 > killSprite scoreChange=-1,0
+        playS5 shootS10 > transformTo stype=playS10 killSecond=True scoreChange=0,2
+        playS5 shootC5 > transformTo stype=playC5 killSecond=True scoreChange=0,1
+
+        shootH10 playH10 > killSprite scoreChange=-1,0
+        playH10 shootH2 > transformTo stype=playH2 killSecond=True scoreChange=0,2
+        playH10 shootS10 > transformTo stype=playS10 killSecond=True scoreChange=0,1
+
+        shootD2 playD2 > killSprite scoreChange=-1,0
+        playD2 shootD3 > transformTo stype=playD3 killSecond=True scoreChange=0,2
+        playD2 shootH2 > transformTo stype=playH2 killSecond=True scoreChange=0,1
+
+        shootC3 playC3 > killSprite scoreChange=-1,0
+        playC3 shootC5 > transformTo stype=playC5 killSecond=True scoreChange=0,2
+        playC3 shootD3 > transformTo stype=playD3 killSecond=True scoreChange=0,1
+
+        ##
+
+        shootS10 playS10 > killSprite scoreChange=0,-1
+        playS10 shootS5 > transformTo stype=playS5 killSecond=True scoreChange=2,0
+        playS10 shootH10 > transformTo stype=playH10 killSecond=True scoreChange=1,0
+
+        shootH2 playH2 > killSprite scoreChange=0,-1
+        playH2 shootH10 > transformTo stype=playH10 killSecond=True scoreChange=2,0
+        playH2 shootD2 > transformTo stype=playD2 killSecond=True scoreChange=1,0
+
+        shootD3 playD3 > killSprite scoreChange=0,-1
+        playD3 shootD2 > transformTo stype=playD2 killSecond=True scoreChange=2,0
+        playD3 shootC3 > transformTo stype=playC3 killSecond=True scoreChange=1,0
+
+        shootC5 playC5 > killSprite scoreChange=0,-1
+        playC5 shootC3 > transformTo stype=playC3 killSecond=True scoreChange=2,0
+        playC5 shootS5 > transformTo stype=playS5 killSecond=True scoreChange=1,0
+
+        #--------- NPCs changing decks to jokers
+        deckA0 npc > transformTo stype=jokerA0
+        deckA1 npc > transformTo stype=jokerA1
+        deckA2 npc > transformTo stype=jokerA2
+        deckA3 npc > transformTo stype=jokerA2
+
+        deckB0 npc > transformTo stype=jokerB0
+        deckB1 npc > transformTo stype=jokerB1
+        deckB2 npc > transformTo stype=jokerB2
+        deckB3 npc > transformTo stype=jokerB2
+
+        npc wall deck play avatar > stepBack
+
+    TerminationSet
+        Timeout limit=1500 count_score=True

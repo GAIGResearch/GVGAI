@@ -1,0 +1,43 @@
+BasicGame no_players=2
+    SpriteSet
+        goal > Immovable color=GREEN
+            othergoal > 
+            mygoal    >
+        win > Immovable color=RED
+            iWin      >
+            otherWins >
+
+        racket >  speed=0.25 hMult=3
+            avatarA > VerticalAvatar img=oryx/floor3
+            avatarB > VerticalAvatar color=BLUE img=oryx/floor2
+
+        ball > Missile orientation=LEFT physicstype=CONT img=oryx/bullet1 shrinkfactor=4
+            normalBall > speed=25
+            slowBall > speed=15
+            slowBallR > speed=15 orientation=RIGHT
+
+        floor > Passive hidden=True invisible=True
+
+    TerminationSet # from the perspective of player 1 (on the left)
+        SpriteCounter stype=goal limit=0 win=False
+        SpriteCounter stype=othergoal limit=0 win=True,False
+        SpriteCounter stype=mygoal limit=0 win=False,True
+        Timeout limit=1000 win=True
+
+    InteractionSet
+        othergoal ball > transformToAll stype=othergoal stypeTo=iWin
+        mygoal ball   > transformToAll stype=mygoal stypeTo=otherWins
+
+        ball racket > bounceDirection
+        ball wall   > wallBounce
+        racket wall > stepBack
+        
+    LevelMapping
+        + > mygoal
+        - > othergoal
+        B > avatarB
+        A > avatarA
+        o > normalBall
+        s > slowBall
+        t > slowBallR
+        . > floor

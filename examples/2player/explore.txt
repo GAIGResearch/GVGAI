@@ -1,0 +1,70 @@
+BasicGame no_players=2 square_size=30 key_handler=Pulse
+
+    SpriteSet
+        land > Immovable hidden=True img=newset/chamber_floor
+
+        button > Immovable
+            buttonA >
+                buttonA0 > img=newset/blockY
+                buttonA1 > img=newset/blockY3
+            buttonB >
+                buttonB0 > img=newset/blockR
+                buttonB1 > img=newset/blockR3
+
+        exit > Immovable
+            exitA > hidden=True invisible=True hidden=True
+            exitB > hidden=True invisible=True hidden=True
+            exitDoorA > hidden=False invisible=False img=newset/flag1
+            exitDoorB > hidden=False invisible=False img=newset/flag2
+
+        winner > Immovable invisible=True hidden=True
+            winnerA >
+            winnerB >
+
+        patrol > LOSChaser stype=avatar cons=2 cooldown=2 img=oryx/guard1 speed=0.5 shrinkfactor=0.7
+
+        wall > Immovable color=BLACK img=oryx/wall3 autotiling=true
+
+        avatar > ShootAvatar
+            avatarA > img=newset/girl3 color=RED   stype=hitA
+            avatarB > img=newset/girl5 color=YELLOW  stype=hitB
+
+        hit > Flicker img=oryx/staff1 shrinkfactor=0.5
+            hitA > singleton=True
+            hitB > singleton=True
+
+    InteractionSet
+
+        patrol patrol EOS wall > stepBack
+        avatarA wall > stepBack
+        avatarB wall > stepBack
+
+        avatarA patrol > killSprite
+        avatarB patrol > killSprite
+
+        hitA buttonA0 > transformToAll stype=exitA stypeTo=exitDoorA
+        buttonA0 hitA > transformTo stype=buttonA1
+        hitB buttonB0 > transformToAll stype=exitB stypeTo=exitDoorB
+        buttonB0 hitB > transformTo stype=buttonB1
+
+        exitDoorA avatarA > spawn stype=winnerA
+        exitDoorB avatarB > spawn stype=winnerB
+
+    
+    TerminationSet
+        MultiSpriteCounter stype1=winnerA limit=1 win=True,False
+        MultiSpriteCounter stype1=winnerB limit=1 win=False,True
+        SpriteCounter stype=avatar limit=0 win=False,False
+        SpriteCounter stype=avatarA limit=0 win=False,True
+        SpriteCounter stype=avatarB limit=0 win=True,False
+        Timeout limit=1000
+    
+    LevelMapping
+        _ > land
+        A > avatarA land
+        B > avatarB land
+        p > land patrol
+        0 > land buttonA0
+        1 > land buttonB0
+        a > land exitA
+        b > land exitB
