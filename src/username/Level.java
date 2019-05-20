@@ -32,13 +32,13 @@ public class Level {
      * Maps every string representing a sprite, to a char. Opposite of charMapping.
      * @see #charMapping
      */
-    private HashMap<String, Character> stringMapping = new HashMap<>();
+    @Getter private HashMap<String, Character> stringMapping = new HashMap<>();
 
     /**
      * Maps every char, to a list of strings representing sprites. Opposite of stringMapping.
      * @see #stringMapping
      */
-    @Getter private HashMap<Character, ArrayList<String>> charMapping = new HashMap<>();
+    @Getter private HashMap<Character, ArrayList<String>> charMapping;
 
     /**
      * The next char to use when we need a new char to map to a string in the charMapping and stringMapping.
@@ -52,13 +52,34 @@ public class Level {
      * @param width The width of the level.
      * @param height The height of the level.
      */
-    Level(int width, int height) {
+    Level(int width, int height, HashMap<Character, ArrayList<String>> levelMapping) {
         level = new char[width][height];
         for (int y = 0; y < height; y++) {
             Arrays.fill(level[y], ' ');
         }
         this.width = width;
         this.height = height;
+
+        charMapping = levelMapping;
+        initializeStingMapping();
+    }
+
+    /**
+     * Initializes the stringMapping field.
+     * @see #stringMapping
+     */
+    private void initializeStingMapping() {
+        HashMap<String, Integer> counts = new HashMap<>();
+
+        charMapping.forEach((character, strings) -> {
+            int size = strings.size();
+            strings.forEach(string -> {
+                if (size < counts.getOrDefault(string, Integer.MAX_VALUE)) {
+                    stringMapping.put(string, character);
+                    counts.put(string, size);
+                }
+            });
+        });
     }
 
     /**

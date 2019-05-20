@@ -57,7 +57,7 @@ public class Agent extends AbstractLevelGenerator {
      */
     private void initializeLevel() {
         // TODO determine a good level size, depending on the game description
-        level = new Level(10, 10);
+        level = new Level(10, 10, gameDescription.getLevelMapping());
     }
 
     /**
@@ -94,13 +94,13 @@ public class Agent extends AbstractLevelGenerator {
     }
 
     /**
-     * Fills every space that has not been assigned a spite yet, with a floor sprite.
+     * Fills every space that has not been assigned a spite yet, with a floor sprite if there exists such a sprite.
      */
     private void fillEmptySpaceWithFloor() {
-        // TODO find floor sprites
-        List<String> floorSprites = gameAnalyzer.getOtherSprites();
-        String floorSprite = floorSprites.get(0);
-        level.setSpriteInEmptySpaces(floorSprite);
+        gameDescription.getStatic().stream().filter(spriteData -> spriteData.type.equals("Immovable")
+                && !spriteData.isSingleton && !spriteData.isResource && !spriteData.isNPC && !spriteData.isAvatar
+                && !spriteData.isPortal && gameAnalyzer.getOtherSprites().contains(spriteData.name)
+        ).findFirst().ifPresent(spriteData -> level.setSpriteInEmptySpaces(spriteData.name));
     }
 
     /**
