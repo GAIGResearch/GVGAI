@@ -364,7 +364,7 @@
                             <include>**/username/**</include>
                         </includes>
                         <rulesets>
-                            <ruleset>pmdMyGVGAI.xml</ruleset>
+                            <ruleset>pmd.xml</ruleset>
                         </rulesets>
                     </configuration>
                 </plugin>
