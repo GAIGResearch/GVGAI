@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+
+<ruleset name="Custom Rules"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+
+    <description>My custom rules</description>
+
+    <!-- Only check the username package -->
+    <exclude-pattern>.*</exclude-pattern>
+    <include-pattern>.*/username/.*</include-pattern>
+
+    <!-- Best Practices -->
+    <rule ref="category/java/bestpractices.xml">
+        <!-- Modify -->
+        <exclude name="JUnitTestContainsTooManyAsserts"/>
+        <exclude name="OneDeclarationPerLine"/>
+        <exclude name="UnusedFormalParameter"/>
+
+        <!-- Remove -->
+        <exclude name="SwitchStmtsShouldHaveDefault"/>
+    </rule>
+    <rule ref="category/java/bestpractices.xml/JUnitTestContainsTooManyAsserts">
+        <properties>
+            <property name="maximumAsserts" value="2"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/bestpractices.xml/OneDeclarationPerLine">
+        <properties>
+            <property name="strictMode" value="true"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/bestpractices.xml/UnusedFormalParameter">
+        <properties>
+            <property name="checkAll" value="true"/>
+        </properties>
+    </rule>
+
+    <!-- Code Style -->
+    <rule ref="category/java/codestyle.xml">
+        <!-- Modify -->
+        <exclude name="LongVariable"/>
+
+        <!-- Suppress for Tests -->
+        <exclude name="TooManyStaticImports"/>
+        <exclude name="AtLeastOneConstructor"/>
+
+        <!-- Remove -->
+        <exclude name="CallSuperInConstructor"/>
+        <exclude name="CommentDefaultAccessModifier"/>
+        <exclude name="ControlStatementBraces"/>
+        <exclude name="MethodArgumentCouldBeFinal"/>
+        <exclude name="OnlyOneReturn"/>
+    </rule>
+    <rule ref="category/java/codestyle.xml/LongVariable">
+        <properties>
+            <property name="minimum" value="20"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/TooManyStaticImports">
+        <properties>
+            <property name="violationSuppressXPath" value="//ClassOrInterfaceDeclaration[ends-with(@Image, 'Test')]"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/AtLeastOneConstructor">
+        <properties>
+            <property name="violationSuppressXPath" value="//ClassOrInterfaceDeclaration[ends-with(@Image, 'Test')]"/>
+        </properties>
+    </rule>
+
+    <!-- Design -->
+    <rule ref="category/java/design.xml">
+        <!-- Modify -->
+        <exclude name="SingularField"/>
+
+        <!-- Remove -->
+        <exclude name="LawOfDemeter"/>
+        <exclude name="LoosePackageCoupling"/>
+    </rule>
+    <rule ref="category/java/design.xml/SingularField">
+        <properties>
+            <property name="checkInnerClasses" value="true"/>
+        </properties>
+    </rule>
+
+    <!-- Documentation -->
+    <rule ref="category/java/documentation.xml"/>
+
+    <!-- Error Prone -->
+    <rule ref="category/java/errorprone.xml">
+        <!-- Modify -->
+        <exclude name="AvoidUsingOctalValues"/>
+
+        <!-- Remove -->
+        <exclude name="DataflowAnomalyAnalysis"/>
+        <exclude name="BeanMembersShouldSerialize"/>
+    </rule>
+    <rule ref="category/java/errorprone.xml/AvoidUsingOctalValues">
+        <properties>
+            <property name="strict" value="true"/>
+        </properties>
+    </rule>
+
+
+    <!-- Multi Threading -->
+    <rule ref="category/java/multithreading.xml"/>
+
+    <!-- Performance -->
+    <rule ref="category/java/performance.xml"/>
+
+    <!-- Security -->
+    <rule ref="category/java/security.xml"/>
+</ruleset>

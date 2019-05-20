@@ -1,6 +1,10 @@
 package tracks.levelGeneration;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
+import java.util.Scanner;
 
 public class TestLevelGeneration {
 
@@ -45,13 +49,13 @@ public class TestLevelGeneration {
 
 		// Other settings
 		int seed = new Random().nextInt();
-		int gameIdx = 11;
-		String recordLevelFile = generateLevelPath + games[gameIdx] + "_glvl.txt";
+		int gameIdx = getIndex(games);
+		String recordLevelFile = "generatedLevels/" + games[gameIdx] + "_glvl.txt";
 		String game = generateLevelPath + games[gameIdx] + ".txt";
 
 
 		// 1. This starts a game, in a generated level created by a specific level generator
-		if(LevelGenMachine.generateOneLevel(game, constructiveLevelGenerator, recordLevelFile)){
+		if(LevelGenMachine.generateOneLevel(game, "username.Agent", recordLevelFile)){
 		    LevelGenMachine.playOneGeneratedLevel(game, recordActionsFile, recordLevelFile, seed);
 		}
 
@@ -72,4 +76,19 @@ public class TestLevelGeneration {
 
 
     }
+
+	private static int getIndex(String[] games) {
+		// Setup
+		List<String> gamesList = new ArrayList<>(Arrays.asList(games));
+
+		// Get user input
+		Scanner reader = new Scanner(System.in);
+		System.out.println("What game do you want to play?\n");
+		int index = gamesList.indexOf(reader.nextLine());
+		reader.close();
+
+		// Return
+		if (index != -1) return  index;
+		return new Random().nextInt(games.length - 1);
+	}
 }

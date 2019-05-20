@@ -1,16 +1,8 @@
-# Eclipse
-.classpath
-.project
-.settings/
-
 # Intellij
 .idea/
 .idea
 *.iml
 *.iws
-
-# Mac
-.DS_Store
 
 # Maven
 log/
@@ -21,41 +13,4 @@ out/
 /build/dist/
 production/
 
-*.ipr
-*.class
-*.xml
-*.html
-*.gif
-*.pyc
-
-clients/GVGAI-JavaClient/src/sampleRandom.zip
-
-
-clients/GVGAI-JavaClient/logs/output_server_redirect_err.txt
-
-clients/GVGAI-JavaClient/logs/output_server_redirect.txt
-
-clients/GVGAI-JavaClient/src/logs/output_server_redirect_err.txt
-
-clients/GVGAI-PythonClient/src/sources.txt
-
-clients/GVGAI-PythonClient/src/logs/output_server_redirect_err.txt
-
-clients/GVGAI-JavaClient/src/sources.txt
-
-clients/GVGAI-JavaClient/src/logs/output_server_redirect.txt
-
-clients/GVGAI-JavaClient/src/logs/clientLog.txt
-
-clients/GVGAI-JavaClient/sources.txt
-
-clients/GVGAI-JavaClient/logs/clientLog.txt
-
-clients/GVGAI-PythonClient/src/logs/output_server_redirect.txt
-
-clients/GVGAI-PythonClient/src/logs/clientLog.txt
-
-#Super secret folder with private games, in the privte repository
-examples/super_secret
-src/META-INF/MANIFEST.MF
-src/rs/META-INF/MANIFEST.MF
+generatedLevels/*
