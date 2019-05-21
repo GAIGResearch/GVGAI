@@ -61,7 +61,7 @@ public class BomberRandomMissile extends SpawnPoint
         int idx = itypesMissile.indexOf(itype);
         try {
             itypesMissile.set(idx, newitype);
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException e) {
             //System.out.println("Type of missile unrecognized.");
         }
     }
