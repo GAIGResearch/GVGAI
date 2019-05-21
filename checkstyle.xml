@@ -24,9 +24,7 @@
         <property name="tabWidth" value="4"/>
 
         <!-- Annotations -->
-        <module name="AnnotationLocation">
-            <property name="allowSamelineSingleParameterlessAnnotation" value="false"/>
-        </module>
+        <module name="AnnotationLocation"/>
         <module name="AnnotationUseStyle">
             <property name="elementStyle" value="compact"/>
         </module>
@@ -74,7 +72,6 @@
         <module name="MagicNumber">
             <property name="ignoreHashCodeMethod" value="true"/>
         </module>
-        <module name="MissingCtor"/>
         <module name="ModifiedControlVariable"/>
         <module name="MultipleStringLiterals"/>
         <module name="MultipleVariableDeclarations"/>
@@ -101,7 +98,7 @@
         </module>
         <module name="AvoidStaticImport">
             <property name="excludes"
-                      value="org.assertj.core.api.AssertionsForInterfaceTypes.assertThat, org.mockito.Mockito.*"/>
+                      value="org.assertj.core.api.Assertions.*, org.mockito.Mockito.*"/>
         </module>
         <module name="CustomImportOrder"> <!-- IntelliJ IDEA default settings -->
             <property name="customImportOrderRules"
@@ -196,7 +193,12 @@
         </module>
         <module name="NoWhitespaceBefore">
             <property name="tokens"
-                      value="COMMA, SEMI, POST_INC, POST_DEC, DOT, GENERIC_START, GENERIC_END, ELLIPSIS, METHOD_REF"/>
+                      value="COMMA, SEMI, POST_INC, POST_DEC, GENERIC_START, GENERIC_END, ELLIPSIS"/>
+        </module>
+        <module name="NoWhitespaceBefore">
+            <property name="allowLineBreaks" value="true"/>
+            <property name="tokens"
+                      value="DOT, METHOD_REF"/>
         </module>
         <module name="OperatorWrap">
             <property name="tokens"

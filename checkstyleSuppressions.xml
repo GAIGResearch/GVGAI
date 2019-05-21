@@ -5,11 +5,11 @@
         "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 
 <suppressions>
-    <!-- Lombok -->
-    <suppress message="^Annotation 'Getter' should be alone on line.$"/>
-    <suppress message="^Annotation 'Setter' should be alone on line.$"/>
-
     <!-- Tests -->
-    <suppress checks="MagicNumberCheck" files="^.*Test.java$"/>
-    <suppress checks="MissingCtorCheck" files="^.*Test.java$"/>
+    <suppress checks="JavadocMethodCheck" files="^.*test"/>
+    <suppress checks="JavadocVariableCheck" files="^.*test"/>
+    <suppress checks="JavadocTypeCheck" files="^.*test"/>
+    <suppress checks="MagicNumberCheck" files="^.*test"/>
+    <suppress checks="MissingCtorCheck" files="^.*test"/>
+    <suppress checks="MultipleStringLiteralsCheck" files="^.*test"/>
 </suppressions>

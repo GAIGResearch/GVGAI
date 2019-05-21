@@ -18,12 +18,12 @@ public class Agent extends AbstractLevelGenerator {
     /**
      * GameDescription object holding all game information.
      */
-    private GameDescription gameDescription;
+    private final GameDescription gameDescription;
 
     /**
      * GameAnalyzer object which adds some tools for extracting information from the gameDescription object.
      */
-    private GameAnalyzer gameAnalyzer;
+    private final GameAnalyzer gameAnalyzer;
 
     /**
      * The level we are generating.
@@ -33,12 +33,12 @@ public class Agent extends AbstractLevelGenerator {
     /**
      * Count down until level generation is due.
      */
-    private ElapsedCpuTimer elapsedCpuTimer;
+    private final ElapsedCpuTimer elapsedCpuTimer;
 
     /**
      * Random number generator.
      */
-    private Random rng = new Random();
+    private final Random rng = new Random();
 
     /**
      * Constructor for the level generator.
@@ -57,7 +57,7 @@ public class Agent extends AbstractLevelGenerator {
      */
     private void initializeLevel() {
         // TODO determine a good level size, depending on the game description
-        level = new Level(10, 10, gameDescription.getLevelMapping());
+        level = new Level(10, 10));
     }
 
     /**
@@ -87,17 +87,17 @@ public class Agent extends AbstractLevelGenerator {
      */
     private void addPlayerAvatar() {
         // TODO determine a good location to add the player avatar.
-        level.setSprite(3, 3, gameAnalyzer.getAvatarSprites().get(0));
+        level.addSprite(3, 3, gameAnalyzer.getAvatarSprites().get(0));
 
         // Temporary, to prevent the game from finishing immediately
-        level.setSprite(6, 6, gameAnalyzer.getGoalSprites().get(0));
+        level.addSprite(6, 6, gameAnalyzer.getGoalSprites().get(0));
     }
 
     /**
      * Fills every space that has not been assigned a spite yet, with a floor sprite if there exists such a sprite.
      */
     private void fillEmptySpaceWithFloor() {
-        gameDescription.getStatic().stream().filter(spriteData -> spriteData.type.equals("Immovable")
+        gameDescription.getStatic().stream().filter(spriteData -> "Immovable".equals(spriteData.type)
                 && !spriteData.isSingleton && !spriteData.isResource && !spriteData.isNPC && !spriteData.isAvatar
                 && !spriteData.isPortal && gameAnalyzer.getOtherSprites().contains(spriteData.name)
         ).findFirst().ifPresent(spriteData -> level.setSpriteInEmptySpaces(spriteData.name));
@@ -110,8 +110,8 @@ public class Agent extends AbstractLevelGenerator {
     public String generateLevel(GameDescription game, ElapsedCpuTimer elapsedTimer) {
         initializeLevel();
         addSolidBorder();
-        addPlayerAvatar();
         fillEmptySpaceWithFloor();
+        addPlayerAvatar();
         return level.getLevel();
     }
 
@@ -120,6 +120,6 @@ public class Agent extends AbstractLevelGenerator {
      */
     @Override
     public HashMap<Character, ArrayList<String>> getLevelMapping() {
-        return level.getLevelMapping();
+        return level.getLevelMapping().getCharMapping();
     }
 }
