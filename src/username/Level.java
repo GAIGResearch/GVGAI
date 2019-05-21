@@ -3,20 +3,23 @@ package username;
 import lombok.Getter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
- * Class representing containing a matrix of chars, representing a level.
+ * Class containing a matrix of sets, containing strings which represent sprites, representing a level.
  */
 public class Level {
 
     /**
-     * The level we are generating, where each char is mapped to a string representing a sprite.
-     * @see Level#charMapping
+     * The level we are generating, represented as a matrix of sets, containing strings which represent sprites.
+     * The outer list contains the rows, i.e. y coordinate.
+     * The middle lists contain sprite lists, i.e. x coordinate.
+     * The inner lists are sprite lists.
      */
-    private char[][] level;
+    private List<List<ArrayList<String>>> level;
 
     /**
      * The width of the level.
@@ -29,84 +32,82 @@ public class Level {
     @Getter private int height;
 
     /**
-     * Maps every string representing a sprite, to a char. Opposite of charMapping.
-     * @see #charMapping
+     * The levelMapping for this level. Only gets generated, once {@link #getLevel()} gets called.
      */
-    @Getter private HashMap<String, Character> stringMapping = new HashMap<>();
+    @Getter private HashMap<Character, ArrayList<String>> levelMapping;
 
     /**
-     * Maps every char, to a list of strings representing sprites. Opposite of stringMapping.
-     * @see #stringMapping
+     * Maps every string to a list of strings, according to the default level mapping.
      */
-    @Getter private HashMap<Character, ArrayList<String>> charMapping;
+    private HashMap<String, ArrayList<String>> specialMappings = new HashMap<>();
 
     /**
-     * The next char to use when we need a new char to map to a string in the charMapping and stringMapping.
-     * @see #charMapping
-     * @see #stringMapping
-     */
-    private char mappingChar = 'a';
-
-    /**
-     * Constructs a new level, of the specified size, and fills it with ' ' chars.
+     * Constructs a new level, of the specified size.
      * @param width The width of the level.
      * @param height The height of the level.
+     * @param levelMapping The default level mapping for this level.
      */
     Level(int width, int height, HashMap<Character, ArrayList<String>> levelMapping) {
-        level = new char[width][height];
-        for (int y = 0; y < height; y++) {
-            Arrays.fill(level[y], ' ');
-        }
         this.width = width;
         this.height = height;
 
-        charMapping = levelMapping;
-        initializeStingMapping();
-    }
+        // Initialize the level matrix
+        level = new ArrayList<>(height);
+        for (int y = 0; y < height; y++) {
+            List<ArrayList<String>> row = new ArrayList<>(width);
+            level.add(row);
+            for (int x = 0; x < width; x++) {
+                row.add(new ArrayList<>(1));
+            }
+        }
 
-    /**
-     * Initializes the stringMapping field.
-     * @see #stringMapping
-     */
-    private void initializeStingMapping() {
-        HashMap<String, Integer> counts = new HashMap<>();
-
-        charMapping.forEach((character, strings) -> {
-            int size = strings.size();
-            strings.forEach(string -> {
-                if (size < counts.getOrDefault(string, Integer.MAX_VALUE)) {
-                    stringMapping.put(string, character);
-                    counts.put(string, size);
+        // Initialize specialMappings
+        Set<String> ambiguousSprites = new HashSet<>();
+        levelMapping.values().forEach(sprites -> sprites.forEach(sprite -> {
+            if (!ambiguousSprites.contains(sprite)) {
+                if (specialMappings.containsKey(sprite)) {
+                    ambiguousSprites.add(sprite);
+                    specialMappings.remove(sprite);
+                } else {
+                    specialMappings.put(sprite, sprites);
                 }
-            });
-        });
+            }
+        }));
     }
 
     /**
-     * Sets the sprite at the specified location, in the char array.
+     * Adds the sprite at the specified location, in the level matrix.
+     * @param x The x coordinate of where to set the sprite.
+     * @param y The y coordinate of where to set the sprite.
+     * @param sprite The sprite to set at the specified coordinates.
+     */
+    void addSprite(int x, int y, String sprite) {
+        List<String> newSprites = specialMappings.getOrDefault(sprite, new ArrayList<>(List.of(sprite)));
+        ArrayList<String> sprites = level.get(y).get(x);
+        sprites.addAll(newSprites);
+    }
+
+    /**
+     * Sets the sprite at the specified location, in the level matrix.
      * @param x The x coordinate of where to set the sprite.
      * @param y The y coordinate of where to set the sprite.
      * @param sprite The sprite to set at the specified coordinates.
      */
     void setSprite(int x, int y, String sprite) {
         // TODO add behaviour for cut of areas of the level (for example: fill with solid sprites)
-        // TODO should probably return what sprite was previously at this coordinate
-        if (!stringMapping.containsKey(sprite)) {
-            stringMapping.put(sprite, mappingChar);
-            charMapping.put(mappingChar, new ArrayList<>(List.of(sprite)));
-            mappingChar++;
-        }
-        level[x][y] = stringMapping.get(sprite);
+        // TODO should probably return which sprites were previously at this coordinate
+        level.get(y).set(x, specialMappings.getOrDefault(sprite, new ArrayList<>(List.of(sprite))));
     }
 
     /**
-     * Sets the specified sprite at any location that still has a ' ' char in the level matrix.
+     * Sets the specified sprite at any location that has 0 sprites set, in the level matrix.
      * @param sprite The sprite to set (A floor sprite)
      */
     void setSpriteInEmptySpaces(String sprite) {
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                if (level[x][y] == ' ') setSprite(x, y, sprite);
+        for (int y = 0; y < level.size(); y++) {
+            List<ArrayList<String>> row = level.get(y);
+            for (int x = 0; x < row.size(); x++) {
+                if (row.get(x).isEmpty()) setSprite(x, y, sprite);
             }
         }
     }
@@ -116,10 +117,25 @@ public class Level {
      * @return The level matrix as a single String.
      */
     String getLevel() {
+        levelMapping = new HashMap<>();
+        HashMap<List<String>, Character> listMapping = new HashMap<>();
+        char mappingChar = 'a';
+
         StringBuilder result = new StringBuilder();
-        for (int y = 0; y < height; y++) {
-            result.append(String.valueOf(level[y])).append("\n");
+        for (List<ArrayList<String>> row : level) {
+            for (ArrayList<String> sprites : row) {
+                // Add a char to the levelMapping for this list of sprites, if there isn't any
+                if (listMapping.putIfAbsent(sprites, mappingChar) == null) {
+                    levelMapping.put(mappingChar, sprites);
+                    mappingChar++;
+                }
+
+                result.append(listMapping.get(sprites));
+            }
+
+            result.append("\n");
         }
+
         return result.substring(0, result.length() - 1);
     }
 }

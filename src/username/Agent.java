@@ -120,6 +120,6 @@ public class Agent extends AbstractLevelGenerator {
      */
     @Override
     public HashMap<Character, ArrayList<String>> getLevelMapping() {
-        return level.getCharMapping();
+        return level.getLevelMapping();
     }
 }
