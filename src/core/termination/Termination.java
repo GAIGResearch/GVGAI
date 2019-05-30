@@ -51,18 +51,22 @@ public abstract class Termination {
     public void countScore(Game game) {
         if (count_score) {
             double maxScore = game.getAvatar(0).getScore();
+            boolean all0 = maxScore == 0;
             for (int i = 1; i < game.no_players; i++) {
                 double score = game.getAvatar(i).getScore();
-                if (score > maxScore) {
-                    maxScore = score;
+                if (score != 0) {
+                    all0 = false;
+                    if (score > maxScore) {
+                        maxScore = score;
+                    }
                 }
             }
-            //give win to player/s with most number of points, rest lose
+
+            // Give win to player/s with most number of points, rest lose
             win = "";
-            boolean winner = false;
             for (int i = 0; i < game.no_players; i++) {
                 double s = game.getAvatar(i).getScore();
-                if (s == maxScore) {
+                if (!all0 && s == maxScore) {
                     win += "True";
                 } else {
                     win += "False";
@@ -70,13 +74,7 @@ public abstract class Termination {
                 if (i != game.no_players - 1) {
                     win += ",";
                 }
-                if (s != 0) winner = true;
             }
-            if (!winner)
-                for (int i = 0; i < game.no_players; i++) {
-                    if (i != game.no_players - 1) win += "False,";
-                    else win += "False";
-                }
         }
     }
 
