@@ -46,6 +46,7 @@
 
         <!-- Suppress for Tests -->
         <exclude name="TooManyStaticImports"/>
+        <exclude name="LinguisticNaming"/>
 
         <!-- Remove -->
         <exclude name="AtLeastOneConstructor"/>
@@ -82,11 +83,19 @@
             <property name="violationSuppressXPath" value="//ClassOrInterfaceDeclaration[ends-with(@Image, 'Test')]"/>
         </properties>
     </rule>
+    <rule ref="category/java/codestyle.xml/LinguisticNaming">
+        <properties>
+            <property name="violationSuppressXPath" value="//ClassOrInterfaceDeclaration[ends-with(@Image, 'Test')]"/>
+        </properties>
+    </rule>
 
     <!-- Design -->
     <rule ref="category/java/design.xml">
         <!-- Modify -->
         <exclude name="SingularField"/>
+
+        <!-- Suppress for Tests -->
+        <exclude name="TooManyMethods"/>
 
         <!-- Remove -->
         <exclude name="LawOfDemeter"/>
@@ -95,6 +104,11 @@
     <rule ref="category/java/design.xml/SingularField">
         <properties>
             <property name="checkInnerClasses" value="true"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/design.xml/TooManyMethods">
+        <properties>
+            <property name="violationSuppressXPath" value="//ClassOrInterfaceDeclaration[ends-with(@Image, 'Test')]"/>
         </properties>
     </rule>
 

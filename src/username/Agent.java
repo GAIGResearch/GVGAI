@@ -57,7 +57,7 @@ public class Agent extends AbstractLevelGenerator {
      */
     private void initializeLevel() {
         // TODO determine a good level size, depending on the game description
-        level = new Level(10, 10));
+        level = new Level(10, 10);
     }
 
     /**
@@ -100,7 +100,15 @@ public class Agent extends AbstractLevelGenerator {
         gameDescription.getStatic().stream().filter(spriteData -> "Immovable".equals(spriteData.type)
                 && !spriteData.isSingleton && !spriteData.isResource && !spriteData.isNPC && !spriteData.isAvatar
                 && !spriteData.isPortal && gameAnalyzer.getOtherSprites().contains(spriteData.name)
-        ).findFirst().ifPresent(spriteData -> level.setSpriteInEmptySpaces(spriteData.name));
+        ).findFirst().ifPresent(spriteData -> {
+            // If we can find a sprite the looks like a floor tile, add it to all coordinates
+            String sprite = spriteData.name;
+            for (int x = 0; x < level.getWidth(); x++) {
+                for (int y = 0; y < level.getHeight(); y++) {
+                    level.addSprite(x, y, sprite);
+                }
+            }
+        });
     }
 
     /**
@@ -110,8 +118,8 @@ public class Agent extends AbstractLevelGenerator {
     public String generateLevel(GameDescription game, ElapsedCpuTimer elapsedTimer) {
         initializeLevel();
         addSolidBorder();
-        fillEmptySpaceWithFloor();
         addPlayerAvatar();
+        fillEmptySpaceWithFloor();
         return level.getLevel();
     }
 
@@ -120,6 +128,6 @@ public class Agent extends AbstractLevelGenerator {
      */
     @Override
     public HashMap<Character, ArrayList<String>> getLevelMapping() {
-        return level.getLevelMapping().getCharMapping();
+        return level.getLEVEL_MAPPING().getCharMapping();
     }
 }

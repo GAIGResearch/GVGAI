@@ -118,6 +118,7 @@
         <module name="JavadocTagContinuationIndentation"/>
         <module name="JavadocType"/>
         <module name="JavadocVariable"/>
+        <!--<module name="MissingJavadocMethod"/>-->
         <module name="NonEmptyAtclauseDescription"/>
         <module name="SummaryJavadocCheck"/>
 
@@ -193,7 +194,7 @@
         </module>
         <module name="NoWhitespaceBefore">
             <property name="tokens"
-                      value="COMMA, SEMI, POST_INC, POST_DEC, GENERIC_START, GENERIC_END, ELLIPSIS"/>
+                      value="COMMA, SEMI, POST_INC, POST_DEC, GENERIC_END, ELLIPSIS"/>
         </module>
         <module name="NoWhitespaceBefore">
             <property name="allowLineBreaks" value="true"/>

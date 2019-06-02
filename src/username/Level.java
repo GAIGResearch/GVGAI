@@ -2,55 +2,49 @@ package username;
 
 import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
- * Class containing a matrix of sets, containing strings which represent sprites, representing a level.
+ * Class representing a level, containing a matrix, containing chars which represent sprites.
  */
-@SuppressWarnings("PMD.LooseCoupling")
 public class Level {
 
     /**
-     * The level we are generating, represented as a matrix of sets, containing strings which represent sprites.
-     * The outer list contains the rows, i.e. y coordinate.
-     * The middle lists contain sprite lists, i.e. x coordinate.
-     * The inner lists are sprite lists.
+     * The LEVEL_MAPPING for this level.
      */
-    private final List<List<ArrayList<String>>> levelMatrix;
+    @Getter private static final LevelMapping LEVEL_MAPPING = new LevelMapping();
 
     /**
-     * The width of the levelMatrix.
+     * The level we are generating, represented as a matrix, containing chars which represent sprites.
+     * The outer array contains the rows, i.e. y coordinate.
+     * The inner array contain the columns, i.e. x coordinate.
+     */
+    private final char[][] matrix;
+
+    /**
+     * The width of the matrix.
      */
     @Getter private int width;
 
     /**
-     * The height of the levelMatrix.
+     * The height of the matrix.
      */
     @Getter private int height;
 
     /**
-     * The levelMapping for this level. Only gets generated, once {@link #getLevel()} gets called.
-     */
-    @Getter private final LevelMapping levelMapping = new LevelMapping();
-
-    /**
      * Constructs a new level, of the specified size.
-     * @param width The width of the levelMatrix.
-     * @param height The height of the levelMatrix.
+     * @param width The width of the matrix.
+     * @param height The height of the matrix.
      */
     Level(int width, int height) {
         this.width = width;
         this.height = height;
 
         // Initialize the level matrix
-        levelMatrix = new ArrayList<>(height);
-        for (int y = 0; y < height; y++) {
-            List<ArrayList<String>> row = new ArrayList<>(width);
-            levelMatrix.add(row);
-            for (int x = 0; x < width; x++) {
-                row.add(new ArrayList<>(1));
-            }
+        char emtpyChar = LEVEL_MAPPING.get();
+        matrix = new char[height][width];
+        for (char[] column : matrix) {
+            Arrays.fill(column, emtpyChar);
         }
     }
 
@@ -61,8 +55,7 @@ public class Level {
      * @param sprite The sprite to set at the specified coordinates.
      */
     void addSprite(int x, int y, String sprite) {
-        ArrayList<String> sprites = levelMatrix.get(y).get(x);
-        sprites.add(sprite);
+        matrix[y][x] = LEVEL_MAPPING.getWith(matrix[y][x], sprite);
     }
 
     /**
@@ -73,21 +66,31 @@ public class Level {
      */
     void setSprite(int x, int y, String sprite) {
         // TODO add behaviour for cut of areas of the level (for example: fill with solid sprites)
-        // TODO should probably return which sprites were previously at this coordinate
-        levelMatrix.get(y).set(x, new ArrayList<>(List.of(sprite)));
+        matrix[y][x] = LEVEL_MAPPING.get(sprite);
     }
 
     /**
-     * Sets the specified sprite at any location that has 0 sprites set, in the level matrix.
-     * @param sprite The sprite to set (A floor sprite)
+     * Removes the sprite from the specified location, in the level matrix.
+     * @param x The x coordinate of where to set the sprite.
+     * @param y The y coordinate of where to set the sprite.
+     * @param sprite The sprite to remove from the specified coordinates.
      */
-    void setSpriteInEmptySpaces(String sprite) {
-        for (int y = 0; y < levelMatrix.size(); y++) {
-            List<ArrayList<String>> row = levelMatrix.get(y);
-            for (int x = 0; x < row.size(); x++) {
-                if (row.get(x).isEmpty()) setSprite(x, y, sprite);
-            }
-        }
+    void removeSprite(int x, int y, String sprite) {
+        matrix[y][x] = LEVEL_MAPPING.getWithout(matrix[y][x], sprite);
+    }
+
+    /**
+     * Moves the sprite to a new location, in the level matrix.
+     * If the sprite does not exist at the old location, it will still be added to the new location.
+     * @param xOld The x coordinate of where the sprite is now.
+     * @param yOld The y coordinate of where the sprite is now.
+     * @param xNew The x coordinate of where the sprite should be moved to.
+     * @param yNew The y coordinate of where the sprite should be moved to.
+     * @param sprite The sprite to be moved.
+     */
+    void moveSprite(int xOld, int yOld, int xNew, int yNew, String sprite) {
+        removeSprite(xOld, yOld, sprite);
+        addSprite(xNew, yNew, sprite);
     }
 
     /**
@@ -96,14 +99,9 @@ public class Level {
      */
     String getLevel() {
         StringBuilder result = new StringBuilder();
-        for (List<ArrayList<String>> row : levelMatrix) {
-            for (ArrayList<String> sprites : row) {
-                result.append(levelMapping.get(sprites));
-            }
-
-            result.append('\n');
+        for (char[] row : matrix) {
+            result.append(String.valueOf(row)).append('\n');
         }
-
         return result.substring(0, result.length() - 1);
     }
 }
