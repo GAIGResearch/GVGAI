@@ -3,6 +3,8 @@ package username;
 import lombok.Getter;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * Class representing a level, containing a matrix, containing chars which represent sprites.
@@ -48,6 +50,10 @@ public class Level {
         }
     }
 
+    List<String> get(int x, int y) {
+        return LEVEL_MAPPING.get(matrix[y][x]);
+    }
+
     /**
      * Adds the sprite at the specified location, in the level matrix.
      * @param x The x coordinate of where to set the sprite.
@@ -91,6 +97,18 @@ public class Level {
     void moveSprite(int xOld, int yOld, int xNew, int yNew, String sprite) {
         removeSprite(xOld, yOld, sprite);
         addSprite(xNew, yNew, sprite);
+    }
+
+    /**
+     * Applies a function that takes two integers (x and y position) to each position in the level.
+     * @param fun A function that takes an x and y position as an input.
+     */
+    void forEachPosition(BiConsumer<Integer, Integer> fun) {
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                fun.accept(x, y);
+            }
+        }
     }
 
     /**
