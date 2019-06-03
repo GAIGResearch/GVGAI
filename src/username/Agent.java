@@ -107,10 +107,15 @@ public class Agent extends AbstractLevelGenerator {
      * Places the player avatar into the level.
      */
     private void addPlayerAvatar() {
-        // TODO determine a good location to add the player avatar.
-        avatarX = 3;
-        avatarY = 3;
+        // Determine if we need to add clearance to not add the player avatar inside the border
+        int borderClearance = 1;
+        if (gameAnalyzer.getSolidSprites().isEmpty()) borderClearance = 0;
 
+        // Pick a random location to add the player avatar
+        avatarX = rng.nextInt(level.getWidth() - borderClearance) + borderClearance;
+        avatarY = rng.nextInt(level.getHeight() - borderClearance) + borderClearance;
+
+        // Add the player avatar
         level.addSprite(avatarX, avatarY, gameAnalyzer.getAvatarSprites().get(0));
 
         // Temporary, to prevent the game from finishing immediately
