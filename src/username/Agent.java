@@ -66,17 +66,28 @@ public class Agent extends AbstractLevelGenerator {
      * @see Level
      */
     private void initializeLevel() {
-        // TODO determine a good level size, depending on the game description
-        level = new Level(10, 10);
+        // Determine if we need to add clearance to add a border
+        int borderClearance = 2;
+        if (gameAnalyzer.getSolidSprites().isEmpty()) borderClearance = 0;
+
+        // Determine the width and height
+        int width = Utils.clamp(Constants.MIN_WIDTH,
+                (int) (gameDescription.getAllSpriteData().size() * (1 + Constants.RANDOM_WIDTH * rng.nextDouble())),
+                Constants.MAX_WIDTH) + borderClearance;
+        int height = Utils.clamp(Constants.MIN_HEIGHT,
+                (int) (gameDescription.getAllSpriteData().size() * (1 + Constants.RANDOM_HEIGHT * rng.nextDouble())),
+                Constants.MAX_HEIGHT) + borderClearance;
+
+        // Initialize the level
+        level = new Level(width, height);
     }
 
     /**
      * Adds a border of random solid sprites around the level.
      */
     private void addSolidBorder() {
-        // TODO determine if this type of game should get a solid border
+        // Get the sprite to use for the border
         List<String> solidSprites = gameAnalyzer.getSolidSprites();
-        if (solidSprites.isEmpty()) return;
         String solidSprite = solidSprites.get(rng.nextInt(solidSprites.size()));
 
         // Add a border along the top and bottom side of the level
