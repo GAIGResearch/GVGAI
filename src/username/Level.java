@@ -50,6 +50,12 @@ public class Level {
         }
     }
 
+    /**
+     * Returns the list of sprites for a given coordinate.
+     * @param x The x coordinate.
+     * @param y The y coordinate.
+     * @return The list of sprites for a given coordinate.
+     */
     List<String> get(int x, int y) {
         return LEVEL_MAPPING.get(matrix[y][x]);
     }
@@ -112,13 +118,25 @@ public class Level {
     }
 
     /**
-     * Transforms the level matrix into a single string.
+     * Transforms the level matrix into a single String.
      * @return The level matrix as a single String.
      */
     String getLevel() {
+        return getLevel(0, width, 0, height);
+    }
+
+    /**
+     * Transforms the level matrix into a single String, but only within the range of given coordinates.
+     * @param minX The minimum x coordinate (inclusive).
+     * @param maxX The maximum x coordinate (exclusive).
+     * @param minY The minimum y coordinate (inclusive).
+     * @param maxY The maximum y coordinate (exclusive).
+     * @return The level matrix as a single String.
+     */
+    String getLevel(int minX, int maxX, int minY, int maxY) {
         StringBuilder result = new StringBuilder();
-        for (char[] row : matrix) {
-            result.append(String.valueOf(row)).append('\n');
+        for (int y = minY; y < maxY; y++) {
+            result.append(String.valueOf(matrix[y], minX, maxX - minX)).append('\n');
         }
         return result.substring(0, result.length() - 1);
     }

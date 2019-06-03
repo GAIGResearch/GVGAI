@@ -122,14 +122,10 @@ public class Agent extends AbstractLevelGenerator {
 
     /**
      * Fills unreachable areas of the level with solid sprites.
+     * @param reachable Matrix indicating which positions are reachable, and which are not.
      */
-    private void fillUnreachablePositions() {
+    private void fillUnreachablePositions(boolean[]... reachable) {
         List<String> solidSprites = gameAnalyzer.getSolidSprites();
-        if (solidSprites.isEmpty()) return;
-
-        // Check which areas are reachable
-        boolean[][] reachable = new boolean[level.getHeight()][level.getWidth()];
-        findReachablePositions(reachable, avatarX, avatarY, solidSprites);
 
         // Fill unreachable areas with solid sprites
         String solidSprite = solidSprites.get(rng.nextInt(solidSprites.size()));
@@ -139,13 +135,38 @@ public class Agent extends AbstractLevelGenerator {
     }
 
     /**
+     * Transforms the level matrix into a single String, and cuts the level to size, using only the relevant parts.
+     * @param reachable Matrix indicating which positions are reachable, and which are not.
+     * @return The level matrix as a single String.
+     */
+    private String getLevelCutToSize(boolean[]... reachable) {
+        int minX = avatarX;
+        int maxX = avatarX;
+        int minY = avatarY;
+        int maxY = avatarY;
+
+        for (int x = 0; x < level.getWidth(); x++) {
+            for (int y = 0; y < level.getHeight(); y++) {
+                if (reachable[y][x]) {
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                }
+            }
+        }
+
+        return level.getLevel(minX, maxX + 1, minY, maxY + 1);
+    }
+
+    /**
      * Finds positions which are reachable from the given position.
      * @param reachable Matrix of booleans, indicating which positions are reachable, and which are not.
      * @param x The x position we are trying to reach other positions from.
      * @param y The y position we are trying to reach other positions from.
      * @param sprites The list of solid sprites.
      */
-    private void findReachablePositions(boolean[][] reachable, int x, int y, List<String> sprites) {
+    private void findReachablePositions(final boolean[][] reachable, int x, int y, List<String> sprites) {
         // If this coordinate has been checked before, do nothing
         if (reachable[y][x]) return;
         reachable[y][x] = true;
@@ -159,25 +180,40 @@ public class Agent extends AbstractLevelGenerator {
 
         for (int i = 0; i < xCoordinates.length; i++) {
             // Check x coordinate is within bounds
-            int xi = xCoordinates[i];
-            if (xi < 0 || xi >= level.getWidth()) continue;
+            int xCoordinate = xCoordinates[i];
+            if (xCoordinate < 0 || xCoordinate >= level.getWidth()) continue;
 
             // Check y coordinate is within bounds
-            int yi = yCoordinates[i];
-            if (yi < 0 || yi >= level.getHeight()) continue;
+            int yCoordinate = yCoordinates[i];
+            if (yCoordinate < 0 || yCoordinate >= level.getHeight()) continue;
 
             // Check the the coordinate
-            findReachablePositions(reachable, xi, yi, sprites);
+            findReachablePositions(reachable, xCoordinate, yCoordinate, sprites);
         }
     }
 
     @Override
     public String generateLevel(GameDescription game, ElapsedCpuTimer elapsedTimer) {
+        List<String> solidSprites = gameAnalyzer.getSolidSprites();
+        boolean solidSpritesExist = !solidSprites.isEmpty();
+
         initializeLevel();
-        addSolidBorder();
+
+        if (solidSpritesExist) addSolidBorder();
+
         addPlayerAvatar();
         fillEmptySpaceWithFloor();
-        fillUnreachablePositions();
+
+        if (solidSpritesExist) {
+            // Check which areas are reachable
+            boolean[][] reachable = new boolean[level.getHeight()][level.getWidth()];
+            findReachablePositions(reachable, avatarX, avatarY, solidSprites);
+
+            fillUnreachablePositions(reachable);
+
+            return getLevelCutToSize(reachable);
+        }
+
         return level.getLevel();
     }
 
