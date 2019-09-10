@@ -67,21 +67,21 @@ public class AtDelfiValidator_HPC {
 		int u=id%10;
 	    int t=(id/10)%10;
 	    
-	    if(id > 499)
-			validator.gameIdx = 4;
-	    else if(id > 399)
-			validator.gameIdx = 30;
-	    else if(id > 299)
+//	    if(id > 500)
+//			validator.gameIdx = 4;
+//	    else if(id > 400)
+//			validator.gameIdx = 30;
+	    if(id > 299)
 			validator.gameIdx = 34;
 	    else if(id > 199) 
 			validator.gameIdx = 39;
 		else if(id > 99)
-			validator.gameIdx = 42;
+			validator.gameIdx = 30;
 		else
 			validator.gameIdx = 47;
 		
 		// fixed game
-		validator.gameIdx = 34;
+//		validator.gameIdx = 34;
 		
 		
 		int withoutH = u + t*10;
@@ -95,7 +95,7 @@ public class AtDelfiValidator_HPC {
 			validator.levelIdx = 1;
 		else
 			validator.levelIdx = 0;
-		validator.runXperiments(1, true, seed, false, id);
+		validator.runXperiments(1, false, seed, false, id);
 		
 //		
 //		try {
@@ -154,6 +154,7 @@ public class AtDelfiValidator_HPC {
 		File mainFile = new File("experiments/main_file_" + gameIdx + "_" + id +".txt");
 		int winning = 0;
 			try{
+				
 				File expFile = new File("experiments/experiment_" + gameIdx + "_" + id + ".txt");
 				expFile.createNewFile();
 				
@@ -180,7 +181,9 @@ public class AtDelfiValidator_HPC {
 		        setupCritPath(player.critPath);
 		        
 		        player.init(root);
-		        winning += player.run(id);				
+		        winning += player.run(id);	
+
+
 			}catch(Exception e) {
 				e.printStackTrace();
 			}

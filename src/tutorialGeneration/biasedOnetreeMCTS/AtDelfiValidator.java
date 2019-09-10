@@ -57,7 +57,7 @@ public class AtDelfiValidator {
 		
 		int seed = 100;
 		AtDelfiValidator validator = new AtDelfiValidator();
-		validator.runXperiments(10, true, seed, false);
+		validator.runXperiments(1, false, seed, false);
 	}
 	
 	public String[] getGame(int id) {
@@ -88,6 +88,7 @@ public class AtDelfiValidator {
 		int winning = 0;
 		for(int i = 0; i < x; i++) {
 			try{
+				long startTime = System.nanoTime();
 				File expFile = new File("experiments/experiment_"+ i + ".txt");
 				expFile.createNewFile();
 				
@@ -113,6 +114,9 @@ public class AtDelfiValidator {
 		        player.init(root);
 		        winning += player.run(i);
 		        System.out.println("Complete. Wins: " + winning + " / " + (i+1));
+				long endTime = System.nanoTime();
+				long duration = (endTime - startTime)/1000000 ;  //divide by 1000000 to get milliseconds.
+				System.out.println("time taken: " + duration);
 				
 			}catch(Exception e) {
 				e.printStackTrace();

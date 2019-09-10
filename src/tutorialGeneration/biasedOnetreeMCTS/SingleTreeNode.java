@@ -31,7 +31,7 @@ public class SingleTreeNode
     private final double K_DECAY = 0.00;
     private final double BONUS_DECAY = 0.10;
     // number of MCTS iterations
-    public int numIterations = 5000;
+    public int numIterations = 500;
     
     public float bonus = 0;
     public double epsilon = 1e-6;
@@ -47,7 +47,7 @@ public class SingleTreeNode
 
     public int num_actions;
     Types.ACTIONS[] actions;
-    public int ROLLOUT_DEPTH = 50;
+    public int ROLLOUT_DEPTH = 1;
     public int bonus_count = 0;
     
     public double K = Math.sqrt(2);

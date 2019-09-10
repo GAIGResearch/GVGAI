@@ -85,6 +85,8 @@ public class SingleMCTSPlayer
     	if	(oneTree) {
     		m_root.mctsSearch(improved, critPath);
     	} else {
+			long startTime = System.currentTimeMillis();
+
     		StateObservation a_gameState = m_root.rootState;
     		ArrayList<ACTIONS> moves = new ArrayList<ACTIONS>();
     		int count = 1;
@@ -94,7 +96,7 @@ public class SingleMCTSPlayer
         		SingleTreeNode.deepest = 0;
         		SingleTreeNode.deepestNode = null;
 	    	    init(a_gameState);
-	    		m_root.numIterations = 5000;
+	    		m_root.numIterations = 500;
 	    	    m_root.mctsSearch(improved, critPath);
 	    	    int action = m_root.mostVisitedAction();
 	    	    if(visualize) {
@@ -117,7 +119,8 @@ public class SingleMCTSPlayer
     			
 	    	    count++;
     		}
-    		
+	        long endTime = System.currentTimeMillis();
+	        long duration = (endTime - startTime);
     		if (a_gameState.getGameWinner() == Types.WINNER.PLAYER_WINS) {
     			System.out.println("Won game!");
     		} else {
@@ -148,11 +151,11 @@ public class SingleMCTSPlayer
                        new FileWriter(mainExperimentsFile, true)); 
 
         		if (a_gameState.getGameWinner() == Types.WINNER.PLAYER_WINS) {
-        			out.write(number+",1," + a_gameState.getGameScore() +  "\n");
+        			out.write(number+",1," + a_gameState.getGameScore() + "," + duration + "," + count + "\n");
                     out.close(); 
         			return 1;
         		} else {
-        			out.write(number+",0," + a_gameState.getGameScore() +  "\n");
+        			out.write(number+",0," + a_gameState.getGameScore() + "," + duration + "," + count + "\n");
                     out.close(); 
                     return 0;
         		}
