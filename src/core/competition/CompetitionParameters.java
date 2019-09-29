@@ -12,17 +12,17 @@ public class CompetitionParameters
     /**
      * Milliseconds allowed per controller action.
      */
-    public static final int ACTION_TIME = 40;
+    public static final int ACTION_TIME = 400000;
 
     /**
      * Milliseconds for controller disqualification, if it returns an action after this time.
      */
-    public static final int ACTION_TIME_DISQ = 50;
+    public static final int ACTION_TIME_DISQ = 500000;
 
     /**
      * Milliseconds allowed for controller initialization.
      */
-    public static final int INITIALIZATION_TIME = 1000;
+    public static final int INITIALIZATION_TIME = 100000000;
 
     /**
      * Milliseconds allowed for controller tear down.
@@ -39,27 +39,27 @@ public class CompetitionParameters
      * Milliseconds allowed for the level generator disqualification, if it returns a level after this time.
      */
     public static final int LEVEL_ACTION_TIME_DISQ = 21600000;
-    
+
     /**
      * Milliseconds allowed for level generator to initialize
      */
     public static final int LEVEL_INITIALIZATION_TIME = 60000;
-    
+
     /**
      * Milliseconds allowed for the rule generator to generate rules
      */
     public static final int RULE_ACTION_TIME = 1800000*10;
-    
+
     /**
      * Milliseconds allowed for the rule generator disqualification, if it returns rules after this time.
      */
     public static final int RULE_ACTION_TIME_DISQ = 21600000;
-    
+
     /**
      * Milliseconds allowed for rule generator to initialize
      */
     public static final int RULE_INITIALIZATION_TIME = 60000;
-    
+
     /**
      * Number of repetition during the optimization operation
      */
@@ -92,12 +92,12 @@ public class CompetitionParameters
      * Max number of evaluations that can be done
      */
     public static final int OPTIMIZATION_EVALUATION = 5;
-    
+
     /**
      * Max number of warning then the system consider the game unplayable.
      */
     public static final int MAX_ALLOWED_WARNINGS = 25;
-    
+
     /**
      * Path to sprite images.
      */
@@ -129,12 +129,12 @@ public class CompetitionParameters
      * Terminates the program when the playing window is closed
      */
     public static boolean closeAppOnClosingWindow = false;
-    
+
     /**
      * Pause the game at the beginning and at the end
      */
     public static boolean dialogBoxOnStartAndEnd = true;
-    
+
     /**
      * Close the open window when you die or win
      */
