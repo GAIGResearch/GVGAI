@@ -65,11 +65,12 @@ public class Agent extends AbstractPlayer {
   public ACTIONS act(final StateObservation stateObs,
                      final ElapsedCpuTimer elapsedTimer) {
 
+    System.out.println("SCORE: " + stateObs.getGameScore());
     switch (this.agentPolicy) {
       case ONE_STEP_LOOK_AHEAD:
         return oneStepLookAhead(stateObs, elapsedTimer);
       case MONTE_CARLO_TREE_SEARCH:
-        monteCarloTreeSearch(stateObs, elapsedTimer);
+        return monteCarloTreeSearch(stateObs, elapsedTimer);
       case RANDOM:
       default:
         return returnRandomAction();
@@ -87,7 +88,7 @@ public class Agent extends AbstractPlayer {
   public ACTIONS monteCarloTreeSearch(final StateObservation stateObs,
                                       final ElapsedCpuTimer elapsedTimer) {
     MonteCarloTree tree = new MonteCarloTree();
-    tree.expandTree(10, stateObs);
+    tree.monteCarloSearch(20, stateObs);
     return tree.getBestFoundAction();
   }
 
@@ -104,10 +105,11 @@ public class Agent extends AbstractPlayer {
         .forEach(action -> {
 
           // Evaluate state
-          StateObservation stCopy = stateObs.copy();
-          stCopy.advance(action);
+          StateObservation newState = stateObs.copy();
+          newState.advance(action);
+
           double actionReward = stateObs.getGameScore() - stateObs.getGameScore();
-          double heuristicScore = gameStateHeuristic.evaluateState(stateObs);
+          double heuristicScore = gameStateHeuristic.evaluateState(stateObs, newState);
 
           double stepScore = actionReward + heuristicScore;
           // Save data

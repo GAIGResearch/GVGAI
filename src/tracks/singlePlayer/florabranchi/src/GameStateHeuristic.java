@@ -9,8 +9,21 @@ public class GameStateHeuristic extends StateHeuristic {
 
   double initialNpcCounter = 0;
 
+  double enemyDeathReward = 200;
+
   public GameStateHeuristic() {
 
+  }
+
+  public double evaluateState(StateObservation stateObs,
+                              StateObservation updatedState) {
+
+    int killedEnemies = 1;
+    //int killedEnemies = stateObs.getNPCPositions().length - updatedState.getNPCPositions().length;
+    System.out.println(String.format("Dead enemies: %s", killedEnemies));
+    final double v = killedEnemies * enemyDeathReward;
+
+    return v + evaluateState(stateObs);
   }
 
   public double evaluateState(StateObservation stateObs) {
