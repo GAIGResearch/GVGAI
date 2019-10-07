@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import core.game.StateObservation;
 import ontology.Types;
 
-public class MCTNode {
+public class MonteCarloNode {
 
   /**
    * Parameter that influences exploration.
@@ -19,58 +19,39 @@ public class MCTNode {
 
   private static int nodeCount = 0;
 
-  public StateObservation getNodeState() {
-    return nodeState;
-  }
+  public int nodeId;
+
+  public MonteCarloNode parentNode;
+
+  public List<MonteCarloNode> childrenNodes = new ArrayList<>();
+
+  public double simulationReward;
+
+  public Types.ACTIONS actionToGetToNode;
+
+  public int timesVisited;
 
   private Random rand;
 
-  private int nodeId;
+  private List<Types.ACTIONS> possibleActions;
+
+  public MonteCarloNode(final MonteCarloNode parentNodeId,
+                        final Types.ACTIONS actionToGetToNode,
+                        final StateObservation nodeState) {
+    this.actionToGetToNode = actionToGetToNode;
+    this.nodeId = nodeCount;
+    nodeCount++;
+    this.parentNode = parentNodeId;
+    this.possibleActions = nodeState.getAvailableActions();
+    rand = new Random();
+  }
 
   public static void reset() {
     nodeCount = 0;
   }
 
-  public int getNodeId() {
-    return nodeId;
-  }
-
-  private MCTNode parentNode;
-
-  private List<MCTNode> childrenNodes = new ArrayList<>();
-
-  private double simulationReward;
-
-  private Types.ACTIONS actionToGetToNode;
-
-  private int timesVisited;
-
   public boolean isLeaf() {
     return childrenNodes.isEmpty();
-  }
-
-  public int getTimesVisited() {
-    return timesVisited;
-  }
-
-  private final StateObservation nodeState;
-
-  private List<Types.ACTIONS> possibleActions;
-
-  public Types.ACTIONS getActionToGetToNode() {
-    return actionToGetToNode;
-  }
-
-  public MCTNode getParentNode() {
-    return parentNode;
-  }
-
-  public List<MCTNode> getChildrenNodes() {
-    return childrenNodes;
-  }
-
-  public double getSimulationReward() {
-    return simulationReward;
   }
 
   public <T> T getRandomListElement(List<T> list) {
@@ -92,14 +73,14 @@ public class MCTNode {
     }
 
     double averageSum = 0;
-    for (MCTNode nodeId : childrenNodes) {
-      averageSum += nodeId.getSimulationReward();
+    for (MonteCarloNode nodeId : childrenNodes) {
+      averageSum += nodeId.simulationReward;
     }
     return averageSum / childrenNodes.size();
   }
 
   public boolean isFullyExtended() {
-    final boolean isfullyExpanded = childrenNodes.size() == getNodeState().getAvailableActions().size();
+    final boolean isfullyExpanded = childrenNodes.size() == possibleActions.size();
     //System.out.println(String.format("Node %s is fully expanded: %s", getNodeId(), isfullyExpanded));
     return isfullyExpanded;
   }
@@ -107,34 +88,22 @@ public class MCTNode {
   /**
    * Retrieves children node with maximum upper confidence bound.
    */
-  public MCTNode getBestChild() {
+  public MonteCarloNode getBestChild() {
 
     //for (MCTNode n : childrenNodes) {
     //System.out.println(String.format("Node %d UCB %s ", n.getNodeId(), n.getNodeUpperConfidenceBound(getTimesVisited())));
     //}
 
 
-    final MCTNode maxUcbNode = Collections.max(childrenNodes, Comparator.comparing(c -> c.getNodeUpperConfidenceBound(getTimesVisited())));
+    final MonteCarloNode maxUcbNode = Collections.max(childrenNodes, Comparator.comparing(c -> c.getNodeUpperConfidenceBound(timesVisited)));
     //System.out.println(String.format("Max UCB: %f.2 for action %s in node %s", maxUcbNode.getNodeUpperConfidenceBound(getTimesVisited()),
     //    maxUcbNode.getActionToGetToNode().toString(), maxUcbNode.getNodeId()));
     return maxUcbNode;
   }
 
-  public MCTNode(final MCTNode parentNodeId,
-                 final Types.ACTIONS actionToGetToNode,
-                 final StateObservation nodeState) {
-    this.actionToGetToNode = actionToGetToNode;
-    this.nodeId = nodeCount;
-    nodeCount++;
-    this.parentNode = parentNodeId;
-    this.nodeState = nodeState;
-    this.possibleActions = nodeState.getAvailableActions();
-    rand = new Random();
-  }
-
-  public MCTNode expand() {
-    final List<Types.ACTIONS> exploredActions = this.childrenNodes.stream().map(MCTNode::getActionToGetToNode).collect(Collectors.toList());
-    final List<Types.ACTIONS> unexploredActions = new ArrayList<>(this.nodeState.getAvailableActions());
+  public MonteCarloNode expand(final StateObservation currentState) {
+    final List<Types.ACTIONS> exploredActions = this.childrenNodes.stream().map(entry -> entry.actionToGetToNode).collect(Collectors.toList());
+    final List<Types.ACTIONS> unexploredActions = new ArrayList<>(currentState.getAvailableActions());
 
     //System.out.println(String.format("Node %s has %s actions possible from initial state", this.nodeId, unexploredActions.size()));
 
@@ -142,20 +111,20 @@ public class MCTNode {
     Collections.shuffle(unexploredActions);
 
     final Types.ACTIONS selectedAction = unexploredActions.get(0);
-    StateObservation newNodeState = this.nodeState.copy();
+    StateObservation newNodeState = currentState.copy();
     newNodeState.advance(selectedAction);
 
     //System.out.println(String.format("Selected action %s to expand node %s", selectedAction.toString(), this.nodeId));
-    MCTNode tempNode = new MCTNode(this, selectedAction, newNodeState);
+    MonteCarloNode tempNode = new MonteCarloNode(this, selectedAction, newNodeState);
     this.childrenNodes.add(tempNode);
     return tempNode;
   }
 
 
-  public void rolloutNode() {
+  public void rolloutNode(final StateObservation currentState) {
 
-    double initialScore = nodeState.getGameScore();
-    StateObservation copyState = nodeState.copy();
+    double initialScore = currentState.getGameScore();
+    StateObservation copyState = currentState.copy();
     while (!copyState.isGameOver()) {
       copyState.advance(getRandomListElement(copyState.getAvailableActions()));
     }
@@ -170,7 +139,7 @@ public class MCTNode {
     if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_WINS)) {
       stateReward += 1;
     } else if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
-      stateReward += 0;
+      stateReward = 0;
     }
 
 

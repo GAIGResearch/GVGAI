@@ -20,12 +20,6 @@ import tracks.singlePlayer.florabranchi.src.mtcs.MonteCarloTree;
  */
 public class Agent extends AbstractPlayer {
 
-  enum EAvailablePolicies {
-    RANDOM,
-    ONE_STEP_LOOK_AHEAD,
-    MONTE_CARLO_TREE_SEARCH
-  }
-
   /**
    * Random generator for the agent.
    */
@@ -34,14 +28,8 @@ public class Agent extends AbstractPlayer {
    * List of available actions for the agent
    */
   protected ArrayList<ACTIONS> actions;
-
   protected Map<Integer, ACTIONS> bestActionMap = new HashMap<>();
-
   private EAvailablePolicies agentPolicy;
-
-  public void setAgentPolicy(final EAvailablePolicies agentPolicy) {
-    this.agentPolicy = agentPolicy;
-  }
 
   /**
    * initialize all variables for the agent
@@ -56,6 +44,10 @@ public class Agent extends AbstractPlayer {
     System.out.println(String.format("Creating agent with policy %s", agentPolicy.name()));
     randomGenerator = new Random();
     actions = stateObs.getAvailableActions();
+  }
+
+  public void setAgentPolicy(final EAvailablePolicies agentPolicy) {
+    this.agentPolicy = agentPolicy;
   }
 
   /**
@@ -89,6 +81,7 @@ public class Agent extends AbstractPlayer {
                                       final ElapsedCpuTimer elapsedTimer) {
     MonteCarloTree tree = new MonteCarloTree();
     tree.monteCarloSearch(20, stateObs);
+    System.out.println(elapsedTimer.elapsedMillis());
     return tree.getBestFoundAction();
   }
 
@@ -123,5 +116,11 @@ public class Agent extends AbstractPlayer {
     return bestActionAtm;
 
 
+  }
+
+  enum EAvailablePolicies {
+    RANDOM,
+    ONE_STEP_LOOK_AHEAD,
+    MONTE_CARLO_TREE_SEARCH
   }
 }
