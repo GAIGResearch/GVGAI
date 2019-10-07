@@ -15,7 +15,7 @@ public class MCTNode {
   /**
    * Parameter that influences exploration.
    */
-  private final static int C = 1;
+  private final static double C = 1 / Math.sqrt(2);
 
   private static int nodeCount = 0;
 
@@ -161,9 +161,16 @@ public class MCTNode {
     }
 
     double finalScore = copyState.getGameScore();
-    double stateReward = 0;
-    if (finalScore > initialScore && copyState.getGameWinner().equals(Types.WINNER.PLAYER_WINS)) {
-      stateReward = 1;
+    double stateReward = 0.01;
+    double scoreDelta = initialScore - finalScore;
+    stateReward += 0.01 * scoreDelta;
+
+    final Types.WINNER gameWinner = copyState.getGameWinner();
+
+    if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_WINS)) {
+      stateReward += 1;
+    } else if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
+      stateReward += 0;
     }
 
 
