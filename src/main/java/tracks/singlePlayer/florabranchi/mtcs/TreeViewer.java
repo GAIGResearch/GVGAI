@@ -1,5 +1,6 @@
 package tracks.singlePlayer.florabranchi.mtcs;
 
+import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.swing.mxGraphComponent;
 
 import org.jgrapht.Graph;
@@ -19,9 +20,7 @@ public class TreeViewer extends JApplet {
 
   private static final Dimension DEFAULT_SIZE = new Dimension(530, 320);
 
-  public JFrame treeViewerFrame = new JFrame();
-
-  private JGraphXAdapter<TreeNode, DefaultEdge> jgAdapter;
+  private JGraphXAdapter<TreeNode, DefaultEdge> jgxAdapter;
 
 
   public TreeViewer() throws HeadlessException {
@@ -35,10 +34,10 @@ public class TreeViewer extends JApplet {
         new DefaultListenableGraph<>(new DefaultDirectedGraph<>(DefaultEdge.class));
 
     // create a visualization using JGraph, via an adapter
-    jgAdapter = new JGraphXAdapter<>(g);
+    jgxAdapter = new JGraphXAdapter<>(g);
 
     setPreferredSize(DEFAULT_SIZE);
-    mxGraphComponent component = new mxGraphComponent(jgAdapter);
+    mxGraphComponent component = new mxGraphComponent(jgxAdapter);
     component.setConnectable(false);
     component.getGraph().setAllowDanglingEdges(false);
     getContentPane().add(component);
@@ -51,7 +50,17 @@ public class TreeViewer extends JApplet {
     g.addVertex(node1);
     g.addVertex(node2);
 
-    // that's all there is to it!...
+    // positioning via jgraphx layouts
+    mxCircleLayout layout = new mxCircleLayout(jgxAdapter);
+
+    // center the circle
+    int radius = 100;
+    layout.setX0((DEFAULT_SIZE.width / 2.0) - radius);
+    layout.setY0((DEFAULT_SIZE.height / 2.0) - radius);
+    layout.setRadius(radius);
+    layout.setMoveCircle(true);
+
+    layout.execute(jgxAdapter.getDefaultParent());
 
     return g;
   }
@@ -61,7 +70,7 @@ public class TreeViewer extends JApplet {
     buildSampleTree();
   }
 
-  public void showTree() {
+  public void showTree(JFrame treeViewerFrame) {
 
     treeViewerFrame.getContentPane().add(this);
     treeViewerFrame.setTitle("JGraphT Adapter to JGraphX Demo");

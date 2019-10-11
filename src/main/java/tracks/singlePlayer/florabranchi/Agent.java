@@ -8,11 +8,14 @@ import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import javax.swing.*;
+
 import core.game.StateObservation;
 import core.player.AbstractPlayer;
 import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
 import tracks.singlePlayer.florabranchi.mtcs.MonteCarloTree;
+import tracks.singlePlayer.florabranchi.mtcs.TreeController;
 import tracks.singlePlayer.florabranchi.mtcs.TreeViewer;
 
 /**
@@ -32,6 +35,8 @@ public class Agent extends AbstractPlayer {
   private EAvailablePolicies agentPolicy;
 
   private TreeViewer treeViewer = new TreeViewer();
+
+  private JFrame treeViewerFrame = new JFrame();
 
   /**
    * initialize all variables for the agent
@@ -66,8 +71,9 @@ public class Agent extends AbstractPlayer {
       case ONE_STEP_LOOK_AHEAD:
         return oneStepLookAhead(stateObs, elapsedTimer);
       case MONTE_CARLO_TREE_SEARCH:
-        treeViewer.showTree();
-        return monteCarloTreeSearch(stateObs, elapsedTimer);
+        //treeViewer.showTree(treeViewerFrame);
+        return monteCarloSearchV2(stateObs, elapsedTimer);
+      //return monteCarloTreeSearch(stateObs, elapsedTimer);
       case RANDOM:
       default:
         return returnRandomAction();
@@ -88,6 +94,14 @@ public class Agent extends AbstractPlayer {
     tree.monteCarloSearch(20, stateObs);
     System.out.println(elapsedTimer.elapsedMillis());
     return tree.getBestFoundAction();
+  }
+
+  public ACTIONS monteCarloSearchV2(final StateObservation stateObs,
+                                    final ElapsedCpuTimer elapsedTimer) {
+    TreeController treeController = new TreeController();
+    treeController.buildTree(20, stateObs);
+    System.out.println(elapsedTimer.elapsedMillis());
+    return treeController.getBestFoundAction();
   }
 
   /**
