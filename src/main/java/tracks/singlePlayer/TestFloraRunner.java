@@ -1,6 +1,9 @@
 package tracks.singlePlayer;
 
+import static com.sun.xml.internal.ws.spi.db.BindingContextFactory.LOGGER;
+
 import java.util.Random;
+import java.util.logging.Level;
 
 import tools.Utils;
 import tracks.ArcadeMachine;
@@ -10,13 +13,9 @@ import tracks.ArcadeMachine;
  */
 public class TestFloraRunner {
 
-  public enum ETrainingType {
-    PLAYER,
-    BOT,
-    REPLAY
-  }
-
   public static void main(String[] args) {
+
+    LOGGER.setLevel(Level.INFO);
 
     //Game settings
 
@@ -92,5 +91,11 @@ public class TestFloraRunner {
 //		}
 
 
+  }
+
+  public enum ETrainingType {
+    PLAYER,
+    BOT,
+    REPLAY
   }
 }
