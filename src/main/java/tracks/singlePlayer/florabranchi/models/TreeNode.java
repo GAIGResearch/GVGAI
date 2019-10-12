@@ -29,5 +29,9 @@ public class TreeNode {
     this.previousAction = previousAction;
   }
 
+  public void resetNodeCount() {
+    nodeCount = 0;
+  }
+
 
 }

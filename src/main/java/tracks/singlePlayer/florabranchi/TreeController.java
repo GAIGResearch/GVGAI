@@ -17,12 +17,9 @@ import tracks.singlePlayer.florabranchi.models.ViewerNode;
 
 public class TreeController {
 
-  private TreeNode rootNode;
-
-  private Logger logger = Logger.getLogger(TreeController.class.getName());
-
   private final static double C = 1 / Math.sqrt(2);
-
+  private TreeNode rootNode;
+  private Logger logger = Logger.getLogger(TreeController.class.getName());
   private Random rand = new Random();
 
   private void logMessage(final String message) {
@@ -32,8 +29,8 @@ public class TreeController {
   public void buildTree(int iterations,
                         final StateObservation initialState) {
 
-    rootNode = new TreeNode(null, null);
 
+    rootNode = new TreeNode(null, null);
     for (int i = 0; i < iterations; i++) {
       final Pair<TreeNode, StateObservation> policyResult = executeTreePolicy(initialState);
       final TreeNode selectedNode = policyResult.getKey();
@@ -44,16 +41,16 @@ public class TreeController {
 
   public List<ViewerNode> castRootNode() {
     List<TreeNode> treeNodes = createListOfNodes(rootNode);
-    return treeNodes.stream().map(node -> new ViewerNode(node)).collect(Collectors.toList());
+    return treeNodes.stream().map(ViewerNode::new).collect(Collectors.toList());
   }
 
-  public List<TreeNode> createListOfNodes(final TreeNode rootNode) {
+  private List<TreeNode> createListOfNodes(final TreeNode rootNode) {
     List<TreeNode> list = new ArrayList<>();
     flattenNodes(rootNode, list);
     return list;
   }
 
-  final void flattenNodes(TreeNode node, List<TreeNode> listOfNodes) {
+  private void flattenNodes(TreeNode node, List<TreeNode> listOfNodes) {
     listOfNodes.add(node);
     for (TreeNode child : node.children) {
       flattenNodes(child, listOfNodes);
@@ -66,7 +63,6 @@ public class TreeController {
       for (TreeNode child : node.children) {
         castedChildren.add(child);
         castedChildren.addAll(createListOfNodes(child));
-
       }
     }
     return castedChildren;
@@ -76,18 +72,19 @@ public class TreeController {
   private Pair<TreeNode, StateObservation> executeTreePolicy(final StateObservation stateObservation) {
 
     TreeNode selectedNode = rootNode;
-    final List<Types.ACTIONS> actionsToGetToNode = new ArrayList<>();
     StateObservation stateAfterNodeAction = stateObservation.copy();
 
     do {
       if (!isNodeFullyExpanded(selectedNode, stateAfterNodeAction.getAvailableActions())) {
         logMessage(String.format("Expanding children of node %s", selectedNode.id));
-        stateAfterNodeAction = advanceStateToNodeState(stateObservation, actionsToGetToNode);
         final TreeNode nodeAfterExpansion = expand(selectedNode, stateAfterNodeAction);
         return new Pair<>(nodeAfterExpansion, stateAfterNodeAction);
       } else {
+        Types.ACTIONS previousAction = selectedNode.previousAction;
+        if (previousAction != null) {
+          stateAfterNodeAction.advance(previousAction);
+        }
         selectedNode = getBestChild(selectedNode);
-        actionsToGetToNode.add(selectedNode.previousAction);
         logMessage(String.format("Selected children %s", selectedNode.id));
       }
     } while (!isNodeFullyExpanded(selectedNode, stateAfterNodeAction.getAvailableActions()));
@@ -141,9 +138,6 @@ public class TreeController {
     Collections.shuffle(unexploredActions);
 
     final Types.ACTIONS selectedAction = unexploredActions.get(0);
-    StateObservation newNodeState = currentState.copy();
-    newNodeState.advance(selectedAction);
-
     logMessage(String.format("Selected action %s to expand node %s", selectedAction.toString(), node.id));
     TreeNode tempNode = new TreeNode(node, selectedAction);
     node.children.add(tempNode);
@@ -152,6 +146,9 @@ public class TreeController {
 
   private boolean isNodeFullyExpanded(final TreeNode node,
                                       final ArrayList<Types.ACTIONS> nodeAvailableActions) {
+    if (nodeAvailableActions.isEmpty()) {
+      return true;
+    }
     return node.children.size() == nodeAvailableActions.size();
   }
 
@@ -200,5 +197,11 @@ public class TreeController {
   public Types.ACTIONS getBestFoundAction() {
     final TreeNode bestNode = getBestChild(rootNode);
     return bestNode.previousAction;
+  }
+
+  void resetNodeCount() {
+    if (rootNode != null) {
+      rootNode.resetNodeCount();
+    }
   }
 }
