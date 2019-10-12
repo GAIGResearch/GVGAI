@@ -17,14 +17,11 @@ import core.player.AbstractPlayer;
 import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
 import tracks.singlePlayer.florabranchi.models.ViewerNode;
-import tracks.singlePlayer.florabranchi.mtcs.MonteCarloTree;
 
 /**
  * Flora Branchi (florabranchi@gmail.com) September 2019
  */
 public class Agent extends AbstractPlayer {
-
-  private static final Dimension DEFAULT_SIZE = new Dimension(300, 500);
 
   /**
    * Random generator for the agent.
@@ -34,12 +31,7 @@ public class Agent extends AbstractPlayer {
    * List of available actions for the agent
    */
   protected ArrayList<ACTIONS> actions;
-  protected Map<Integer, ACTIONS> bestActionMap = new HashMap<>();
   private EAvailablePolicies agentPolicy;
-
-  private TreeViewer treeViewer = new TreeViewer();
-
-  private JFrame treeViewerFrame;
 
   /**
    * initialize all variables for the agent
@@ -54,17 +46,6 @@ public class Agent extends AbstractPlayer {
     System.out.println(String.format("Creating agent with policy %s", agentPolicy.name()));
     randomGenerator = new Random();
     actions = stateObs.getAvailableActions();
-
-    treeViewerFrame = new JFrame();
-    treeViewerFrame.setTitle("JGraphT Adapter to JGraphX Demo");
-    treeViewerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    treeViewerFrame.pack();
-    treeViewerFrame.setSize(400, 400);
-    treeViewerFrame.setVisible(true);
-
-    treeViewerFrame.getContentPane().add(treeViewer);
-
-    treeViewer.init();
   }
 
   public void setAgentPolicy(final EAvailablePolicies agentPolicy) {
@@ -83,8 +64,7 @@ public class Agent extends AbstractPlayer {
       case ONE_STEP_LOOK_AHEAD:
         return oneStepLookAhead(stateObs, elapsedTimer);
       case MONTE_CARLO_TREE_SEARCH:
-        return monteCarloSearchV2(stateObs, elapsedTimer);
-      //return monteCarloTreeSearch(stateObs, elapsedTimer);
+      return monteCarloSearch(stateObs, elapsedTimer);
       case RANDOM:
       default:
         return returnRandomAction();
@@ -99,15 +79,7 @@ public class Agent extends AbstractPlayer {
     return actions.get(index);
   }
 
-  public ACTIONS monteCarloTreeSearch(final StateObservation stateObs,
-                                      final ElapsedCpuTimer elapsedTimer) {
-    MonteCarloTree tree = new MonteCarloTree();
-    tree.monteCarloSearch(20, stateObs);
-    System.out.println(elapsedTimer.elapsedMillis());
-    return tree.getBestFoundAction();
-  }
-
-  public ACTIONS monteCarloSearchV2(final StateObservation stateObs,
+  public ACTIONS monteCarloSearch(final StateObservation stateObs,
                                     final ElapsedCpuTimer elapsedTimer) {
     TreeController treeController = new TreeController();
     treeController.buildTree(20, stateObs);
