@@ -1,4 +1,4 @@
-package tracks.singlePlayer.florabranchi.mtcs;
+package tracks.singlePlayer.florabranchi.models;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,8 @@ import java.util.List;
 import ontology.Types;
 
 public class TreeNode {
+
+  private static int nodeCount = 0;
 
   public int id;
 
@@ -19,11 +21,13 @@ public class TreeNode {
 
   public Types.ACTIONS previousAction;
 
-  public TreeNode(final int id,
-                  final TreeNode parent,
+  public TreeNode(final TreeNode parent,
                   final Types.ACTIONS previousAction) {
-    this.id = id;
+    this.id = nodeCount;
+    nodeCount++;
     this.parent = parent;
     this.previousAction = previousAction;
   }
+
+
 }

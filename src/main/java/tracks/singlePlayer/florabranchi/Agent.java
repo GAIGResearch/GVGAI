@@ -1,8 +1,10 @@
 package tracks.singlePlayer.florabranchi;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.SortedMap;
@@ -14,14 +16,15 @@ import core.game.StateObservation;
 import core.player.AbstractPlayer;
 import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
+import tracks.singlePlayer.florabranchi.models.ViewerNode;
 import tracks.singlePlayer.florabranchi.mtcs.MonteCarloTree;
-import tracks.singlePlayer.florabranchi.mtcs.TreeController;
-import tracks.singlePlayer.florabranchi.mtcs.TreeViewer;
 
 /**
  * Flora Branchi (florabranchi@gmail.com) September 2019
  */
 public class Agent extends AbstractPlayer {
+
+  private static final Dimension DEFAULT_SIZE = new Dimension(300, 500);
 
   /**
    * Random generator for the agent.
@@ -36,7 +39,7 @@ public class Agent extends AbstractPlayer {
 
   private TreeViewer treeViewer = new TreeViewer();
 
-  private JFrame treeViewerFrame = new JFrame();
+  private JFrame treeViewerFrame;
 
   /**
    * initialize all variables for the agent
@@ -51,6 +54,15 @@ public class Agent extends AbstractPlayer {
     System.out.println(String.format("Creating agent with policy %s", agentPolicy.name()));
     randomGenerator = new Random();
     actions = stateObs.getAvailableActions();
+
+    treeViewerFrame = new JFrame();
+    treeViewerFrame.setTitle("JGraphT Adapter to JGraphX Demo");
+    treeViewerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    treeViewerFrame.pack();
+    treeViewerFrame.setSize(400, 400);
+    treeViewerFrame.setVisible(true);
+
+    treeViewerFrame.getContentPane().add(treeViewer);
 
     treeViewer.init();
   }
@@ -71,7 +83,6 @@ public class Agent extends AbstractPlayer {
       case ONE_STEP_LOOK_AHEAD:
         return oneStepLookAhead(stateObs, elapsedTimer);
       case MONTE_CARLO_TREE_SEARCH:
-        //treeViewer.showTree(treeViewerFrame);
         return monteCarloSearchV2(stateObs, elapsedTimer);
       //return monteCarloTreeSearch(stateObs, elapsedTimer);
       case RANDOM:
@@ -100,6 +111,12 @@ public class Agent extends AbstractPlayer {
                                     final ElapsedCpuTimer elapsedTimer) {
     TreeController treeController = new TreeController();
     treeController.buildTree(20, stateObs);
+
+    final List<ViewerNode> viewerNodes = treeController.castRootNode();
+
+    //treeViewer.showTree(viewerNodes, treeViewerFrame);
+    //treeViewerFrame.repaint();
+
     System.out.println(elapsedTimer.elapsedMillis());
     return treeController.getBestFoundAction();
   }

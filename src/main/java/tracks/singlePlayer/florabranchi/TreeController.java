@@ -1,4 +1,4 @@
-package tracks.singlePlayer.florabranchi.mtcs;
+package tracks.singlePlayer.florabranchi;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 import core.game.StateObservation;
 import javafx.util.Pair;
 import ontology.Types;
+import tracks.singlePlayer.florabranchi.models.TreeNode;
+import tracks.singlePlayer.florabranchi.models.ViewerNode;
 
 public class TreeController {
 
@@ -19,7 +21,7 @@ public class TreeController {
 
   private Logger logger = Logger.getLogger(TreeController.class.getName());
 
-  private double C = 1;
+  private final static double C = 1 / Math.sqrt(2);
 
   private Random rand = new Random();
 
@@ -30,7 +32,7 @@ public class TreeController {
   public void buildTree(int iterations,
                         final StateObservation initialState) {
 
-    rootNode = new TreeNode(0, null, null);
+    rootNode = new TreeNode(null, null);
 
     for (int i = 0; i < iterations; i++) {
       final Pair<TreeNode, StateObservation> policyResult = executeTreePolicy(initialState);
@@ -39,6 +41,37 @@ public class TreeController {
       rollout(selectedNode, initialState);
     }
   }
+
+  public List<ViewerNode> castRootNode() {
+    List<TreeNode> treeNodes = createListOfNodes(rootNode);
+    return treeNodes.stream().map(node -> new ViewerNode(node)).collect(Collectors.toList());
+  }
+
+  public List<TreeNode> createListOfNodes(final TreeNode rootNode) {
+    List<TreeNode> list = new ArrayList<>();
+    flattenNodes(rootNode, list);
+    return list;
+  }
+
+  final void flattenNodes(TreeNode node, List<TreeNode> listOfNodes) {
+    listOfNodes.add(node);
+    for (TreeNode child : node.children) {
+      flattenNodes(child, listOfNodes);
+    }
+  }
+
+  public List<TreeNode> readChildren(final TreeNode node) {
+    List<TreeNode> castedChildren = new ArrayList<>();
+    if (!node.children.isEmpty()) {
+      for (TreeNode child : node.children) {
+        castedChildren.add(child);
+        castedChildren.addAll(createListOfNodes(child));
+
+      }
+    }
+    return castedChildren;
+  }
+
 
   private Pair<TreeNode, StateObservation> executeTreePolicy(final StateObservation stateObservation) {
 
@@ -112,7 +145,7 @@ public class TreeController {
     newNodeState.advance(selectedAction);
 
     logMessage(String.format("Selected action %s to expand node %s", selectedAction.toString(), node.id));
-    TreeNode tempNode = new TreeNode(0, node, selectedAction);
+    TreeNode tempNode = new TreeNode(node, selectedAction);
     node.children.add(tempNode);
     return tempNode;
   }
