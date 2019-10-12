@@ -17,16 +17,19 @@ import tracks.singlePlayer.florabranchi.models.ViewerNode;
 
 public class TreeController {
 
+  private final static Logger logger = Logger.getLogger(TreeController.class.getName());
+
   private final static double C = 1 / Math.sqrt(2);
+
   private TreeNode rootNode;
-  private Logger logger = Logger.getLogger(TreeController.class.getName());
+
   private Random rand = new Random();
 
   private void logMessage(final String message) {
     logger.log(Level.INFO, message);
   }
 
-  public void buildTree(int iterations,
+  public void buildTree(final int iterations,
                         final StateObservation initialState) {
 
 
@@ -50,24 +53,13 @@ public class TreeController {
     return list;
   }
 
-  private void flattenNodes(TreeNode node, List<TreeNode> listOfNodes) {
+  private void flattenNodes(final TreeNode node,
+                            final List<TreeNode> listOfNodes) {
     listOfNodes.add(node);
     for (TreeNode child : node.children) {
       flattenNodes(child, listOfNodes);
     }
   }
-
-  public List<TreeNode> readChildren(final TreeNode node) {
-    List<TreeNode> castedChildren = new ArrayList<>();
-    if (!node.children.isEmpty()) {
-      for (TreeNode child : node.children) {
-        castedChildren.add(child);
-        castedChildren.addAll(createListOfNodes(child));
-      }
-    }
-    return castedChildren;
-  }
-
 
   private Pair<TreeNode, StateObservation> executeTreePolicy(final StateObservation stateObservation) {
 
@@ -109,7 +101,7 @@ public class TreeController {
     final Types.WINNER gameWinner = copyState.getGameWinner();
 
     if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_WINS)) {
-      stateReward += 1;
+      stateReward = 1;
     } else if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
       stateReward = 0;
     }
@@ -152,7 +144,7 @@ public class TreeController {
     return node.children.size() == nodeAvailableActions.size();
   }
 
-  private TreeNode getBestChild(TreeNode node) {
+  private TreeNode getBestChild(final TreeNode node) {
 
     //for (MCTNode n : childrenNodes) {
     //System.out.println(String.format("Node %d UCB %s ", n.getNodeId(), n.getNodeUpperConfidenceBound(getTimesVisited())));
@@ -166,7 +158,7 @@ public class TreeController {
   }
 
   public double getNodeUpperConfidenceBound(final TreeNode node,
-                                            int parentVisits) {
+                                            final int parentVisits) {
 
     if (node.visits == 0) {
       return Double.MAX_VALUE;
