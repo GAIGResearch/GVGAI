@@ -94,14 +94,14 @@ public class TreeController {
     }
 
     double finalScore = copyState.getGameScore();
-    double stateReward = 0.01;
+    double stateReward = 0.5;
     double scoreDelta = initialScore - finalScore;
     stateReward += 0.01 * scoreDelta;
 
     final Types.WINNER gameWinner = copyState.getGameWinner();
 
     if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_WINS)) {
-      stateReward = 1;
+      stateReward = 0.8;
     } else if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
       stateReward = 0;
     }
@@ -111,9 +111,10 @@ public class TreeController {
 
   public void updateTree(final TreeNode selectedNode,
                          final double updatedValue) {
-    logMessage(String.format("Node %s has been visited %d times", selectedNode.id, selectedNode.visits));
+
     selectedNode.visits++;
     selectedNode.value = selectedNode.value + updatedValue;
+    logMessage(String.format("Node %s has been visited %d times", selectedNode.id, selectedNode.visits));
     if (selectedNode.parent != null) {
       updateTree(selectedNode.parent, updatedValue);
     }
