@@ -23,7 +23,7 @@ public class ViewerNode {
 
   public ViewerNode(final TreeNode node) {
     this.id = node.id;
-    this.value = node.value / node.visits;
+    this.value = node.value / (node.visits != 0 ? node.visits : 1);
     this.action = String.valueOf(node.previousAction);
     this.children = node.children.stream().map(c -> c.id).collect(Collectors.toList());
   }

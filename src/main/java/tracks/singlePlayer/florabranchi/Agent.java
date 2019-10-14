@@ -22,10 +22,12 @@ public class Agent extends AbstractPlayer {
    * Random generator for the agent.
    */
   protected Random randomGenerator;
+
   /**
    * List of available actions for the agent
    */
   protected ArrayList<ACTIONS> actions;
+
   private EAvailablePolicies agentPolicy;
 
   private TreeViewer treeViewer = new TreeViewer();
@@ -79,7 +81,7 @@ public class Agent extends AbstractPlayer {
   public ACTIONS monteCarloSearch(final StateObservation stateObs,
                                   final ElapsedCpuTimer elapsedTimer) {
     TreeController treeController = new TreeController();
-    treeController.buildTree(40, stateObs);
+    treeController.buildTree(20, stateObs);
 
     final List<ViewerNode> viewerNodes = treeController.castRootNode();
 

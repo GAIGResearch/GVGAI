@@ -32,10 +32,9 @@ public class TreeController {
   public void buildTree(final int iterations,
                         final StateObservation initialState) {
 
-
     rootNode = new TreeNode(null, null);
     for (int i = 0; i < iterations; i++) {
-      final Pair<TreeNode, StateObservation> policyResult = executeTreePolicy(initialState);
+      final Pair<TreeNode, StateObservation> policyResult = executeTreePolicyV2(initialState);
       final TreeNode selectedNode = policyResult.getKey();
       logMessage(String.format("Rollouting selected node %s", selectedNode.id));
       rollout(selectedNode, initialState);
@@ -61,26 +60,34 @@ public class TreeController {
     }
   }
 
-  private Pair<TreeNode, StateObservation> executeTreePolicy(final StateObservation stateObservation) {
+  private Pair<TreeNode, StateObservation> executeTreePolicyV2(final StateObservation stateObservation) {
 
     TreeNode selectedNode = rootNode;
-    StateObservation stateAfterNodeAction = stateObservation.copy();
 
-    do {
-      if (!isNodeFullyExpanded(selectedNode, stateAfterNodeAction.getAvailableActions())) {
+    while (!stateObservation.isGameOver()) {
+
+      if (selectedNode.children.isEmpty()) {
         logMessage(String.format("Expanding children of node %s", selectedNode.id));
-        final TreeNode nodeAfterExpansion = expand(selectedNode, stateAfterNodeAction);
-        return new Pair<>(nodeAfterExpansion, stateAfterNodeAction);
-      } else {
-        Types.ACTIONS previousAction = selectedNode.previousAction;
-        if (previousAction != null) {
-          stateAfterNodeAction.advance(previousAction);
+        for (Types.ACTIONS action : stateObservation.getAvailableActions()) {
+          expand(selectedNode, stateObservation);
         }
-        selectedNode = getBestChild(selectedNode);
-        logMessage(String.format("Selected children %s", selectedNode.id));
+        return new Pair<>(selectedNode.children.get(0), stateObservation);
       }
-    } while (!isNodeFullyExpanded(selectedNode, stateAfterNodeAction.getAvailableActions()));
-    return new Pair<>(selectedNode, stateAfterNodeAction);
+
+      logMessage(String.format("Node %s have child", selectedNode.id));
+      selectedNode = getBestChild(selectedNode);
+      logMessage(String.format("Selected child %d", selectedNode.id));
+      Types.ACTIONS actionToGetToNode = selectedNode.previousAction;
+      if (actionToGetToNode != null) {
+        stateObservation.advance(actionToGetToNode);
+      }
+    }
+
+    return new Pair<>(selectedNode, stateObservation);
+  }
+
+  private boolean isLeafNode(final TreeNode node) {
+    return node.children.isEmpty();
   }
 
 
@@ -101,7 +108,7 @@ public class TreeController {
     final Types.WINNER gameWinner = copyState.getGameWinner();
 
     if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_WINS)) {
-      stateReward = 0.8;
+      stateReward = 1;
     } else if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
       stateReward = 0;
     }
@@ -147,9 +154,10 @@ public class TreeController {
 
   private TreeNode getBestChild(final TreeNode node) {
 
-    //for (MCTNode n : childrenNodes) {
-    //System.out.println(String.format("Node %d UCB %s ", n.getNodeId(), n.getNodeUpperConfidenceBound(getTimesVisited())));
-    //}
+    System.out.println("Selecting best child of " + node.id);
+    for (TreeNode n : node.children) {
+      System.out.println(String.format("Node %d UCB %.2f ", n.id, getNodeUpperConfidenceBound(n, node.visits)));
+    }
 
 
     final TreeNode maxUcbNode = Collections.max(node.children, Comparator.comparing(c -> getNodeUpperConfidenceBound(c, node.visits)));
