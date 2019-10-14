@@ -5,6 +5,9 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.swingViewer.Viewer;
+import org.graphstream.ui.swingViewer.ViewerListener;
+import org.graphstream.ui.swingViewer.ViewerPipe;
+import org.graphstream.ui.swingViewer.basicRenderer.SwingBasicGraphRenderer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,18 +16,26 @@ import java.util.Map;
 
 import tracks.singlePlayer.florabranchi.models.ViewerNode;
 
-public class TreeViewer {
-
+public class TreeViewer implements ViewerListener {
 
   private Graph graph;
 
+  ViewerPipe pipeIn;
+
   public TreeViewer() {
+    System.setProperty("gs.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
     graph = new SingleGraph("Tutorial 1");
-    final Viewer display = graph.display();
+    Viewer display = new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
+    display.enableAutoLayout();
+    pipeIn = display.newViewerPipe();
+    display.addView("view1", new SwingBasicGraphRenderer());
+
+    pipeIn.addViewerListener(this);
+    pipeIn.pump();
 
     String myStyle = "node {"
-        + "size: 10px;"
-        + "fill-color: red;"
+        + "size: 3px;"
+        //+ "fill-color: red;"
         + "}"
 
         + "edge {"
@@ -34,7 +45,7 @@ public class TreeViewer {
         + "}";
 
     graph.addAttribute("ui.stylesheet", myStyle);
-    createBaseNodes(4, 5);
+    createBaseNodes(4, 3);
   }
 
   public static void main(String[] args) {
@@ -90,6 +101,15 @@ public class TreeViewer {
     return nodeMap;
   }
 
+  public void addTestNodes(List<ViewerNode> nodes) {
+    for (ViewerNode node : nodes) {
+      final Node node1 = graph.getNode(node.id);
+      node1.addAttribute("ui.label", node);
+    }
+
+    pipeIn.pump();
+  }
+
   public void buildTreeNodes(final List<ViewerNode> nodes) {
     graph.clear();
 
@@ -116,4 +136,18 @@ public class TreeViewer {
   }
 
 
+  @Override
+  public void viewClosed(final String s) {
+
+  }
+
+  @Override
+  public void buttonPushed(final String s) {
+
+  }
+
+  @Override
+  public void buttonReleased(final String s) {
+
+  }
 }

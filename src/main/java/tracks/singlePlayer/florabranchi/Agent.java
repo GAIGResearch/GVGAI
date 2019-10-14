@@ -79,11 +79,11 @@ public class Agent extends AbstractPlayer {
   public ACTIONS monteCarloSearch(final StateObservation stateObs,
                                   final ElapsedCpuTimer elapsedTimer) {
     TreeController treeController = new TreeController();
-    treeController.buildTree(20, stateObs);
+    treeController.buildTree(40, stateObs);
 
     final List<ViewerNode> viewerNodes = treeController.castRootNode();
 
-    treeViewer.buildTreeNodes(viewerNodes);
+    treeViewer.addTestNodes(viewerNodes);
 
     treeController.resetNodeCount();
     System.out.println(elapsedTimer.elapsedMillis());

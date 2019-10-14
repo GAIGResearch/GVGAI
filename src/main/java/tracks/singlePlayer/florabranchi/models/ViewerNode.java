@@ -9,6 +9,8 @@ public class ViewerNode {
 
   public double value;
 
+  public String action;
+
   public List<Integer> children;
 
   public ViewerNode(final Integer id,
@@ -21,13 +23,13 @@ public class ViewerNode {
 
   public ViewerNode(final TreeNode node) {
     this.id = node.id;
-    this.value = node.value;
+    this.value = node.value / node.visits;
+    this.action = String.valueOf(node.previousAction);
     this.children = node.children.stream().map(c -> c.id).collect(Collectors.toList());
   }
 
   @Override
   public String toString() {
-    return ("id=" + id) + "\n " +
-        "\n value=" + value;
+    return String.format("id= %d, value= %.2f, action=%s", id, value, action);
   }
 }
