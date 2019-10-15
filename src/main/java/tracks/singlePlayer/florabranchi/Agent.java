@@ -83,9 +83,9 @@ public class Agent extends AbstractPlayer {
     TreeController treeController = new TreeController();
     treeController.buildTree(20, stateObs);
 
-    final List<ViewerNode> viewerNodes = treeController.castRootNode();
+    final List<ViewerNode> viewerNodes = treeController.castRootNode(stateObs);
 
-    treeViewer.addTestNodes(viewerNodes);
+    treeViewer.updateNodes(viewerNodes);
 
     treeController.resetNodeCount();
     System.out.println(elapsedTimer.elapsedMillis());

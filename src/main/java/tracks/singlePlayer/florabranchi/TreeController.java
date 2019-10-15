@@ -41,15 +41,42 @@ public class TreeController {
     }
   }
 
-  public List<ViewerNode> castRootNode() {
-    List<TreeNode> treeNodes = createListOfNodes(rootNode);
-    return treeNodes.stream().map(ViewerNode::new).collect(Collectors.toList());
+  public List<ViewerNode> castRootNode(StateObservation initialState) {
+
+    List<ViewerNode> list = new ArrayList<>();
+    int nodeChildren = initialState.getAvailableActions().size();
+    int depth = 0;
+    castLayer(rootNode, depth, 0, list, nodeChildren);
+    return list;
+
+
+    //List<TreeNode> treeNodes = createListOfNodes(rootNode);
+    //return treeNodes.stream().map(ViewerNode::new).collect(Collectors.toList());
   }
 
   private List<TreeNode> createListOfNodes(final TreeNode rootNode) {
     List<TreeNode> list = new ArrayList<>();
     flattenNodes(rootNode, list);
     return list;
+  }
+
+
+  private void castLayer(final TreeNode treeNode,
+                         final int currDepth,
+                         final int nodeId,
+                         final List<ViewerNode> listOfNodes,
+                         final int nodeChildren) {
+    int nextLayerFirstElement = (int) Math.pow(nodeChildren, currDepth);
+    int index = 0;
+    int tempCurrDepth = currDepth;
+
+    listOfNodes.add(new ViewerNode(nodeId, treeNode));
+
+    tempCurrDepth++;
+    for (TreeNode child : treeNode.children) {
+      castLayer(child, tempCurrDepth, nextLayerFirstElement + index, listOfNodes, nodeChildren);
+      index++;
+    }
   }
 
   private void flattenNodes(final TreeNode node,

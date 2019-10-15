@@ -1,7 +1,6 @@
 package tracks.singlePlayer.florabranchi;
 
 
-import org.graphstream.algorithm.Toolkit;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
@@ -44,54 +43,70 @@ public class TreeViewer implements ViewerListener {
         + "}";
 
     graph.addAttribute("ui.stylesheet", myStyle);
-    //createBaseNodes(4, 3);
+    createBaseNodesWithFixedPosition(3, 3);
   }
 
   public static void main(String[] args) {
 
     TreeViewer n = new TreeViewer();
-    n.createBaseNodesWithFixedPosition(3, 3);
+    //n.createBaseNodesWithFixedPosition(4, 3);
   }
 
-  public void createBaseNodesWithFixedPosition(int treeDepth, int levelNodes) {
+  public void createBaseNodesWithFixedPosition(int treeDepth,
+                                               int levelNodes) {
 
-    int totalNodes = 0;
+    int layerWeight = 4;
+    int layerWidth = 2;
+
+    int maxWidth = layerWidth * (int) Math.pow(levelNodes, treeDepth);
+
+    int nodeCount = 0;
     for (int k = 0; k <= treeDepth; k++) {
-      totalNodes += (int) Math.pow(levelNodes, k);
+      nodeCount += (int) Math.pow(levelNodes, k);
     }
-    int absoluteTotalNodes = totalNodes;
 
-    int currentLayerNodes = 0;
-    int maxWidth = (int) Math.pow(levelNodes, treeDepth);
+    int currentLayerNodes;
+
     List<Integer> lastLayerNodesList = new ArrayList<>();
     List<Integer> currentLayerNodesList = new ArrayList<>();
-    for (int d = treeDepth; d >= 0; d--) {
 
-      currentLayerNodes = (int) Math.pow(levelNodes, d);
+    // Build tree from bottom
+    for (int depth = treeDepth; depth >= 0; depth--) {
+
+      currentLayerNodes = (int) Math.pow(levelNodes, depth);
+
       int nodeSpacing = maxWidth / currentLayerNodes;
-      for (int i = 0; i < currentLayerNodes; i++) {
-        final Node node = graph.addNode(String.valueOf(totalNodes));
-        double nodeX = (double) nodeSpacing / (double) 2 + i * nodeSpacing;
-        node.addAttribute("xyz", nodeX, -d * 10, 0);
-        final double[] doubles = Toolkit.nodePosition(node);
-        System.out.println(String.format("%s - %s %s %s", totalNodes, doubles[0], doubles[1], doubles[2]));
+
+      for (int currentNode = 0; currentNode < currentLayerNodes; currentNode++) {
+
+        // Add new base node
+        final Node node = graph.addNode(String.valueOf(nodeCount));
+
+        double nodeX = (double) nodeSpacing / (double) 2 + currentNode * nodeSpacing;
+
+        // Size = maxDepth * layerWeight
+        // -1 to grow from bottom to top
+        node.addAttribute("xyz", nodeX, -depth * layerWeight, 0);
+
+        //final double[] doubles = Toolkit.nodePosition(node);
+        //System.out.println(String.format("%s - %s %s %s", nodeCount, doubles[0], doubles[1], doubles[2]));
         //node.setAttribute("ui.label", totalNodes);
-        currentLayerNodesList.add(totalNodes);
-        totalNodes--;
+
+        currentLayerNodesList.add(nodeCount);
+        nodeCount--;
       }
 
       // Add layer edges
-      // for each node in last layer
-      // link to n = levelNodes edges in current layer
+      // for each node in current layer
+      // link to n = levelNodes edges in last layer
       int index = 0;
       if (!lastLayerNodesList.isEmpty()) {
         for (Integer currentNode : currentLayerNodesList) {
           for (int i = 0; i < levelNodes; i++) {
-            int currentNodeId = getNodeId(currentNode, absoluteTotalNodes);
-            int targetNodeId = getNodeId(lastLayerNodesList.get(index), absoluteTotalNodes);
-            Node n = graph.getNode(targetNodeId);
-            final String edgeId = String.valueOf(currentNodeId + targetNodeId);
-            graph.addEdge(edgeId, targetNodeId, currentNodeId);
+            int currentNodeIndex = getNodeIndex(currentNode);
+            int targetNodeIndex = getNodeIndex(lastLayerNodesList.get(index));
+            final String edgeId = String.valueOf(currentNodeIndex + targetNodeIndex);
+            graph.addEdge(edgeId, targetNodeIndex, currentNodeIndex);
             index++;
           }
         }
@@ -100,37 +115,13 @@ public class TreeViewer implements ViewerListener {
       lastLayerNodesList = new ArrayList<>(currentLayerNodesList);
       currentLayerNodesList.clear();
     }
-
-   /* int minNodeW = 0;
-    int maxNodeW = (currentLayerNodes - 1);
-    for (int i = 0; i < currentLayerNodes; i++) {
-      final Node node = graph.addNode(String.valueOf(totalNodes));
-      node.addAttribute("xyz", i, initialY, 0);
-      final double[] doubles = Toolkit.nodePosition(node);
-      System.out.println(String.format("%s - %s %s %s", totalNodes, doubles[0], doubles[1], doubles[2]));
-      node.setAttribute("ui.label", totalNodes);
-      totalNodes--;
-    }
-
-    double avgW = (maxNodeW - minNodeW) / (double) 2;
-
-    currentLayerNodes = (int) Math.pow(levelNodes, treeDepth - 1);
-    for (int i = 0; i < currentLayerNodes; i++) {
-      final Node node = graph.addNode(String.valueOf(totalNodes));
-      node.addAttribute("xyz", avgW, 1, 0);
-      final double[] doubles = Toolkit.nodePosition(node);
-      System.out.println(String.format("%s %s %s", doubles[0], doubles[1], doubles[2]));
-      totalNodes--;
-    }*/
-
   }
 
-  public int getNodeId(final int nodeId,
-                       final int absoluteTotalNodes) {
-    return (absoluteTotalNodes - nodeId);
+  public int getNodeIndex(final Integer nodeId) {
+    return graph.getNode(String.valueOf(nodeId)).getIndex();
   }
 
-  public void createBaseNodes(int treeDepth, int levelNodes) {
+  public void createFreeBaseNodes(int treeDepth, int levelNodes) {
 
     int nodeCount = 0;
     List<Integer> lastLayerNodes = new ArrayList<>();
@@ -172,14 +163,15 @@ public class TreeViewer implements ViewerListener {
     return nodeMap;
   }
 
-  public void addTestNodes(List<ViewerNode> nodes) {
+  public void updateNodes(List<ViewerNode> nodes) {
     for (ViewerNode node : nodes) {
       try {
-        final Node node1 = graph.getNode(node.id);
+        // Index is 1 based
+        final Node node1 = graph.getNode(getNodeIndex(node.id + 1));
         if (node1 != null) {
           node1.addAttribute("ui.label", node);
         }
-      } catch (final IndexOutOfBoundsException ex) {
+      } catch (final Exception ex) {
         System.out.println("Node does not exist");
       }
 
