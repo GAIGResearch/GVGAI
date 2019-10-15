@@ -1,13 +1,18 @@
 package tracks.singlePlayer.florabranchi;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import core.game.StateObservation;
 import javafx.util.Pair;
@@ -21,9 +26,22 @@ public class TreeController {
 
   private final static double C = 1 / Math.sqrt(2);
 
+  private Map<Integer, List<Integer>> idsPerDepth = new HashMap<>();
+
   private TreeNode rootNode;
 
   private Random rand = new Random();
+
+  public TreeController(StateObservation initialState) {
+
+    int nodeChildren = initialState.getAvailableActions().size();
+    int lastNode = 0;
+    for (int i = 0; i < 12; i++) {
+      int totalNodesInDepth = (int) Math.pow(nodeChildren, i);
+      idsPerDepth.put(i, IntStream.range(lastNode, lastNode + totalNodesInDepth).boxed().collect(Collectors.toList()));
+      lastNode = lastNode + totalNodesInDepth;
+    }
+  }
 
   private void logMessage(final String message) {
     logger.log(Level.INFO, message);
@@ -43,15 +61,45 @@ public class TreeController {
 
   public List<ViewerNode> castRootNode(StateObservation initialState) {
 
-    List<ViewerNode> list = new ArrayList<>();
-    int nodeChildren = initialState.getAvailableActions().size();
-    int depth = 0;
-    castLayer(rootNode, depth, 0, list, nodeChildren);
-    return list;
+    List<ViewerNode> viewerNodeList = new ArrayList<>();
+
+    Queue<TreeNode> queue = new ArrayDeque<>();
+    queue.add(rootNode);
+    System.out.println(rootNode.nodeCount);
+
+    while (!queue.isEmpty()) {
+      TreeNode currentNode = queue.remove();
+      System.out.println(String.format("Elements in queue: %s", queue.size()));
+      int nodeDepth = getNodeDepth(currentNode);
+      int nodeId = idsPerDepth.get(nodeDepth).get(0);
+      idsPerDepth.get(nodeDepth).remove(0);
+      System.out.println(String.format("Node id: %d Depth: %d", currentNode.id, nodeDepth));
+      final List<Integer> childrenId = currentNode.children.stream().map(node -> node.id).collect(Collectors.toList());
+      viewerNodeList.add(new ViewerNode(nodeId, currentNode));
+
+      if (currentNode.children != null && currentNode.children.size() > 0) {
+        System.out.println(String.format("Adding children of id: %d children: %s", currentNode.id, currentNode.children.size()));
+        queue.addAll(currentNode.children);
+      }
+    }
+
+
+    //castLayer(rootNode, depth, 0, viewerNodeList, nodeChildren);
+    return viewerNodeList;
 
 
     //List<TreeNode> treeNodes = createListOfNodes(rootNode);
     //return treeNodes.stream().map(ViewerNode::new).collect(Collectors.toList());
+  }
+
+  public int getNodeDepth(final TreeNode node) {
+    int treeDepth = 0;
+    TreeNode selectedNode = node;
+    while (selectedNode.parent != null) {
+      treeDepth++;
+      selectedNode = selectedNode.parent;
+    }
+    return treeDepth;
   }
 
   private List<TreeNode> createListOfNodes(final TreeNode rootNode) {
@@ -69,10 +117,9 @@ public class TreeController {
     int nextLayerFirstElement = (int) Math.pow(nodeChildren, currDepth);
     int index = 0;
     int tempCurrDepth = currDepth;
-
-    listOfNodes.add(new ViewerNode(nodeId, treeNode));
-
     tempCurrDepth++;
+    System.out.println(String.format("Node id: %d Depth: %d", nodeId, currDepth));
+    listOfNodes.add(new ViewerNode(nodeId, treeNode));
     for (TreeNode child : treeNode.children) {
       castLayer(child, tempCurrDepth, nextLayerFirstElement + index, listOfNodes, nodeChildren);
       index++;
@@ -162,7 +209,6 @@ public class TreeController {
     logMessage(String.format("Node %s has %s actions possible from initial state", node.id, unexploredActions.size()));
 
     unexploredActions.removeAll(exploredActions);
-    Collections.shuffle(unexploredActions);
 
     final Types.ACTIONS selectedAction = unexploredActions.get(0);
     logMessage(String.format("Selected action %s to expand node %s", selectedAction.toString(), node.id));
@@ -219,6 +265,10 @@ public class TreeController {
                                                    final List<Types.ACTIONS> actionsToGetToNode) {
     actionsToGetToNode.forEach(initialState::advance);
     return initialState;
+  }
+
+  public TreeNode getBestChild() {
+    return getBestChild(rootNode);
   }
 
 

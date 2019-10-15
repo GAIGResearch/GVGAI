@@ -11,6 +11,7 @@ import core.game.StateObservation;
 import core.player.AbstractPlayer;
 import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
+import tracks.singlePlayer.florabranchi.models.TreeNode;
 import tracks.singlePlayer.florabranchi.models.ViewerNode;
 
 /**
@@ -80,12 +81,13 @@ public class Agent extends AbstractPlayer {
 
   public ACTIONS monteCarloSearch(final StateObservation stateObs,
                                   final ElapsedCpuTimer elapsedTimer) {
-    TreeController treeController = new TreeController();
+    TreeController treeController = new TreeController(stateObs);
     treeController.buildTree(20, stateObs);
 
     final List<ViewerNode> viewerNodes = treeController.castRootNode(stateObs);
+    final TreeNode bestChild = treeController.getBestChild();
 
-    treeViewer.updateNodes(viewerNodes);
+    treeViewer.updateNodes(viewerNodes, bestChild);
 
     treeController.resetNodeCount();
     System.out.println(elapsedTimer.elapsedMillis());

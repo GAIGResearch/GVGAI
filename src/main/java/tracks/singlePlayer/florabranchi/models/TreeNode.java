@@ -7,7 +7,7 @@ import ontology.Types;
 
 public class TreeNode {
 
-  private static int nodeCount = 0;
+  public static int nodeCount = 0;
 
   public int id;
 
