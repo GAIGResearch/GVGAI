@@ -2,10 +2,14 @@ package tracks.singlePlayer.florabranchi;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import core.game.StateObservation;
 import core.player.AbstractPlayer;
@@ -19,6 +23,7 @@ import tracks.singlePlayer.florabranchi.models.ViewerNode;
  */
 public class Agent extends AbstractPlayer {
 
+  private final TreeController treeController;
   /**
    * Random generator for the agent.
    */
@@ -33,6 +38,8 @@ public class Agent extends AbstractPlayer {
 
   private TreeViewer treeViewer = new TreeViewer();
 
+  private Map<Integer, List<Integer>> idsPerDepth = new HashMap<>();
+
   /**
    * initialize all variables for the agent
    *
@@ -46,6 +53,7 @@ public class Agent extends AbstractPlayer {
     System.out.println(String.format("Creating agent with policy %s", agentPolicy.name()));
     randomGenerator = new Random();
     actions = stateObs.getAvailableActions();
+    treeController = new TreeController(stateObs);
   }
 
   public void setAgentPolicy(final EAvailablePolicies agentPolicy) {
@@ -81,17 +89,27 @@ public class Agent extends AbstractPlayer {
 
   public ACTIONS monteCarloSearch(final StateObservation stateObs,
                                   final ElapsedCpuTimer elapsedTimer) {
-    TreeController treeController = new TreeController(stateObs);
-    treeController.buildTree(20, stateObs);
+    treeController.treeSearch(20, stateObs);
 
     final List<ViewerNode> viewerNodes = treeController.castRootNode(stateObs);
+    int lastNode = 0;
+    for (int i = 0; i < 12; i++) {
+      int totalNodesInDepth = (int) Math.pow(stateObs.getAvailableActions().size(), i);
+      idsPerDepth.put(i, IntStream.range(lastNode, lastNode + totalNodesInDepth).boxed().collect(Collectors.toList()));
+      lastNode = lastNode + totalNodesInDepth;
+    }
+
     final TreeNode bestChild = treeController.getBestChild();
 
     treeViewer.updateNodes(viewerNodes, bestChild);
 
-    treeController.resetNodeCount();
+    //treeController.resetNodeCount();
+
     System.out.println(elapsedTimer.elapsedMillis());
-    return treeController.getBestFoundAction();
+
+    final ACTIONS bestFoundAction = treeController.getBestFoundAction();
+    treeController.pruneTree(bestFoundAction, stateObs.getAvailableActions().size());
+    return bestFoundAction;
   }
 
   /**

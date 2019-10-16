@@ -47,16 +47,26 @@ public class TreeController {
     logger.log(Level.INFO, message);
   }
 
-  public void buildTree(final int iterations,
-                        final StateObservation initialState) {
+  public void treeSearch(final int iterations,
+                         final StateObservation initialState) {
 
-    rootNode = new TreeNode(null, null);
+    if (rootNode == null) {
+      rootNode = new TreeNode(null, null);
+    }
+
     for (int i = 0; i < iterations; i++) {
       final Pair<TreeNode, StateObservation> policyResult = executeTreePolicyV2(initialState);
       final TreeNode selectedNode = policyResult.getKey();
       logMessage(String.format("Rollouting selected node %s", selectedNode.id));
       rollout(selectedNode, initialState);
     }
+  }
+
+  public void pruneTree(final Types.ACTIONS selectedAction, final double nodeChildren) {
+    rootNode = rootNode.children.stream().filter(child -> child.previousAction == selectedAction).findFirst()
+        .orElse(null);
+    rootNode.parent = null;
+
   }
 
   public List<ViewerNode> castRootNode(StateObservation initialState) {
@@ -71,7 +81,12 @@ public class TreeController {
       TreeNode currentNode = queue.remove();
       System.out.println(String.format("Elements in queue: %s", queue.size()));
       int nodeDepth = getNodeDepth(currentNode);
+
+      if (!idsPerDepth.containsKey(nodeDepth)) {
+        continue;
+      }
       int nodeId = idsPerDepth.get(nodeDepth).get(0);
+
       idsPerDepth.get(nodeDepth).remove(0);
       System.out.println(String.format("Node id: %d Depth: %d", currentNode.id, nodeDepth));
       final List<Integer> childrenId = currentNode.children.stream().map(node -> node.id).collect(Collectors.toList());
