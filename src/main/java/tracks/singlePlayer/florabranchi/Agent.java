@@ -2,14 +2,10 @@ package tracks.singlePlayer.florabranchi;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import core.game.StateObservation;
 import core.player.AbstractPlayer;
@@ -35,10 +31,6 @@ public class Agent extends AbstractPlayer {
   protected ArrayList<ACTIONS> actions;
 
   private EAvailablePolicies agentPolicy;
-
-  private TreeViewer treeViewer = new TreeViewer();
-
-  private Map<Integer, List<Integer>> idsPerDepth = new HashMap<>();
 
   /**
    * initialize all variables for the agent
@@ -89,28 +81,25 @@ public class Agent extends AbstractPlayer {
 
   public ACTIONS monteCarloSearch(final StateObservation stateObs,
                                   final ElapsedCpuTimer elapsedTimer) {
-    treeController.treeSearch(20, stateObs);
 
-    final List<ViewerNode> viewerNodes = treeController.castRootNode(stateObs);
-    int lastNode = 0;
-    for (int i = 0; i < 12; i++) {
-      int totalNodesInDepth = (int) Math.pow(stateObs.getAvailableActions().size(), i);
-      idsPerDepth.put(i, IntStream.range(lastNode, lastNode + totalNodesInDepth).boxed().collect(Collectors.toList()));
-      lastNode = lastNode + totalNodesInDepth;
-    }
+    // Perform tree Search
 
-    final TreeNode bestChild = treeController.getBestChild();
+    treeController.treeSearch(10, stateObs);
+    final TreeNode bestChild = treeController.getMostVisitedChild(treeController.rootNode);
+    final ACTIONS bestFoundAction = treeController.getBestFoundAction();
 
-    treeViewer.updateNodes(viewerNodes, bestChild);
+    // Visualization shenenigans
+    //treeController.updateTreeVisualization(stateObs, bestChild);
 
     //treeController.resetNodeCount();
 
     System.out.println(elapsedTimer.elapsedMillis());
 
-    final ACTIONS bestFoundAction = treeController.getBestFoundAction();
-    treeController.pruneTree(bestFoundAction, stateObs.getAvailableActions().size());
+    treeController.pruneTree(bestFoundAction);
     return bestFoundAction;
   }
+
+
 
   /**
    * Returns the best action considering the outcome of a single play.

@@ -1,18 +1,12 @@
 package tracks.singlePlayer.florabranchi;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Queue;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import core.game.StateObservation;
 import javafx.util.Pair;
@@ -24,23 +18,22 @@ public class TreeController {
 
   private final static Logger logger = Logger.getLogger(TreeController.class.getName());
 
-  private final static double C = 1 / Math.sqrt(2);
+  private final static double C = 1; /// Math.sqrt(2);
 
-  private Map<Integer, List<Integer>> idsPerDepth = new HashMap<>();
 
-  private TreeNode rootNode;
+  public TreeNode rootNode;
 
   private Random rand = new Random();
 
+  private TreeViewer treeViewer = new TreeViewer();
+
   public TreeController(StateObservation initialState) {
 
-    int nodeChildren = initialState.getAvailableActions().size();
-    int lastNode = 0;
-    for (int i = 0; i < 12; i++) {
-      int totalNodesInDepth = (int) Math.pow(nodeChildren, i);
-      idsPerDepth.put(i, IntStream.range(lastNode, lastNode + totalNodesInDepth).boxed().collect(Collectors.toList()));
-      lastNode = lastNode + totalNodesInDepth;
-    }
+  }
+
+  public void updateTreeVisualization(final StateObservation stateObs,
+                                      final int i) {
+    treeViewer.updateNodes(stateObs.getGameTick(), i, rootNode, stateObs);
   }
 
   private void logMessage(final String message) {
@@ -55,67 +48,56 @@ public class TreeController {
     }
 
     for (int i = 0; i < iterations; i++) {
-      final Pair<TreeNode, StateObservation> policyResult = executeTreePolicyV2(initialState);
-      final TreeNode selectedNode = policyResult.getKey();
-      logMessage(String.format("Rollouting selected node %s", selectedNode.id));
-      rollout(selectedNode, initialState);
+
+      System.out.println("ITERATION " + i);
+
+      // Selection - Get most promising node
+      final Pair<TreeNode, StateObservation> mostPromisingNodePair = getMostPromisingLeafNode(initialState);
+      TreeNode mostPromisingNode = mostPromisingNodePair.getKey();
+      StateObservation mostPromisingNodeState = mostPromisingNodePair.getValue();
+
+      TreeNode selectedNode = mostPromisingNode;
+      double simulationReward;
+
+      // Expansion - Expand node if not terminal
+      if (!mostPromisingNodeState.isGameOver()) {
+        expand(mostPromisingNode, mostPromisingNodeState);
+
+        // Simulation with random children
+        selectedNode = mostPromisingNode.children.get(rand.nextInt(mostPromisingNode.children.size() - 1));
+        mostPromisingNodeState.advance(selectedNode.previousAction);
+        logMessage(String.format("Rollouting selected node %s", selectedNode.id));
+        simulationReward = rollout(mostPromisingNodeState);
+      } else {
+        simulationReward = 0;
+      }
+
+      // Backpropagation
+      updateTree(selectedNode, simulationReward);
+      updateTreeVisualization(initialState, i);
     }
+
+    //updateTreeVisualization(initialState, 0);
+
   }
 
-  public void pruneTree(final Types.ACTIONS selectedAction, final double nodeChildren) {
+  public Pair<TreeNode, StateObservation> getMostPromisingLeafNode(final StateObservation initialState) {
+    TreeNode selectedNode = rootNode;
+    StateObservation newState = initialState.copy();
+    while (!selectedNode.children.isEmpty()) {
+      selectedNode = getBestChild(selectedNode);
+      newState.advance(selectedNode.previousAction);
+    }
+    return new Pair<>(selectedNode, newState);
+  }
+
+  public void pruneTree(final Types.ACTIONS selectedAction) {
     rootNode = rootNode.children.stream().filter(child -> child.previousAction == selectedAction).findFirst()
         .orElse(null);
     rootNode.parent = null;
 
   }
 
-  public List<ViewerNode> castRootNode(StateObservation initialState) {
-
-    List<ViewerNode> viewerNodeList = new ArrayList<>();
-
-    Queue<TreeNode> queue = new ArrayDeque<>();
-    queue.add(rootNode);
-    System.out.println(rootNode.nodeCount);
-
-    while (!queue.isEmpty()) {
-      TreeNode currentNode = queue.remove();
-      System.out.println(String.format("Elements in queue: %s", queue.size()));
-      int nodeDepth = getNodeDepth(currentNode);
-
-      if (!idsPerDepth.containsKey(nodeDepth)) {
-        continue;
-      }
-      int nodeId = idsPerDepth.get(nodeDepth).get(0);
-
-      idsPerDepth.get(nodeDepth).remove(0);
-      System.out.println(String.format("Node id: %d Depth: %d", currentNode.id, nodeDepth));
-      final List<Integer> childrenId = currentNode.children.stream().map(node -> node.id).collect(Collectors.toList());
-      viewerNodeList.add(new ViewerNode(nodeId, currentNode));
-
-      if (currentNode.children != null && currentNode.children.size() > 0) {
-        System.out.println(String.format("Adding children of id: %d children: %s", currentNode.id, currentNode.children.size()));
-        queue.addAll(currentNode.children);
-      }
-    }
-
-
-    //castLayer(rootNode, depth, 0, viewerNodeList, nodeChildren);
-    return viewerNodeList;
-
-
-    //List<TreeNode> treeNodes = createListOfNodes(rootNode);
-    //return treeNodes.stream().map(ViewerNode::new).collect(Collectors.toList());
-  }
-
-  public int getNodeDepth(final TreeNode node) {
-    int treeDepth = 0;
-    TreeNode selectedNode = node;
-    while (selectedNode.parent != null) {
-      treeDepth++;
-      selectedNode = selectedNode.parent;
-    }
-    return treeDepth;
-  }
 
   private List<TreeNode> createListOfNodes(final TreeNode rootNode) {
     List<TreeNode> list = new ArrayList<>();
@@ -133,7 +115,7 @@ public class TreeController {
     int index = 0;
     int tempCurrDepth = currDepth;
     tempCurrDepth++;
-    System.out.println(String.format("Node id: %d Depth: %d", nodeId, currDepth));
+    //System.out.println(String.format("Node id: %d Depth: %d", nodeId, currDepth));
     listOfNodes.add(new ViewerNode(nodeId, treeNode));
     for (TreeNode child : treeNode.children) {
       castLayer(child, tempCurrDepth, nextLayerFirstElement + index, listOfNodes, nodeChildren);
@@ -149,7 +131,7 @@ public class TreeController {
     }
   }
 
-  private Pair<TreeNode, StateObservation> executeTreePolicyV2(final StateObservation stateObservation) {
+  private Pair<TreeNode, StateObservation> executeTreePolicy(final StateObservation stateObservation) {
 
     TreeNode selectedNode = rootNode;
 
@@ -162,6 +144,7 @@ public class TreeController {
         }
         return new Pair<>(selectedNode.children.get(0), stateObservation);
       }
+
 
       logMessage(String.format("Node %s have child", selectedNode.id));
       selectedNode = getBestChild(selectedNode);
@@ -180,8 +163,7 @@ public class TreeController {
   }
 
 
-  public void rollout(final TreeNode selectedNode,
-                      final StateObservation initialState) {
+  public double rollout(final StateObservation initialState) {
     double initialScore = initialState.getGameScore();
     StateObservation copyState = initialState.copy();
     while (!copyState.isGameOver()) {
@@ -202,7 +184,7 @@ public class TreeController {
       stateReward = 0;
     }
 
-    updateTree(selectedNode, stateReward);
+    return stateReward;
   }
 
   public void updateTree(final TreeNode selectedNode,
@@ -211,25 +193,20 @@ public class TreeController {
     selectedNode.visits++;
     selectedNode.value = selectedNode.value + updatedValue;
     logMessage(String.format("Node %s has been visited %d times", selectedNode.id, selectedNode.visits));
+    logMessage(String.format("Node %s value %s", selectedNode.id, selectedNode.value / selectedNode.visits));
     if (selectedNode.parent != null) {
       updateTree(selectedNode.parent, updatedValue);
     }
   }
 
-  public TreeNode expand(final TreeNode node,
-                         final StateObservation currentState) {
-    final List<Types.ACTIONS> exploredActions = node.children.stream().map(entry -> entry.previousAction).collect(Collectors.toList());
-    final List<Types.ACTIONS> unexploredActions = new ArrayList<>(currentState.getAvailableActions());
-
-    logMessage(String.format("Node %s has %s actions possible from initial state", node.id, unexploredActions.size()));
-
-    unexploredActions.removeAll(exploredActions);
-
-    final Types.ACTIONS selectedAction = unexploredActions.get(0);
-    logMessage(String.format("Selected action %s to expand node %s", selectedAction.toString(), node.id));
-    TreeNode tempNode = new TreeNode(node, selectedAction);
-    node.children.add(tempNode);
-    return tempNode;
+  public void expand(final TreeNode node,
+                     final StateObservation currentState) {
+    TreeNode tempNode = node;
+    for (Types.ACTIONS action : currentState.getAvailableActions()) {
+      logMessage(String.format("Selected action %s to expand node %s", action.toString(), node.id));
+      tempNode = new TreeNode(node, action);
+      node.children.add(tempNode);
+    }
   }
 
   private boolean isNodeFullyExpanded(final TreeNode node,
@@ -240,18 +217,12 @@ public class TreeController {
     return node.children.size() == nodeAvailableActions.size();
   }
 
-  private TreeNode getBestChild(final TreeNode node) {
+  public TreeNode getMostVisitedChild(final TreeNode node) {
+    return Collections.max(node.children, Comparator.comparing(c -> c.visits));
+  }
 
-    System.out.println("Selecting best child of " + node.id);
-    for (TreeNode n : node.children) {
-      System.out.println(String.format("Node %d UCB %.2f ", n.id, getNodeUpperConfidenceBound(n, node.visits)));
-    }
-
-
-    final TreeNode maxUcbNode = Collections.max(node.children, Comparator.comparing(c -> getNodeUpperConfidenceBound(c, node.visits)));
-    //System.out.println(String.format("Max UCB: %f.2 for action %s in node %s", maxUcbNode.getNodeUpperConfidenceBound(getTimesVisited()),
-    //    maxUcbNode.getActionToGetToNode().toString(), maxUcbNode.getNodeId()));
-    return maxUcbNode;
+  public TreeNode getBestChild(final TreeNode node) {
+    return Collections.max(node.children, Comparator.comparing(c -> getNodeUpperConfidenceBound(c, node.visits)));
   }
 
   public double getNodeUpperConfidenceBound(final TreeNode node,
@@ -260,32 +231,8 @@ public class TreeController {
     if (node.visits == 0) {
       return Double.MAX_VALUE;
     }
-    return getChildrenAverageReward(node) + C * Math.sqrt((2 * (Math.log(parentVisits)) / node.visits));
+    return node.value / node.visits + C * Math.sqrt((2 * (Math.log(parentVisits)) / node.visits));
   }
-
-  public double getChildrenAverageReward(final TreeNode node) {
-
-    if (node.children.isEmpty()) {
-      return 0;
-    }
-
-    double averageSum = 0;
-    for (TreeNode nodeId : node.children) {
-      averageSum += nodeId.value;
-    }
-    return averageSum / node.children.size();
-  }
-
-  private StateObservation advanceStateToNodeState(final StateObservation initialState,
-                                                   final List<Types.ACTIONS> actionsToGetToNode) {
-    actionsToGetToNode.forEach(initialState::advance);
-    return initialState;
-  }
-
-  public TreeNode getBestChild() {
-    return getBestChild(rootNode);
-  }
-
 
   public Types.ACTIONS getBestFoundAction() {
     final TreeNode bestNode = getBestChild(rootNode);

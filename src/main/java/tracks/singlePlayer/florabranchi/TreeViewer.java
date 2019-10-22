@@ -4,6 +4,8 @@ package tracks.singlePlayer.florabranchi;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
+import org.graphstream.stream.file.FileSinkImages;
+import org.graphstream.stream.file.FileSourceDGS;
 import org.graphstream.ui.spriteManager.Sprite;
 import org.graphstream.ui.spriteManager.SpriteManager;
 import org.graphstream.ui.swingViewer.Viewer;
@@ -11,11 +13,16 @@ import org.graphstream.ui.swingViewer.ViewerListener;
 import org.graphstream.ui.swingViewer.ViewerPipe;
 import org.graphstream.ui.swingViewer.basicRenderer.SwingBasicGraphRenderer;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import core.game.StateObservation;
 import tracks.singlePlayer.florabranchi.models.TreeNode;
 import tracks.singlePlayer.florabranchi.models.ViewerNode;
 
@@ -24,17 +31,35 @@ public class TreeViewer implements ViewerListener {
   ViewerPipe pipeIn;
   SpriteManager sman;
   private Graph graph;
+  private FileSinkImages pic;
+
+  private HashMap<Integer, List<Integer>> nodeChildrenMapByIndex = new HashMap<>();
+  private HashMap<Integer, Integer> translatedIdsMap = new HashMap<>();
+  private HashMap<Integer, List<Integer>> idsPerDepth;
 
   public TreeViewer() {
+
+    idsPerDepth = new HashMap<>();
+
     System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
-    graph = new SingleGraph("Tutorial 1");
+    graph = new SingleGraph("Monte Carlo Viewer 1");
     sman = new SpriteManager(graph);
     Viewer display = new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
     display.disableAutoLayout();
+
     pipeIn = display.newViewerPipe();
     display.addView("view1", new SwingBasicGraphRenderer());
     pipeIn.addViewerListener(this);
+    pipeIn.addSink(graph);
     pipeIn.pump();
+
+    FileSourceDGS dgs = new FileSourceDGS();
+    FileSinkImages.OutputType type = FileSinkImages.OutputType.PNG;
+    FileSinkImages.Resolution resolution = FileSinkImages.Resolutions.HD720;
+
+    pic = new FileSinkImages(type, resolution);
+    dgs.addSink(pic);
+
 
     String myStyle = "node {"
         + "size: 10px;"
@@ -60,10 +85,38 @@ public class TreeViewer implements ViewerListener {
     createBaseNodesWithFixedPosition(3, 3);
   }
 
+  private void saveToFile(int iteration,
+                          int gameTick) {
+
+
+    pipeIn.pump();
+
+/*    try {
+      pic.writeAll(graph, String.format("tests/sample%d%s.png", iteration, gameTick));
+    } catch (RuntimeException | IOException e) {
+      e.printStackTrace();
+    }*/
+  }
+
   public static void main(String[] args) {
 
     TreeViewer n = new TreeViewer();
     //n.createBaseNodesWithFixedPosition(4, 3);
+  }
+
+  public void addChildrenNodeToMap(final Integer parentId,
+                                   final Integer childId) {
+
+    if (nodeChildrenMapByIndex.containsKey(parentId)) {
+      final List<Integer> existingChildren = nodeChildrenMapByIndex.get(parentId);
+      existingChildren.add(childId);
+      nodeChildrenMapByIndex.put(parentId, existingChildren);
+    } else {
+      final ArrayList<Integer> children = new ArrayList<>();
+      children.add(childId);
+      nodeChildrenMapByIndex.put(parentId, children);
+    }
+
   }
 
   public void createBaseNodesWithFixedPosition(int treeDepth,
@@ -102,6 +155,7 @@ public class TreeViewer implements ViewerListener {
         // Size = maxDepth * layerWeight
         // -1 to grow from bottom to top
         node.addAttribute("xyz", nodeX, -depth * layerWeight, 0);
+        node.setAttribute("ui.label", nodeCount);
 
         // Attach property Sprite
         final Sprite sprite = sman.addSprite("S" + String.valueOf(nodeCount));
@@ -110,7 +164,7 @@ public class TreeViewer implements ViewerListener {
 
         //final double[] doubles = Toolkit.nodePosition(node);
         //System.out.println(String.format("%s - %s %s %s", nodeCount, doubles[0], doubles[1], doubles[2]));
-        //node.setAttribute("ui.label", totalNodes);
+        //node.setAttribute("ui.label", node.getId());
 
         currentLayerNodesList.add(nodeCount);
         nodeCount--;
@@ -123,10 +177,12 @@ public class TreeViewer implements ViewerListener {
       if (!lastLayerNodesList.isEmpty()) {
         for (Integer currentNode : currentLayerNodesList) {
           for (int i = 0; i < levelNodes; i++) {
-            int currentNodeIndex = getNodeIndex(currentNode);
-            int targetNodeIndex = getNodeIndex(lastLayerNodesList.get(index));
-            final String edgeId = String.valueOf(currentNodeIndex + targetNodeIndex);
-            graph.addEdge(edgeId, targetNodeIndex, currentNodeIndex);
+            int currentLayerNodeIndex = getNodeIndex(currentNode);
+            int lastLayerNodeIndex = getNodeIndex(lastLayerNodesList.get(index));
+            final String edgeId = String.valueOf(currentNode) + String.valueOf((lastLayerNodesList.get(index)));
+            graph.addEdge(edgeId, currentLayerNodeIndex, lastLayerNodeIndex);
+            addChildrenNodeToMap(currentNode, lastLayerNodesList.get(index));
+            //edge.setAttribute("ui.label", edgeId);
             index++;
           }
         }
@@ -135,6 +191,9 @@ public class TreeViewer implements ViewerListener {
       lastLayerNodesList = new ArrayList<>(currentLayerNodesList);
       currentLayerNodesList.clear();
     }
+
+    graph.setAttribute("ui.screenshot", String.format("tests/sample%d%d.png", 99, 2));
+    pipeIn.pump();
   }
 
   public int getNodeIndex(final Integer nodeId) {
@@ -176,6 +235,83 @@ public class TreeViewer implements ViewerListener {
     }
   }
 
+  public List<ViewerNode> castRootNode(final StateObservation initialState,
+                                       final TreeNode rootNode) {
+
+    List<ViewerNode> viewerNodeList = new ArrayList<>();
+    int lastNode = 1;
+    for (int i = 0; i < 13; i++) {
+      int totalNodesInDepth = (int) Math.pow(initialState.getAvailableActions().size(), i);
+      idsPerDepth.put(i, IntStream.range(lastNode, lastNode + totalNodesInDepth).boxed().collect(Collectors.toList()));
+      lastNode = lastNode + totalNodesInDepth;
+    }
+
+    Queue<TreeNode> queue = new ArrayDeque<>();
+    queue.add(rootNode);
+
+    // Create copy of parent map
+    Map<Integer, List<Integer>> mapCopy = new HashMap<>();
+    nodeChildrenMapByIndex.forEach((key, value) -> mapCopy.put(key,
+        new ArrayList<>(value)));
+
+
+    while (!queue.isEmpty()) {
+
+      // Get element
+      TreeNode currentNode = queue.remove();
+
+      Integer parentNode = null;
+
+      // Find parent in base 1
+      if (currentNode.parent != null) {
+        parentNode = translatedIdsMap.get(currentNode.parent.id);
+        //System.out.println("Parent casted " + parentNode);
+      }
+
+      int nodeDepth = getNodeDepth(currentNode);
+
+      // Skip nodes not available in visualization
+      if (!idsPerDepth.containsKey(nodeDepth)
+          || (parentNode != null
+          && !mapCopy.containsKey(parentNode))) {
+        continue;
+      }
+
+      final int nodeId = getNodeId(parentNode, mapCopy);
+      translatedIdsMap.put(currentNode.id, nodeId);
+      //System.out.println("Node id" + nodeId + " Parent: " + parentNode);
+      viewerNodeList.add(new ViewerNode(nodeId, currentNode));
+
+      if (currentNode.children != null && currentNode.children.size() > 0) {
+        queue.addAll(currentNode.children);
+      }
+    }
+
+    return viewerNodeList;
+  }
+
+  public Integer getNodeId(final Integer parentId,
+                           final Map<Integer, List<Integer>> availableIdentifiers) {
+
+    if (parentId == null) {
+      return 1;
+    }
+
+    final Integer nodeId = availableIdentifiers.get(parentId).get(0);
+    availableIdentifiers.get(parentId).remove(0);
+    return nodeId;
+  }
+
+  public int getNodeDepth(final TreeNode node) {
+    int treeDepth = 0;
+    TreeNode selectedNode = node;
+    while (selectedNode.parent != null) {
+      treeDepth++;
+      selectedNode = selectedNode.parent;
+    }
+    return treeDepth;
+  }
+
 
   public Map<Integer, ViewerNode> createNodeMap(List<ViewerNode> nodes) {
     final Map<Integer, ViewerNode> nodeMap = new HashMap<>();
@@ -183,46 +319,43 @@ public class TreeViewer implements ViewerListener {
     return nodeMap;
   }
 
-  public void updateNodes(List<ViewerNode> nodes,
-                          final TreeNode bestChild) {
+  public void updateNodes(final int gameTick,
+                          final int iteration,
+                          final TreeNode rootNode,
+                          final StateObservation stateObs) {
+
+    final List<ViewerNode> viewerNodes = castRootNode(stateObs, rootNode);
+
+    final Map<Integer, ViewerNode> nodeMap = new HashMap<>();
+    viewerNodes.forEach(n -> nodeMap.put(n.id, n));
 
     for (Node n : graph.getEachNode()) {
-      n.removeAttribute("ui.color");
 
       try {
         final Sprite sprite = sman.getSprite("S" + n.getId());
+        n.removeAttribute("ui.color");
         sprite.removeAttribute("ui.label");
-      } catch (Exception ex) {
 
-      }
+        int nodeId = Integer.parseInt(n.getId());
 
-    }
+        if (nodeMap.containsKey(nodeId)) {
 
-    for (ViewerNode node : nodes) {
-      try {
-        // Index is 1 based
-        final Node node1 = graph.getNode(getNodeIndex(node.id + 1));
-        if (node1 != null) {
-          //node1.setAttribute("ui.label", node);
-          if (node.id.equals(bestChild.id)) {
-            node1.setAttribute("ui.label", "BEST");
-          } else {
-            // Add value to balance color
-            node1.removeAttribute("ui.label");
-            node1.setAttribute("ui.color", node.value);
-          }
+          final ViewerNode viewerNode = nodeMap.get(nodeId);
+
+          // Add value to balance color
+          n.setAttribute("ui.color", viewerNode.value);
 
           // Update data sprite
-          final Sprite sprite = sman.getSprite("S" + node.id);
-          sprite.setAttribute("ui.label", node);
-
+          sprite.setAttribute("ui.label", viewerNode);
         }
-      } catch (final Exception ex) {
-        System.out.println("Node does not exist");
-      }
 
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
     }
 
+
+    graph.setAttribute("ui.screenshot", String.format("tests/sample%d%d.png", gameTick, iteration));
     pipeIn.pump();
   }
 
@@ -247,7 +380,11 @@ public class TreeViewer implements ViewerListener {
     nodeChildren.forEach(children -> {
       final String childId = Integer.toString(children);
       final String edgeId = parentNodeId + childId;
-      graph.addEdge(edgeId, parentNodeId, childId);
+      try {
+        graph.addEdge(edgeId, parentNodeId, childId);
+      } catch (RuntimeException ex) {
+        ex.printStackTrace();
+      }
     });
   }
 
