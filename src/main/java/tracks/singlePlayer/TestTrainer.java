@@ -11,7 +11,7 @@ import tracks.ArcadeMachine;
 /**
  * author: Flora Branchi (florabranchi@gmail.com)
  */
-public class TestFloraRunner {
+public class TestTrainer {
 
   public static void main(String[] args) {
 
@@ -24,7 +24,7 @@ public class TestFloraRunner {
     boolean visuals = true;
     int seed = new Random().nextInt();
 
-    String floraController = "tracks.singlePlayer.florabranchi.Agent";
+    String floraController = "tracks.singlePlayer.florabranchi.training.OfflineTrainerAgent";
 
     // Load available games
     String spGamesCollection = "examples/all_games_sp.csv";

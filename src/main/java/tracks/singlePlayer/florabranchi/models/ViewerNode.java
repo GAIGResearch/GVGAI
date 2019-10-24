@@ -31,6 +31,6 @@ public class ViewerNode {
 
   @Override
   public String toString() {
-    return String.format("%s %.2f", action.toString(), value);
+    return String.format("%.2f", value);
   }
 }

@@ -3,7 +3,6 @@ package tracks.singlePlayer.florabranchi;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -12,13 +11,12 @@ import core.game.StateObservation;
 import javafx.util.Pair;
 import ontology.Types;
 import tracks.singlePlayer.florabranchi.models.TreeNode;
-import tracks.singlePlayer.florabranchi.models.ViewerNode;
 
 public class TreeController {
 
   private final static Logger logger = Logger.getLogger(TreeController.class.getName());
 
-  private final static double C = 1; /// Math.sqrt(2);
+  private final static double C = 1 / Math.sqrt(2);
 
 
   public TreeNode rootNode;
@@ -77,7 +75,7 @@ public class TreeController {
       updateTreeVisualization(initialState, i);
     }
 
-    //updateTreeVisualization(initialState, 0);
+    updateTreeVisualization(initialState, 0);
 
   }
 
@@ -97,71 +95,6 @@ public class TreeController {
     rootNode.parent = null;
 
   }
-
-
-  private List<TreeNode> createListOfNodes(final TreeNode rootNode) {
-    List<TreeNode> list = new ArrayList<>();
-    flattenNodes(rootNode, list);
-    return list;
-  }
-
-
-  private void castLayer(final TreeNode treeNode,
-                         final int currDepth,
-                         final int nodeId,
-                         final List<ViewerNode> listOfNodes,
-                         final int nodeChildren) {
-    int nextLayerFirstElement = (int) Math.pow(nodeChildren, currDepth);
-    int index = 0;
-    int tempCurrDepth = currDepth;
-    tempCurrDepth++;
-    //System.out.println(String.format("Node id: %d Depth: %d", nodeId, currDepth));
-    listOfNodes.add(new ViewerNode(nodeId, treeNode));
-    for (TreeNode child : treeNode.children) {
-      castLayer(child, tempCurrDepth, nextLayerFirstElement + index, listOfNodes, nodeChildren);
-      index++;
-    }
-  }
-
-  private void flattenNodes(final TreeNode node,
-                            final List<TreeNode> listOfNodes) {
-    listOfNodes.add(node);
-    for (TreeNode child : node.children) {
-      flattenNodes(child, listOfNodes);
-    }
-  }
-
-  private Pair<TreeNode, StateObservation> executeTreePolicy(final StateObservation stateObservation) {
-
-    TreeNode selectedNode = rootNode;
-
-    while (!stateObservation.isGameOver()) {
-
-      if (selectedNode.children.isEmpty()) {
-        logMessage(String.format("Expanding children of node %s", selectedNode.id));
-        for (Types.ACTIONS action : stateObservation.getAvailableActions()) {
-          expand(selectedNode, stateObservation);
-        }
-        return new Pair<>(selectedNode.children.get(0), stateObservation);
-      }
-
-
-      logMessage(String.format("Node %s have child", selectedNode.id));
-      selectedNode = getBestChild(selectedNode);
-      logMessage(String.format("Selected child %d", selectedNode.id));
-      Types.ACTIONS actionToGetToNode = selectedNode.previousAction;
-      if (actionToGetToNode != null) {
-        stateObservation.advance(actionToGetToNode);
-      }
-    }
-
-    return new Pair<>(selectedNode, stateObservation);
-  }
-
-  private boolean isLeafNode(final TreeNode node) {
-    return node.children.isEmpty();
-  }
-
 
   public double rollout(final StateObservation initialState) {
     double initialScore = initialState.getGameScore();

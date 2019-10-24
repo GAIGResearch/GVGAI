@@ -2,7 +2,6 @@ package tracks.singlePlayer.florabranchi;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -12,7 +11,6 @@ import core.player.AbstractPlayer;
 import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
 import tracks.singlePlayer.florabranchi.models.TreeNode;
-import tracks.singlePlayer.florabranchi.models.ViewerNode;
 
 /**
  * Flora Branchi (florabranchi@gmail.com) September 2019
@@ -96,9 +94,9 @@ public class Agent extends AbstractPlayer {
     System.out.println(elapsedTimer.elapsedMillis());
 
     treeController.pruneTree(bestFoundAction);
+    treeController.updateTreeVisualization(stateObs, 99);
     return bestFoundAction;
   }
-
 
 
   /**
