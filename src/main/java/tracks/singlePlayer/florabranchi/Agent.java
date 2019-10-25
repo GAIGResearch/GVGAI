@@ -30,7 +30,7 @@ public class Agent extends AbstractPlayer {
 
   private EAvailablePolicies agentPolicy;
 
-  /**
+  /**'
    * initialize all variables for the agent
    *
    * @param stateObs     Observation of the current state.

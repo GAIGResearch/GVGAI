@@ -5,8 +5,6 @@ import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
-import org.graphstream.stream.file.FileSinkImages;
-import org.graphstream.stream.file.FileSourceDGS;
 import org.graphstream.ui.spriteManager.Sprite;
 import org.graphstream.ui.spriteManager.SpriteManager;
 import org.graphstream.ui.swingViewer.Viewer;
@@ -101,7 +99,7 @@ public class TreeViewer implements ViewerListener {
   public void createBaseNodesWithFixedPosition(int treeDepth,
                                                int levelNodes) {
 
-    int layerWeight = 50;
+    int layerWeight = 20;
     int layerWidth = 15;
     int spriteDisplacementX = 0;
     double spriteDisplacementY = -2;
@@ -293,7 +291,11 @@ public class TreeViewer implements ViewerListener {
           edgeSet.forEach(edge -> {
             final Node node1 = edge.getNode1();
             final ViewerNode tempNode = nodeMap.get(Integer.parseInt(node1.getId()));
-            edge.addAttribute("ui.label", tempNode.action);
+
+            if (tempNode != null && tempNode.action != null) {
+              edge.addAttribute("ui.label", tempNode.action);
+            }
+
           });
         }
 

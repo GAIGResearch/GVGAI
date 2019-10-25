@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import core.game.StateObservation;
@@ -17,7 +16,6 @@ public class TreeController {
   private final static Logger logger = Logger.getLogger(TreeController.class.getName());
 
   private final static double C = 1 / Math.sqrt(2);
-
 
   public TreeNode rootNode;
 
@@ -35,7 +33,7 @@ public class TreeController {
   }
 
   private void logMessage(final String message) {
-    logger.log(Level.INFO, message);
+    //logger.log(Level.INFO, message);
   }
 
   public void treeSearch(final int iterations,
@@ -47,7 +45,7 @@ public class TreeController {
 
     for (int i = 0; i < iterations; i++) {
 
-      System.out.println("ITERATION " + i);
+      //System.out.println("ITERATION " + i);
 
       // Selection - Get most promising node
       final Pair<TreeNode, StateObservation> mostPromisingNodePair = getMostPromisingLeafNode(initialState);

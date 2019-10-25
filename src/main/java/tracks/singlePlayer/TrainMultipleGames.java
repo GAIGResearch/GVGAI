@@ -11,20 +11,21 @@ import tracks.ArcadeMachine;
 /**
  * author: Flora Branchi (florabranchi@gmail.com)
  */
-public class TestFloraAgent {
+public class TrainMultipleGames {
 
   public static void main(String[] args) {
 
-    LOGGER.setLevel(Level.CONFIG);
+    LOGGER.setLevel(Level.INFO);
 
     //Game settings
 
     final boolean saveActions = false;
     final ETrainingType selectedTraining = ETrainingType.BOT;
-    boolean visuals = true;
+    //boolean visuals = true;
+    boolean visuals = false;
     int seed = new Random().nextInt();
 
-    String floraController = "tracks.singlePlayer.florabranchi.Agent";
+    String floraController = "tracks.singlePlayer.florabranchi.training.OfflineTrainerAgent";
 
     // Load available games
     String spGamesCollection = "examples/all_games_sp.csv";
@@ -38,6 +39,14 @@ public class TestFloraAgent {
     String gameName = games[gameIdx][1];
     String game = games[gameIdx][0];
     String level1 = game.replace(gameName, gameName + "_lvl" + levelIdx);
+
+
+    // TOTAL GAMES
+
+    final int totalGames = 5;
+    String[] levelFiles;
+    levelFiles = new String[1];
+    levelFiles[0] = level1;
 
     // where to record the actions
     // executed. null if not to save.
@@ -54,7 +63,11 @@ public class TestFloraAgent {
         break;
       case BOT:
         // 2. This plays a game in a level by the controller.
-        ArcadeMachine.runOneGame(game, level1, visuals, floraController, recordActionsFile, seed, 0);
+        //ArcadeMachine.runOneGame(game, level1, visuals, floraController, recordActionsFile, seed, 0);
+
+        ArcadeMachine.runGames(game, levelFiles, totalGames, floraController, null);
+
+
         break;
       case REPLAY:
         // 3. This replays a game from an action file previously recorded

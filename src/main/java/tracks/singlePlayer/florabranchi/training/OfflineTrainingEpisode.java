@@ -3,9 +3,10 @@ package tracks.singlePlayer.florabranchi.training;
 import java.io.Serializable;
 
 public class OfflineTrainingEpisode implements Serializable {
+
   int trainingCount;
 
-  WeightVector weightVector;
+  TrainingWeights weightVector;
 
   public int getTrainingCount() {
     return trainingCount;
@@ -15,16 +16,16 @@ public class OfflineTrainingEpisode implements Serializable {
     this.trainingCount = trainingCount;
   }
 
-  public WeightVector getWeightVector() {
+  public TrainingWeights getWeightVector() {
     return weightVector;
   }
 
-  public void setWeightVector(final WeightVector weightVector) {
+  public void setWeightVector(final TrainingWeights weightVector) {
     this.weightVector = weightVector;
   }
 
   public OfflineTrainingEpisode(final int trainingCount,
-                                final WeightVector weightVector) {
+                                final TrainingWeights weightVector) {
     this.trainingCount = trainingCount;
     this.weightVector = weightVector;
   }

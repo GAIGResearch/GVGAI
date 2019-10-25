@@ -22,6 +22,7 @@ public class TestTrainer {
     final boolean saveActions = false;
     final ETrainingType selectedTraining = ETrainingType.BOT;
     boolean visuals = true;
+    //boolean visuals = false;
     int seed = new Random().nextInt();
 
     String floraController = "tracks.singlePlayer.florabranchi.training.OfflineTrainerAgent";
@@ -55,6 +56,8 @@ public class TestTrainer {
       case BOT:
         // 2. This plays a game in a level by the controller.
         ArcadeMachine.runOneGame(game, level1, visuals, floraController, recordActionsFile, seed, 0);
+
+
         break;
       case REPLAY:
         // 3. This replays a game from an action file previously recorded
