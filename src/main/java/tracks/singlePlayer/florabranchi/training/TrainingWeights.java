@@ -2,15 +2,15 @@ package tracks.singlePlayer.florabranchi.training;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
 
 import ontology.Types;
 
 public class TrainingWeights implements Serializable {
 
-  private TreeMap<Types.ACTIONS, ArrayList<Double>> weightVectorMap;
+  private TreeMap<Types.ACTIONS, TreeMap<String, Double>> weightVectorMap;
 
   private static List<Types.ACTIONS> avallableGameActions = new ArrayList<>();
 
@@ -31,29 +31,30 @@ public class TrainingWeights implements Serializable {
   public TrainingWeights(final int featureSize) {
     weightVectorMap = new TreeMap<>();
 
+    TreeMap<String, Double> emptyPropertyMap = new TreeMap<>();
+    final Set<String> propertyValueMap = FeatureVectorController.getAvailableProperties();
+    for (final String property : propertyValueMap) {
+      emptyPropertyMap.put(property, 0d);
+    }
+
     for (final Types.ACTIONS avallableGameAction : avallableGameActions) {
-      weightVectorMap.put(avallableGameAction, new ArrayList<>(Collections.nCopies(featureSize, 0d)));
+      weightVectorMap.put(avallableGameAction, new TreeMap<>(emptyPropertyMap));
     }
   }
 
-  public List<Double> getWeightVectorForAction(final Types.ACTIONS actions) {
+  public TreeMap<String, Double> getWeightVectorForAction(final Types.ACTIONS actions) {
     return weightVectorMap.get(actions);
   }
 
-  public TrainingWeights(final TreeMap<Types.ACTIONS, ArrayList<Double>> weightVectorMap) {
+  public TrainingWeights(final TreeMap<Types.ACTIONS, TreeMap<String, Double>> weightVectorMap) {
     this.weightVectorMap = weightVectorMap;
   }
 
   public void updateWeightVector(final Types.ACTIONS action,
-                                 final int index,
+                                 final String property,
                                  final double newValue) {
 
-    final ArrayList<Double> doubles = weightVectorMap.get(action);
-
-    if (doubles.size() <= index) {
-      doubles.add(newValue);
-    } else {
-      doubles.set(index, newValue);
-    }
+    final TreeMap<String, Double> doubles = weightVectorMap.get(action);
+    doubles.put(property, newValue);
   }
 }

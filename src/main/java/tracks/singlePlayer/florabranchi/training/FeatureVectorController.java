@@ -12,7 +12,6 @@ import tools.Vector2d;
 
 public class FeatureVectorController {
 
-
   private static final String AVATAR_HEALTH = "AVATAR_HEALTH";
   private static final String GAME_STATE = "GAME_STATE";
   private static final String GAME_TICK = "GAME_TICK";
@@ -24,7 +23,7 @@ public class FeatureVectorController {
   private static final String AVAILABLE_RESOURCES = "AVAILABLE_RESOURCES";
   private static final String PLAYER_RESOURCES = "PLAYER_RESOURCES";
 
-  static TreeSet<String> availableProperties = new TreeSet<>();
+  public static TreeSet<String> availableProperties = new TreeSet<>();
 
   public static Set<String> getAvailableProperties() {
     return availableProperties;
@@ -152,4 +151,6 @@ public class FeatureVectorController {
   public int getSize() {
     return availableProperties.size();
   }
+
+
 }

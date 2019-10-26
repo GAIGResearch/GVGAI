@@ -117,34 +117,32 @@ public class OfflineTrainerAgent extends AbstractPlayer {
                                        final StateObservation currentState) {
 
 
-    // Get Weight vector for previous action
-    final double[] weightVectorForPreviousAction = castToDoublesArray(trainingWeights.getWeightVectorForAction(previousAction));
+    // Get Weight vector for previous action (a)
+    final TreeMap<String, Double> weightVectorForPreviousAction = trainingWeights.getWeightVectorForAction(previousAction);
 
-    // Get current feature values
+    // Get feature values for previous state (s)
     final TreeMap<String, Double> initialFeatureVector = featureVectorController.extractFeatureVector(previousState);
-    double[] featureVectorInPreviousState = castToDoublesArray(initialFeatureVector);
 
-    // Get Weight vector for new action
-    final double[] weightVectorForCurrentAction = castToDoublesArray(trainingWeights.getWeightVectorForAction(currentAction));
+    // Get Weight vector for new action (a')
+    final TreeMap<String, Double> weightVectorForCurrentAction = trainingWeights.getWeightVectorForAction(currentAction);
 
-    // Extract feature values
+    // Extract feature values (s')
     final TreeMap<String, Double> featureVectorAfterAction = featureVectorController.extractFeatureVector(currentState);
-    double[] featureVectorInCurrentState = castToDoublesArray(featureVectorAfterAction);
 
-    for (int weightIndex = 0; weightIndex < weightVectorForPreviousAction.length - 1; weightIndex++) {
+    // delta = r + gamma (Qa'(s')) - Qa(s)
+    double delta = stateReward + GAMMA * (dotProduct(weightVectorForCurrentAction, featureVectorAfterAction))
+        - dotProduct(weightVectorForPreviousAction, initialFeatureVector);
 
-      double initialW = weightVectorForPreviousAction[weightIndex];
+    // Update weights
+    for (Map.Entry<String, Double> weightMapEntry : weightVectorForPreviousAction.entrySet()) {
 
-      // delta = r + gamma (Qa'(s')) - Qa(s)
-      double delta = stateReward + GAMMA * (dotProduct(weightVectorForPreviousAction, featureVectorInCurrentState))
-          - dotProduct(weightVectorForCurrentAction, featureVectorInPreviousState);
+      double initialW = weightMapEntry.getValue();
 
-      // w = w + lambda * delta
-      final double updatedWeight = initialW + (ALFA * delta * featureVectorInPreviousState[weightIndex]);
-      weightVectorForPreviousAction[weightIndex] = updatedWeight;
+      // w = w + lambda * delta * f()
+      final double updatedWeight = initialW + (ALFA * delta * initialFeatureVector.get(weightMapEntry.getKey()));
 
       // Update global weights
-      trainingWeights.updateWeightVector(currentAction, weightIndex, updatedWeight);
+      trainingWeights.updateWeightVector(currentAction, weightMapEntry.getKey(), updatedWeight);
     }
 
   }
@@ -197,14 +195,16 @@ public class OfflineTrainerAgent extends AbstractPlayer {
       final Types.ACTIONS randomAction = returnRandomAction(stateObs);
 
       // Update last values
+      // a
       previousAction = randomAction;
+      // s
       previousState = stateObs;
       previousScore = 0;
 
       return randomAction;
     }
 
-    // Select best action given current weight vector
+    // Select best action given current weight vector (a')
     final Types.ACTIONS selectedAction = selectBestPerceivedAction(stateObs);
 
     // Reward = curr score - previous score
@@ -213,7 +213,7 @@ public class OfflineTrainerAgent extends AbstractPlayer {
     double reward = stateScore - previousScore;
     System.out.println("reward: " + reward);
 
-    // need: a', s', a, s, r
+    // need: a, s, r, a', s1
     updateWeightVectorValues(reward, previousAction, previousState, selectedAction, stateObs);
 
     final TreeMap<String, Double> featuresForCurrState = featureVectorController.extractFeatureVector(stateObs);
@@ -232,14 +232,12 @@ public class OfflineTrainerAgent extends AbstractPlayer {
                                    final Types.ACTIONS action) {
 
     // Extract feature array
-    TreeMap<String, Double> featureAfterAction = featureVectorController.extractFeatureVector(initialState);
-    double[] featureValuesForState = castToDoublesArray(featureAfterAction);
+    final TreeMap<String, Double> featureAfterAction = featureVectorController.extractFeatureVector(initialState);
 
     // Get related weight vector
-    final List<Double> weightVectorForAction = trainingWeights.getWeightVectorForAction(action);
-    double[] weightArray = castToDoublesArray(weightVectorForAction);
+    final TreeMap<String, Double> weightVectorForAction = trainingWeights.getWeightVectorForAction(action);
 
-    return dotProduct(featureValuesForState, weightArray);
+    return dotProduct(featureAfterAction, weightVectorForAction);
   }
 
   public void saveResults() {
@@ -405,8 +403,7 @@ public class OfflineTrainerAgent extends AbstractPlayer {
   public void writeResultsToUi(final TreeMap<String, Double> featureVectorAfterAction,
                                final Types.ACTIONS selectedAction) {
 
-    final List<Double> weightVectorForAction = trainingWeights.getWeightVectorForAction(selectedAction);
-    final double[] weightVector = castToDoublesArray(weightVectorForAction);
+    final TreeMap<String, Double> weightVectorForAction = trainingWeights.getWeightVectorForAction(selectedAction);
 
     if (featureVectorAfterAction != null) {
 
@@ -420,7 +417,7 @@ public class OfflineTrainerAgent extends AbstractPlayer {
 
         JLabel weightVectorRelatedLabel = labelMap.getOrDefault(buildWeightVectorKey(entry.getKey(), selectedAction), null);
         if (weightVectorRelatedLabel != null) {
-          weightVectorRelatedLabel.setText(String.format("%.4f", weightVector[i]));
+          weightVectorRelatedLabel.setText(String.format("%.4f", weightVectorForAction.get(entry.getKey())));
         }
         i++;
 
@@ -488,6 +485,16 @@ public class OfflineTrainerAgent extends AbstractPlayer {
     for (int i = 0; i < a.length; i++) {
       sum += a[i] * b[i];
     }
+    return sum;
+  }
+
+  public double dotProduct(TreeMap<String, Double> a,
+                           TreeMap<String, Double> b) {
+    double sum = 0;
+    for (String property : FeatureVectorController.getAvailableProperties()) {
+      sum += a.getOrDefault(property, 0d) * b.getOrDefault(property, 0d);
+    }
+
     return sum;
   }
 
