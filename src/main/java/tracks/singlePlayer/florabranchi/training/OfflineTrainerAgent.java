@@ -23,6 +23,8 @@ import tools.ElapsedCpuTimer;
 
 public class OfflineTrainerAgent extends AbstractPlayer {
 
+  boolean showJframe = true;
+
   private static final String resultsPath = "./previousResults.txt";
   private final TrainingLog log;
 
@@ -61,11 +63,43 @@ public class OfflineTrainerAgent extends AbstractPlayer {
   public OfflineTrainerAgent(final StateObservation stateObs,
                              final ElapsedCpuTimer elapsedTimer) {
     super();
+    log = new TrainingLog(new ArrayList<>());
     featureVectorController = new FeatureVectorController();
     initializeTrainingWeightVector(featureVectorController.getSize());
 
-    log = new TrainingLog(new ArrayList<>());
-    createJFrame(stateObs);
+    if (showJframe) {
+      createJFrame(stateObs);
+    }
+  }
+
+  @Override
+  public Types.ACTIONS act(final StateObservation stateObs,
+                           final ElapsedCpuTimer elapsedTimer) {
+
+    log.write(String.format("Act for Game Tick %d", stateObs.getGameTick()));
+
+    return getActionAndupdateWeightVectorValues(stateObs, elapsedTimer);
+  }
+
+  @Override
+  public void result(final StateObservation stateObs,
+                     final ElapsedCpuTimer elapsedCpuTimer) {
+
+    // last update - reward if won, negative if loss
+    final Types.WINNER gameWinner = stateObs.getGameWinner();
+    double reward = 20;
+    if (gameWinner.equals(Types.WINNER.PLAYER_LOSES)) {
+      reward = -50;
+      log.write("Player lost");
+    } else {
+      log.write("Player won");
+    }
+    getActionAndupdateWeightVectorValues(stateObs, elapsedCpuTimer, reward);
+
+    logCurrentWeights();
+    saveResults();
+    closeJframe();
+    super.result(stateObs, elapsedCpuTimer);
   }
 
   public void createJFrame(final StateObservation stateObs) {
@@ -74,7 +108,7 @@ public class OfflineTrainerAgent extends AbstractPlayer {
     panel.setLayout(null);
     frame.add(panel);
 
-    frame.setSize(800, 600);
+    frame.setSize(1200, 1000);
     frame.setVisible(true);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setResizable(false);
@@ -84,37 +118,17 @@ public class OfflineTrainerAgent extends AbstractPlayer {
   }
 
   public void closeJframe() {
-    frame.dispose();
+    if (frame != null) {
+      frame.dispose();
+    }
   }
-
-  @Override
-  public void result(final StateObservation stateObs, final ElapsedCpuTimer elapsedCpuTimer) {
-    saveResults();
-    closeJframe();
-    super.result(stateObs, elapsedCpuTimer);
-  }
-
-  public static void main(String[] args) {
-
-
-    // saving test
-    //OfflineTrainerAgent trainer = new OfflineTrainerAgent();
-
-    //OfflineTrainingEpisode episode = new OfflineTrainingEpisode(0, new WeightVector());
-    //OffilneTrainerResults results = new OffilneTrainerResults(Collections.singletonList(episode));
-    //trainer.saveToFile(results);
-
-    //final double[] doubles = trainer.readFromFile();
-
-  }
-
 
   // need: a', s', a, s, r
-  public void updateWeightVectorValues(final double stateReward,
-                                       final Types.ACTIONS previousAction,
-                                       final StateObservation previousState,
-                                       final Types.ACTIONS currentAction,
-                                       final StateObservation currentState) {
+  public void getActionAndupdateWeightVectorValues(final double stateReward,
+                                                   final Types.ACTIONS previousAction,
+                                                   final StateObservation previousState,
+                                                   final Types.ACTIONS currentAction,
+                                                   final StateObservation currentState) {
 
 
     // Get Weight vector for previous action (a)
@@ -139,7 +153,7 @@ public class OfflineTrainerAgent extends AbstractPlayer {
       double initialW = weightMapEntry.getValue();
 
       // w = w + lambda * delta * f()
-      final double updatedWeight = initialW + (ALFA * delta * initialFeatureVector.get(weightMapEntry.getKey()));
+      final double updatedWeight = initialW + (ALFA * delta * initialFeatureVector.getOrDefault(weightMapEntry.getKey(), 0d));
 
       // Update global weights
       trainingWeights.updateWeightVector(currentAction, weightMapEntry.getKey(), updatedWeight);
@@ -149,48 +163,33 @@ public class OfflineTrainerAgent extends AbstractPlayer {
 
 
   public Types.ACTIONS returnRandomAction(final StateObservation stateObservation) {
+
+    if (stateObservation.getAvailableActions().isEmpty()) {
+      return Types.ACTIONS.ACTION_NIL;
+    }
+
     int index = randomGenerator.nextInt(stateObservation.getAvailableActions().size());
     return stateObservation.getAvailableActions().get(index);
   }
 
-  public double[] castToDoublesArray(List<Double> weightList) {
-    double[] featureVector = initializeArrayWithExpectedSize();
 
-    int i = 0;
-    for (Double entry : weightList) {
-      featureVector[i] = entry;
-      i++;
-    }
-    return featureVector;
+  /**
+   * Uses default game score to update values
+   */
+  public Types.ACTIONS getActionAndupdateWeightVectorValues(final StateObservation stateObs,
+                                                            final ElapsedCpuTimer elapsedTimer) {
+
+    // Reward = curr score - previous score
+    double stateScore = stateObs.getGameScore();
+    double reward = stateScore - previousScore;
+    return getActionAndupdateWeightVectorValues(stateObs, elapsedTimer, reward);
   }
 
-  public double[] castToDoublesArray(Map<String, Double> propertyMap) {
-    double[] featureVector = initializeArrayWithExpectedSize();
+  public Types.ACTIONS getActionAndupdateWeightVectorValues(final StateObservation stateObs,
+                                                            final ElapsedCpuTimer elapsedTimer,
+                                                            final double reward) {
 
-    int i = 0;
-    for (Map.Entry<String, Double> entry : propertyMap.entrySet()) {
-      featureVector[i] = entry.getValue();
-      i++;
-    }
-    return featureVector;
-  }
-
-  private double[] initializeArrayWithExpectedSize() {
-    int expectedSize = featureVectorController.getSize();
-    double[] featureVector = new double[expectedSize];
-    for (int j = 0; j < expectedSize; j++) {
-      featureVector[j] = 0d;
-    }
-    return featureVector;
-  }
-
-
-  @Override
-  public Types.ACTIONS act(final StateObservation stateObs,
-                           final ElapsedCpuTimer elapsedTimer) {
-
-    log.write(String.format("Act for Game Tick %d", stateObs.getGameTick()));
-    // First play
+    log.write(String.format("Updating weights with reward %s after action: ", reward));
     if (previousAction == null) {
       final Types.ACTIONS randomAction = returnRandomAction(stateObs);
 
@@ -207,23 +206,19 @@ public class OfflineTrainerAgent extends AbstractPlayer {
     // Select best action given current weight vector (a')
     final Types.ACTIONS selectedAction = selectBestPerceivedAction(stateObs);
 
-    // Reward = curr score - previous score
-    double stateScore = stateObs.getGameScore();
-
-    double reward = stateScore - previousScore;
-    System.out.println("reward: " + reward);
-
     // need: a, s, r, a', s1
-    updateWeightVectorValues(reward, previousAction, previousState, selectedAction, stateObs);
+    getActionAndupdateWeightVectorValues(reward, previousAction, previousState, selectedAction, stateObs);
 
     final TreeMap<String, Double> featuresForCurrState = featureVectorController.extractFeatureVector(stateObs);
 
-    writeResultsToUi(featuresForCurrState, selectedAction);
+    if (showJframe) {
+      writeResultsToUi(featuresForCurrState, selectedAction);
+    }
 
     // Update last values
     previousAction = selectedAction;
     previousState = stateObs;
-    previousScore = stateScore;
+    previousScore = stateObs.getGameScore();
 
     return selectedAction;
   }
@@ -250,10 +245,16 @@ public class OfflineTrainerAgent extends AbstractPlayer {
 
   public Types.ACTIONS selectBestPerceivedAction(final StateObservation stateObservation) {
 
+    if (stateObservation.getAvailableActions().isEmpty()) {
+      log.write("Selecting NIL action to calculate last weight vector");
+      return Types.ACTIONS.ACTION_NIL;
+    }
+
     // Exploration parameter
     int rand = randomGenerator.nextInt(100);
     if (rand <= EXPLORATION_EPSILON) {
-      System.out.println("Exploring random action");
+      final Types.ACTIONS randomAction = returnRandomAction(stateObservation);
+      log.write(String.format("Exploring random action %s", randomAction));
       return returnRandomAction(stateObservation);
     }
 
@@ -274,8 +275,10 @@ public class OfflineTrainerAgent extends AbstractPlayer {
         maxValue = actionExpectedReward;
         bestAction = action;
 
-        final JLabel jLabel = labelMap.get(buildQvalueKey(action));
-        jLabel.setText(String.format("%.4f", maxValue));
+        if (showJframe) {
+          final JLabel jLabel = labelMap.get(buildQvalueKey(action));
+          jLabel.setText(String.format("%.4f", maxValue));
+        }
       }
     }
 
@@ -284,11 +287,11 @@ public class OfflineTrainerAgent extends AbstractPlayer {
 
       Collections.shuffle(duplicatedActions);
       final Types.ACTIONS selectedActon = duplicatedActions.get(randomGenerator.nextInt(duplicatedActions.size() - 1));
-      System.out.println(String.format("Best play: draw for score %s, selected: %s", maxValue, selectedActon));
+      log.write(String.format("Best play: draw for score %s, selected: %s", maxValue, selectedActon));
       return selectedActon;
     }
 
-    System.out.println(String.format("Best play: %s - score - %.2f", bestAction, maxValue));
+    log.write(String.format("Best play: %s - score - %.2f", bestAction, maxValue));
     return bestAction;
   }
 
@@ -297,7 +300,7 @@ public class OfflineTrainerAgent extends AbstractPlayer {
     int initialXDisplacement = 10;
     int initialYDisplacement = 10;
     int lineHeight = 20; //y
-    int lineWidth = 150; //x
+    int lineWidth = 200; //x
 
     int currElement = 0;
 
@@ -412,7 +415,7 @@ public class OfflineTrainerAgent extends AbstractPlayer {
 
         JLabel propertyRelatedLabel = labelMap.getOrDefault(buildPropertyKey(entry.getKey()), null);
         if (propertyRelatedLabel != null) {
-          propertyRelatedLabel.setText(entry.getValue().toString());
+          propertyRelatedLabel.setText(String.format("%.4f", entry.getValue()));
         }
 
         JLabel weightVectorRelatedLabel = labelMap.getOrDefault(buildWeightVectorKey(entry.getKey(), selectedAction), null);
@@ -427,10 +430,20 @@ public class OfflineTrainerAgent extends AbstractPlayer {
     panel.repaint();
   }
 
+  public void logCurrentWeights() {
+    final TreeMap<Types.ACTIONS, TreeMap<String, Double>> weightVectorMap = trainingWeights.getWeightVectorMap();
+    weightVectorMap.forEach((key, value) -> {
+      log.write(String.format("Weight Vector for %s", key));
+      value.forEach((key1, value1) -> log.write(String.format("%s - %s", key1, value1)));
+    });
+  }
+
 
   public void initializeTrainingWeightVector(int featureVectorSize) {
 
     if (previousResults != null) {
+      log.write("Previous results still in memory");
+      logCurrentWeights();
       return;
     }
 
@@ -439,10 +452,15 @@ public class OfflineTrainerAgent extends AbstractPlayer {
 
     // if could not load initialize
     if (previousResults == null) {
+      log.write("No previous results, creating new Weights");
       previousResults = new OffilneTrainerResults(new ArrayList<>());
       trainingWeights = new TrainingWeights(featureVectorSize);
+      logCurrentWeights();
     } else {
-      trainingWeights = previousResults.getEpsiodes().get(previousResults.getEpsiodes().size() - 1).getWeightVector();
+      int previousEpisode = previousResults.getEpsiodes().size() - 1;
+      log.write(String.format("Loading previous results from episode %s", previousEpisode));
+      trainingWeights = previousResults.getEpsiodes().get(previousEpisode).getWeightVector();
+      logCurrentWeights();
     }
   }
 

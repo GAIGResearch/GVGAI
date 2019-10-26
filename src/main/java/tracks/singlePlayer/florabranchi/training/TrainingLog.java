@@ -35,6 +35,7 @@ public class TrainingLog {
   }
 
   public void write(final String log) {
+    System.out.println(log);
     trainingLog.add(log);
   }
 }

@@ -43,7 +43,7 @@ public class TrainMultipleGames {
 
     // TOTAL GAMES
 
-    final int totalGames = 5;
+    final int totalGames = 100;
     String[] levelFiles;
     levelFiles = new String[1];
     levelFiles[0] = level1;

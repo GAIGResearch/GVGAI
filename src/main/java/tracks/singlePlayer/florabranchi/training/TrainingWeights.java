@@ -24,6 +24,10 @@ public class TrainingWeights implements Serializable {
     avallableGameActions.add(Types.ACTIONS.ACTION_ESCAPE);
   }
 
+  public TreeMap<Types.ACTIONS, TreeMap<String, Double>> getWeightVectorMap() {
+    return weightVectorMap;
+  }
+
   public static List<Types.ACTIONS> getAvallableGameActions() {
     return avallableGameActions;
   }
