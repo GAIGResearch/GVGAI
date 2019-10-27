@@ -23,22 +23,28 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import core.game.StateObservation;
+import ontology.Types;
 import tracks.singlePlayer.florabranchi.models.TreeNode;
 import tracks.singlePlayer.florabranchi.models.ViewerNode;
+import tracks.singlePlayer.florabranchi.tree.TreeHelper;
 
 public class TreeViewer implements ViewerListener {
 
-  ViewerPipe pipeIn;
-  SpriteManager sman;
+  private ViewerPipe pipeIn;
+  private SpriteManager sman;
   private Graph graph;
 
   private HashMap<Integer, List<Integer>> nodeChildrenMapByIndex = new HashMap<>();
   private HashMap<Integer, Integer> translatedIdsMap = new HashMap<>();
   private HashMap<Integer, List<Integer>> idsPerDepth;
+  private HashMap<Integer, List<Edge>> edgesMap;
+
+  private TreeHelper treeHelper;
 
   public TreeViewer() {
 
     idsPerDepth = new HashMap<>();
+    edgesMap = new HashMap<>();
 
     System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
 
@@ -73,13 +79,30 @@ public class TreeViewer implements ViewerListener {
         + "}";
 
     graph.addAttribute("ui.stylesheet", myStyle);
-    createBaseNodesWithFixedPosition(3, 3);
+
+    int treeDepth = 3;
+    int levelNodes = 3;
+
+    // todo change for sso
+    List<Types.ACTIONS> availableActions = new ArrayList<>();
+    availableActions.add(Types.ACTIONS.ACTION_USE);
+    availableActions.add(Types.ACTIONS.ACTION_LEFT);
+    availableActions.add(Types.ACTIONS.ACTION_RIGHT);
+
+    treeHelper = new TreeHelper(treeDepth, availableActions);
+
+    //createBaseNodesWithFixedPosition(treeDepth, levelNodes);
   }
 
   public static void main(String[] args) {
 
+    List<Types.ACTIONS> availableActions = new ArrayList<>();
+    availableActions.add(Types.ACTIONS.ACTION_USE);
+    availableActions.add(Types.ACTIONS.ACTION_LEFT);
+    availableActions.add(Types.ACTIONS.ACTION_RIGHT);
+
     TreeViewer n = new TreeViewer();
-    //n.createBaseNodesWithFixedPosition(4, 3);
+    n.createBaseNodesWithFixedPositionFromTop(4, availableActions);
   }
 
   public void addChildrenNodeToMap(final Integer parentId,
@@ -96,6 +119,100 @@ public class TreeViewer implements ViewerListener {
     }
   }
 
+  public void addEdgeToMap(final Integer parentId,
+                           final Edge edge) {
+
+    if (edgesMap.containsKey(parentId)) {
+      final List<Edge> existingChildren = edgesMap.get(parentId);
+      existingChildren.add(edge);
+      edgesMap.put(parentId, existingChildren);
+    } else {
+      final ArrayList<Edge> children = new ArrayList<>();
+      children.add(edge);
+      edgesMap.put(parentId, children);
+    }
+  }
+
+  public void createBaseNodesWithFixedPositionFromTop(int treeDepth,
+                                                      List<Types.ACTIONS> availableActions) {
+
+    int levelNodes = availableActions.size();
+    int layerWeight = 30;
+    int layerWidth = 20;
+    int spriteDisplacementX = 0;
+    double spriteDisplacementY = -2;
+
+    int maxWidth = layerWidth * (int) Math.pow(levelNodes, treeDepth);
+
+    int nodeCount = 0;
+    for (int k = 0; k <= treeDepth; k++) {
+      nodeCount += (int) Math.pow(levelNodes, k);
+    }
+
+    int firstLayerNode = 0;
+
+    List<Integer> lastLayerNodesList = new ArrayList<>();
+    List<Integer> currentLayerNodesList = new ArrayList<>();
+
+    //   //\\
+    //  ///\\\
+    // ////\\\\\
+    //   //\\
+
+    // Build tree from top
+    for (int depth = 0; depth < treeDepth; depth++) {
+
+      double currentLayerNodes = Math.pow(levelNodes, depth);
+      double nodeSpacing = maxWidth / currentLayerNodes;
+      firstLayerNode = nodeCount;
+
+      // Create current Layer nodes
+      if (!lastLayerNodesList.isEmpty()) {
+        int currentLayerNodeCount = 0;
+        for (Integer lastLayerNode : lastLayerNodesList) {
+
+          final List<Integer> nodeChildren = treeHelper.getNodeChildren(lastLayerNode);
+          for (Integer childrenNode : nodeChildren) {
+
+            // Generate children nodes
+            generateNewNode(layerWeight, childrenNode, depth, (int) nodeSpacing, currentLayerNodeCount);
+            currentLayerNodesList.add(childrenNode);
+
+            // Add edge from parent to new children
+            int parentNodeIndex = getNodeIndex(lastLayerNode);
+            int childNodeIndex = getNodeIndex(childrenNode);
+
+            final String edgeId = childrenNode + String.valueOf(lastLayerNode);
+            graph.addEdge(edgeId, parentNodeIndex, childNodeIndex);
+
+            currentLayerNodeCount++;
+            nodeCount++;
+          }
+        }
+
+      } else {
+        int initialNodeId = 0;
+        generateNewNode(layerWeight, initialNodeId, depth, (int) nodeSpacing, 0);
+        currentLayerNodesList.add(0);
+        nodeCount++;
+      }
+
+
+      lastLayerNodesList = new ArrayList<>(currentLayerNodesList);
+      currentLayerNodesList.clear();
+    }
+
+    graph.setAttribute("ui.screenshot", String.format("tests/sample%d%d.png", 1, 2));
+    pipeIn.pump();
+  }
+
+
+  /**
+   * Initial node placement.
+   *
+   * @param treeDepth  desired fixed tree depth.
+   * @param levelNodes derided children
+   */
   public void createBaseNodesWithFixedPosition(int treeDepth,
                                                int levelNodes) {
 
@@ -125,17 +242,13 @@ public class TreeViewer implements ViewerListener {
 
       for (int currentNode = 0; currentNode < currentLayerNodes; currentNode++) {
 
-        // Add new base node
-        final Node node = graph.addNode(String.valueOf(nodeCount));
-        double nodeX = (double) nodeSpacing / (double) 2 + currentNode * nodeSpacing;
+        double nodeX = generateNewNode(layerWeight, nodeCount, depth, nodeSpacing, currentNode);
 
-        // Size = maxDepth * layerWeight
-        // -1 to grow from bottom to top
-        node.addAttribute("xyz", nodeX, -depth * layerWeight, 0);
+        // add node id
         //node.setAttribute("ui.label", nodeCount);
 
         // Attach property Sprite
-        final Sprite sprite = sman.addSprite("S" + String.valueOf(nodeCount));
+        final Sprite sprite = sman.addSprite("S" + nodeCount);
         sprite.attachToNode(String.valueOf(nodeCount));
         sprite.setPosition(nodeX + spriteDisplacementX, -depth * layerWeight + spriteDisplacementY, 0);
 
@@ -155,12 +268,15 @@ public class TreeViewer implements ViewerListener {
       if (!lastLayerNodesList.isEmpty()) {
         for (Integer currentNode : currentLayerNodesList) {
           for (int i = 0; i < levelNodes; i++) {
+
             int currentLayerNodeIndex = getNodeIndex(currentNode);
             int lastLayerNodeIndex = getNodeIndex(lastLayerNodesList.get(index));
-            final String edgeId = String.valueOf(currentNode) + String.valueOf((lastLayerNodesList.get(index)));
-            graph.addEdge(edgeId, currentLayerNodeIndex, lastLayerNodeIndex);
+
+            final String edgeId = currentNode + String.valueOf((lastLayerNodesList.get(index)));
+            final Edge edge = graph.addEdge(edgeId, currentLayerNodeIndex, lastLayerNodeIndex);
+
+            addEdgeToMap(currentLayerNodeIndex, edge);
             addChildrenNodeToMap(currentNode, lastLayerNodesList.get(index));
-            //edge.setAttribute("ui.label", edgeId);
             index++;
           }
         }
@@ -172,6 +288,24 @@ public class TreeViewer implements ViewerListener {
 
     graph.setAttribute("ui.screenshot", String.format("tests/sample%d%d.png", 99, 2));
     pipeIn.pump();
+  }
+
+  private double generateNewNode(final int layerWeight,
+                                 final int desiredId,
+                                 final int depth,
+                                 final int nodeSpacing,
+                                 final int currentNodeInLayer) {
+    // Add new base node
+    final Node node = graph.addNode(String.valueOf(desiredId));
+    node.setAttribute("ui.label", desiredId);
+
+    // Calculate node X
+    double nodeX = (double) nodeSpacing / (double) 2 + currentNodeInLayer * nodeSpacing;
+
+    // Size = maxDepth * layerWeight
+    // -1 to grow from bottom to top
+    node.addAttribute("xyz", nodeX, -depth * layerWeight, 0);
+    return nodeX;
   }
 
   public int getNodeIndex(final Integer nodeId) {
@@ -286,8 +420,8 @@ public class TreeViewer implements ViewerListener {
           // Update data sprite
           sprite.setAttribute("ui.label", viewerNode);
 
-          // Add edges
-          final Collection<Edge> edgeSet = n.getEdgeSet();
+          // Add first layer adge and selection
+          final Collection<Edge> edgeSet = edgesMap.get(0);
           edgeSet.forEach(edge -> {
             final Node node1 = edge.getNode1();
             final ViewerNode tempNode = nodeMap.get(Integer.parseInt(node1.getId()));
