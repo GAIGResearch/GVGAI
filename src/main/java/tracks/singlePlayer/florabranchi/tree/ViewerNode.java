@@ -1,4 +1,4 @@
-package tracks.singlePlayer.florabranchi.models;
+package tracks.singlePlayer.florabranchi.tree;
 
 import java.util.List;
 import java.util.stream.Collectors;

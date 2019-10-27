@@ -25,7 +25,7 @@ public class TrainMultipleGames {
     boolean visuals = false;
     int seed = new Random().nextInt();
 
-    String floraController = "tracks.singlePlayer.florabranchi.training.OfflineTrainerAgent";
+    String floraController = "tracks.singlePlayer.florabranchi.agents.OfflineTrainerAgent";
 
     // Load available games
     String spGamesCollection = "examples/all_games_sp.csv";

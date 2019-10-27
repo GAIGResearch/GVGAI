@@ -10,22 +10,20 @@ import ontology.Types;
 public class TreeHelper {
 
 
-  public TreeHelper(final int treeDepth,
-                    final List<Types.ACTIONS> availableActions) {
-    generateTreeNodeIds(treeDepth, availableActions);
+  public TreeHelper(final List<Types.ACTIONS> availableActions) {
+    generateTreeNodeIds(10, availableActions);
   }
 
   public static Map<Integer, Map<Types.ACTIONS, Integer>> nodeIdsMap = new HashMap<>();
 
   public static void main(String[] args) {
 
-    int depth = 3;
     List<Types.ACTIONS> availableActions = new ArrayList<>();
     availableActions.add(Types.ACTIONS.ACTION_USE);
     availableActions.add(Types.ACTIONS.ACTION_LEFT);
     availableActions.add(Types.ACTIONS.ACTION_RIGHT);
 
-    TreeHelper helper = new TreeHelper(depth, availableActions);
+    TreeHelper helper = new TreeHelper(availableActions);
     System.out.println("did it work");
   }
 

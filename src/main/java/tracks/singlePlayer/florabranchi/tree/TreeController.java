@@ -1,4 +1,4 @@
-package tracks.singlePlayer.florabranchi;
+package tracks.singlePlayer.florabranchi.tree;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 import core.game.StateObservation;
 import javafx.util.Pair;
 import ontology.Types;
-import tracks.singlePlayer.florabranchi.models.TreeNode;
 
 public class TreeController {
 
@@ -17,19 +16,24 @@ public class TreeController {
 
   private final static double C = 1 / Math.sqrt(2);
 
+  private final TreeHelper helper;
+
   public TreeNode rootNode;
 
   private Random rand = new Random();
 
-  private TreeViewer treeViewer = new TreeViewer();
+  private TreeViewer treeViewer;
 
   public TreeController(StateObservation initialState) {
 
+    treeViewer = new TreeViewer(initialState);
+    helper = new TreeHelper(initialState.getAvailableActions());
   }
 
   public void updateTreeVisualization(final StateObservation stateObs,
-                                      final int i) {
-    treeViewer.updateNodes(stateObs.getGameTick(), i, rootNode, stateObs);
+                                      final int i,
+                                      final Types.ACTIONS selectedAction) {
+    treeViewer.updateTreeObjects(stateObs.getGameTick(), i, rootNode, stateObs, selectedAction);
   }
 
   private void logMessage(final String message) {
@@ -39,9 +43,11 @@ public class TreeController {
   public void treeSearch(final int iterations,
                          final StateObservation initialState) {
 
-    if (rootNode == null) {
-      rootNode = new TreeNode(null, null);
-    }
+/*    if (rootNode == null) {
+      rootNode = new TreeNode(0, null, null);
+    }*/
+
+    rootNode = new TreeNode(0, null, null);
 
     for (int i = 0; i < iterations; i++) {
 
@@ -70,11 +76,9 @@ public class TreeController {
 
       // Backpropagation
       updateTree(selectedNode, simulationReward);
-      updateTreeVisualization(initialState, i);
     }
 
-    updateTreeVisualization(initialState, 0);
-
+    updateTreeVisualization(initialState, 0, null);
   }
 
   public Pair<TreeNode, StateObservation> getMostPromisingLeafNode(final StateObservation initialState) {
@@ -88,6 +92,8 @@ public class TreeController {
   }
 
   public void pruneTree(final Types.ACTIONS selectedAction) {
+    // todo fix ids
+
     rootNode = rootNode.children.stream().filter(child -> child.previousAction == selectedAction).findFirst()
         .orElse(null);
     rootNode.parent = null;
@@ -135,17 +141,9 @@ public class TreeController {
     TreeNode tempNode = node;
     for (Types.ACTIONS action : currentState.getAvailableActions()) {
       logMessage(String.format("Selected action %s to expand node %s", action.toString(), node.id));
-      tempNode = new TreeNode(node, action);
+      tempNode = new TreeNode(helper.getNodeId(node.id, action), node, action);
       node.children.add(tempNode);
     }
-  }
-
-  private boolean isNodeFullyExpanded(final TreeNode node,
-                                      final ArrayList<Types.ACTIONS> nodeAvailableActions) {
-    if (nodeAvailableActions.isEmpty()) {
-      return true;
-    }
-    return node.children.size() == nodeAvailableActions.size();
   }
 
   public TreeNode getMostVisitedChild(final TreeNode node) {
@@ -168,11 +166,5 @@ public class TreeController {
   public Types.ACTIONS getBestFoundAction() {
     final TreeNode bestNode = getBestChild(rootNode);
     return bestNode.previousAction;
-  }
-
-  void resetNodeCount() {
-    if (rootNode != null) {
-      rootNode.resetNodeCount();
-    }
   }
 }

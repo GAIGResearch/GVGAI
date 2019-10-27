@@ -1,4 +1,4 @@
-package tracks.singlePlayer.florabranchi.training;
+package tracks.singlePlayer.florabranchi.agents;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -20,6 +20,10 @@ import core.game.StateObservation;
 import core.player.AbstractPlayer;
 import ontology.Types;
 import tools.ElapsedCpuTimer;
+import tracks.singlePlayer.florabranchi.training.FeatureVectorController;
+import tracks.singlePlayer.florabranchi.training.OffilneTrainerResults;
+import tracks.singlePlayer.florabranchi.training.TrainingLog;
+import tracks.singlePlayer.florabranchi.training.TrainingWeights;
 
 public class OfflineTrainerAgent extends AbstractPlayer {
 

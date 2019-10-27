@@ -1,4 +1,4 @@
-package tracks.singlePlayer.florabranchi;
+package tracks.singlePlayer.florabranchi.agents;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,12 +10,14 @@ import core.game.StateObservation;
 import core.player.AbstractPlayer;
 import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
-import tracks.singlePlayer.florabranchi.models.TreeNode;
+import tracks.singlePlayer.florabranchi.GameStateHeuristic;
+import tracks.singlePlayer.florabranchi.tree.TreeController;
+import tracks.singlePlayer.florabranchi.tree.TreeNode;
 
 /**
  * Flora Branchi (florabranchi@gmail.com) September 2019
  */
-public class Agent extends AbstractPlayer {
+public class ExperimentsAgent extends AbstractPlayer {
 
   private final TreeController treeController;
   /**
@@ -30,16 +32,16 @@ public class Agent extends AbstractPlayer {
 
   private EAvailablePolicies agentPolicy;
 
-  /**'
-   * initialize all variables for the agent
+  /**
+   * ' initialize all variables for the agent
    *
    * @param stateObs     Observation of the current state.
    * @param elapsedTimer Timer when the action returned is due.
    */
-  public Agent(final StateObservation stateObs,
-               final ElapsedCpuTimer elapsedTimer) {
+  public ExperimentsAgent(final StateObservation stateObs,
+                          final ElapsedCpuTimer elapsedTimer) {
 
-    agentPolicy = EAvailablePolicies.MONTE_CARLO_TREE_SEARCH;
+    agentPolicy = EAvailablePolicies.ONE_STEP_LOOK_AHEAD;
     System.out.println(String.format("Creating agent with policy %s", agentPolicy.name()));
     randomGenerator = new Random();
     actions = stateObs.getAvailableActions();
@@ -61,8 +63,6 @@ public class Agent extends AbstractPlayer {
     switch (this.agentPolicy) {
       case ONE_STEP_LOOK_AHEAD:
         return oneStepLookAhead(stateObs, elapsedTimer);
-      case MONTE_CARLO_TREE_SEARCH:
-        return monteCarloSearch(stateObs, elapsedTimer);
       case RANDOM:
       default:
         return returnRandomAction();
@@ -81,20 +81,18 @@ public class Agent extends AbstractPlayer {
                                   final ElapsedCpuTimer elapsedTimer) {
 
     // Perform tree Search
-
     treeController.treeSearch(10, stateObs);
     final TreeNode bestChild = treeController.getMostVisitedChild(treeController.rootNode);
-    final ACTIONS bestFoundAction = treeController.getBestFoundAction();
+    final ACTIONS bestFoundAction = bestChild.previousAction;
 
-    // Visualization shenenigans
-    //treeController.updateTreeVisualization(stateObs, bestChild);
-
-    //treeController.resetNodeCount();
+    // Update Visualization
+    treeController.updateTreeVisualization(stateObs, stateObs.getGameTick(), bestFoundAction);
 
     System.out.println(elapsedTimer.elapsedMillis());
 
-    treeController.pruneTree(bestFoundAction);
-    treeController.updateTreeVisualization(stateObs, 99);
+    // todo add prune suppport
+    //treeController.pruneTree(bestFoundAction);
+
     return bestFoundAction;
   }
 
@@ -135,6 +133,5 @@ public class Agent extends AbstractPlayer {
   enum EAvailablePolicies {
     RANDOM,
     ONE_STEP_LOOK_AHEAD,
-    MONTE_CARLO_TREE_SEARCH
   }
 }
