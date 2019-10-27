@@ -62,11 +62,11 @@ public class MonteCarloTreeAgent extends AbstractPlayer {
     final ACTIONS bestFoundAction = bestChild.previousAction;
 
     // Update Visualization
-    treeController.updateTreeVisualization(stateObs, stateObs.getGameTick(), bestFoundAction);
+    treeController.updateTreeVisualization(stateObs, 0, bestFoundAction);
 
     System.out.println(elapsedTimer.elapsedMillis());
 
-    // todo add prune suppport
+    // todo add prune support
     //treeController.pruneTree(bestFoundAction);
 
     return bestFoundAction;

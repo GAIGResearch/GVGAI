@@ -31,9 +31,9 @@ public class TreeController {
   }
 
   public void updateTreeVisualization(final StateObservation stateObs,
-                                      final int i,
+                                      final int iteration,
                                       final Types.ACTIONS selectedAction) {
-    treeViewer.updateTreeObjects(stateObs.getGameTick(), i, rootNode, stateObs, selectedAction);
+    treeViewer.updateTreeObjects(1, stateObs.getGameTick(), iteration, rootNode, stateObs, selectedAction);
   }
 
   private void logMessage(final String message) {

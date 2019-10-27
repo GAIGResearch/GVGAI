@@ -19,7 +19,6 @@ import tracks.singlePlayer.florabranchi.tree.TreeNode;
  */
 public class ExperimentsAgent extends AbstractPlayer {
 
-  private final TreeController treeController;
   /**
    * Random generator for the agent.
    */
@@ -45,7 +44,6 @@ public class ExperimentsAgent extends AbstractPlayer {
     System.out.println(String.format("Creating agent with policy %s", agentPolicy.name()));
     randomGenerator = new Random();
     actions = stateObs.getAvailableActions();
-    treeController = new TreeController(stateObs);
   }
 
   public void setAgentPolicy(final EAvailablePolicies agentPolicy) {
@@ -76,26 +74,6 @@ public class ExperimentsAgent extends AbstractPlayer {
     int index = randomGenerator.nextInt(actions.size());
     return actions.get(index);
   }
-
-  public ACTIONS monteCarloSearch(final StateObservation stateObs,
-                                  final ElapsedCpuTimer elapsedTimer) {
-
-    // Perform tree Search
-    treeController.treeSearch(10, stateObs);
-    final TreeNode bestChild = treeController.getMostVisitedChild(treeController.rootNode);
-    final ACTIONS bestFoundAction = bestChild.previousAction;
-
-    // Update Visualization
-    treeController.updateTreeVisualization(stateObs, stateObs.getGameTick(), bestFoundAction);
-
-    System.out.println(elapsedTimer.elapsedMillis());
-
-    // todo add prune suppport
-    //treeController.pruneTree(bestFoundAction);
-
-    return bestFoundAction;
-  }
-
 
   /**
    * Returns the best action considering the outcome of a single play.
