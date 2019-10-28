@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.stream.Collectors;
 
 import core.game.StateObservation;
 import ontology.Types;
@@ -35,16 +36,20 @@ public class TreeViewer implements ViewerListener {
 
   private HashMap<Integer, List<Integer>> nodeChildrenMapByIndex = new HashMap<>();
   private HashMap<Integer, List<Edge>> edgesMap = new HashMap<>();
+  private HashMap<Integer, Edge> childrenEdgeMap = new HashMap<>();
   private HashMap<Integer, Node> nodeMap = new HashMap<>();
+  private HashMap<Integer, Node> extraNodes = new HashMap<>();
+  private HashMap<Integer, Sprite> extraSprites = new HashMap<>();
   private HashMap<String, Sprite> gameStateSpriteMap = new HashMap<>();
 
 
+  private int totalFixedNodes;
   private TreeHelper treeHelper;
 
   // Viewer properties
   final static int TREE_DEPTH = 4;
 
-  private final static int LAYER_WEIGHT = 300;
+  private final static int LAYER_HEIGHT = 300;
   private final static int LAYER_WIDTH = 50;
 
   private final static int SPRITE_DISPLACEMENT_X = 0;
@@ -52,6 +57,7 @@ public class TreeViewer implements ViewerListener {
 
   private final static String GAME_SCORE = "GAME_SCORE";
   private final static String GAME_TICK = "GAME_TICK";
+  private int maxGraphWidth;
 
   public TreeViewer(final StateObservation stateObservation) {
 
@@ -90,28 +96,43 @@ public class TreeViewer implements ViewerListener {
 
   private void addStyle() {
 
-    String myStyle = "node {"
-        + "size: 10px;"
-        + "fill-color: red, green;"
-        + "fill-mode: dyn-plain;"
-        + "}"
+    String myStyle =
 
-        + "edge {"
-        + "shape: line;"
-        + "fill-color: #222;"
-        + "}"
+        "node {"
+            + "size: 1px;"
+            + "fill-color: gray;"
+            + "}"
 
-        + "edge.selected {"
-        + "shape: line;"
-        + "size: 10px;"
-        + "fill-color: yellow;"
-        + "arrow-size: 3px, 2px;"
-        + "}"
+            + "node.selected {"
+            + "size: 10px;"
+            + "fill-color: red, green;"
+            + "fill-mode: dyn-plain;"
+            + "}"
 
-        + "sprite {"
-        + "size: 0px;"
-        + "text-alignment: left;"
-        + "}";
+            + "edge {"
+            + "fill-color: white;"
+            + "}"
+
+            + "edge.populated {"
+            + "shape: line;"
+            + "fill-color: #bfbfbf;"
+            + "}"
+
+            + "edge.selected {"
+            + "shape: line;"
+            + "size: 10px;"
+            + "fill-color: yellow;"
+            + "arrow-size: 3px, 2px;"
+            + "}"
+
+            + "edge.extraNodes {"
+            + "fill-color: #bfbfbf;"
+            + "}"
+
+            + "sprite {"
+            + "size: 0px;"
+            + "text-alignment: left;"
+            + "}";
 
     graph.addAttribute("ui.stylesheet", myStyle);
   }
@@ -161,12 +182,14 @@ public class TreeViewer implements ViewerListener {
     addGameStateSprites();
 
     int levelNodes = availableActions.size();
-    int maxWidth = LAYER_WIDTH * (int) Math.pow(levelNodes, treeDepth);
+    maxGraphWidth = LAYER_WIDTH * (int) Math.pow(levelNodes, treeDepth);
 
     int nodeCount = 0;
-    for (int k = 0; k <= treeDepth; k++) {
+    for (int k = 0; k < treeDepth; k++) {
       nodeCount += (int) Math.pow(levelNodes, k);
     }
+
+    totalFixedNodes = nodeCount;
 
     int firstLayerNode = 0;
 
@@ -182,7 +205,7 @@ public class TreeViewer implements ViewerListener {
     for (int depth = 0; depth < treeDepth; depth++) {
 
       double currentLayerNodes = Math.pow(levelNodes, depth);
-      double nodeSpacing = maxWidth / currentLayerNodes;
+      double nodeSpacing = maxGraphWidth / currentLayerNodes;
 
       // Create current Layer nodes
       if (!lastLayerNodesList.isEmpty()) {
@@ -203,6 +226,8 @@ public class TreeViewer implements ViewerListener {
             final String edgeId = childrenNode + String.valueOf(lastLayerNode);
             final Edge edge = graph.addEdge(edgeId, parentNodeIndex, childNodeIndex);
 
+
+            childrenEdgeMap.put(childrenNode, edge);
             addEdgeToMap(lastLayerNode, edge);
             addChildrenNodeToMap(lastLayerNode, childrenNode);
 
@@ -255,20 +280,150 @@ public class TreeViewer implements ViewerListener {
     // Calculate node X
     double nodeX = (double) nodeSpacing / (double) 2 + currentNodeInLayer * nodeSpacing;
 
-    // Size = maxDepth * LAYER_WEIGHT
+    // Size = maxDepth * LAYER_HEIGHT
     // -1 to grow from bottom to top
-    int nodeY = -depth * TreeViewer.LAYER_WEIGHT;
+    int nodeY = -depth * TreeViewer.LAYER_HEIGHT;
 
     node.addAttribute("xyz", nodeX, nodeY, 0);
 
     // Attach property Sprite
     final Sprite sprite = sman.addSprite("S" + desiredId);
     sprite.attachToNode(String.valueOf(desiredId));
-    sprite.setPosition(nodeX + SPRITE_DISPLACEMENT_X, -depth * TreeViewer.LAYER_WEIGHT + SPRITE_DISPLACEMENT_Y, 0);
+    sprite.setPosition(nodeX + SPRITE_DISPLACEMENT_X, -depth * TreeViewer.LAYER_HEIGHT + SPRITE_DISPLACEMENT_Y, 0);
+
+  }
+
+  public void addNewNodesFromParent(Integer parentNodeId,
+                                    final List<ViewerNode> viewerNodes,
+                                    final int nodeSpacing) {
+
+    final Node parentNode = graph.getNode(parentNodeId.toString());
+
+    if (parentNode == null) {
+      System.out.println("ERROR FAILED TO FIND PARENT");
+      return;
+    }
+
+    final Object[] parentCoord = parentNode.getAttribute("xyz");
+    double parentX = (double) parentCoord[0];
+    Double parentY = Double.valueOf(String.valueOf(parentCoord[1]));
+
+    int lastLayerHeight = 100;
+
+    double nodeY = parentY - lastLayerHeight;
+
+    // Calculate node X
+    // Split available size between node children
+    double nodeSpacingForChildren = (double) nodeSpacing / viewerNodes.size();
+    double startingX = viewerNodes.size() == 1 ? parentX : parentX - (nodeSpacingForChildren / 2);
+
+    int currNode = 0;
+
+    for (ViewerNode newNode : viewerNodes) {
+
+      double nodeX = startingX + (currNode * nodeSpacingForChildren);
+
+      Integer desiredId = newNode.id;
+
+      // Add new base node
+      final Node node = graph.addNode(String.valueOf(desiredId));
+      extraNodes.put(desiredId, node);
+
+      node.addAttribute("xyz", nodeX, nodeY, 0);
+      node.setAttribute("ui.color", newNode.value);
+      node.addAttribute("ui.class", "selected");
+
+      // Attach property Sprite
+      final Sprite sprite = sman.addSprite("S" + desiredId);
+      sprite.attachToNode(String.valueOf(desiredId));
+      sprite.setPosition(nodeX + SPRITE_DISPLACEMENT_X, nodeY + SPRITE_DISPLACEMENT_Y, 0);
+      extraSprites.put(desiredId, sprite);
+
+      // Add edge from parent to new children
+      int parentNodeIndex = getNodeIndex(parentNodeId);
+      int childNodeIndex = getNodeIndex(desiredId);
+
+      final String edgeId = childNodeIndex + String.valueOf(parentNodeIndex);
+      final Edge edge = graph.addEdge(edgeId, parentNodeIndex, childNodeIndex);
+      edge.addAttribute("ui.class", "extraNodes");
+      currNode++;
+    }
   }
 
   public int getNodeIndex(final Integer nodeId) {
     return graph.getNode(String.valueOf(nodeId)).getIndex();
+  }
+
+  public void updateExtraNodes(final List<ViewerNode> newNodeList) {
+
+    // Clean previous temp nodes
+    for (Map.Entry<Integer, Node> newNode : extraNodes.entrySet()) {
+      graph.removeNode(newNode.getValue());
+    }
+    for (Map.Entry<Integer, Sprite> sprite : extraSprites.entrySet()) {
+      sman.removeSprite(sprite.getValue().getId());
+    }
+
+    extraSprites = new HashMap<>();
+    extraNodes = new HashMap<>();
+
+    // Cast by depth
+    final Map<Integer, List<ViewerNode>> nodeDepthMap = getNodeDepthMap(newNodeList);
+
+    int currParent = 1;
+    int yOffset = LAYER_HEIGHT / 5;
+
+    for (Map.Entry<Integer, List<ViewerNode>> nodeDepthEntries : nodeDepthMap.entrySet()) {
+
+      final List<ViewerNode> layerNodes = nodeDepthEntries.getValue();
+      //int nodeSpacing = maxGraphWidth / layerNodes.size();
+      final int nodeDepth = nodeDepthEntries.getKey();
+      int currentNode = 0;
+
+      Map<Integer, List<ViewerNode>> childrenByParentMap = new HashMap<>();
+      for (ViewerNode node : layerNodes) {
+        int index = node.parent;
+        if (childrenByParentMap.containsKey(index)) {
+          final List<ViewerNode> newList = childrenByParentMap.get(index);
+          newList.add(node);
+        } else {
+          List<ViewerNode> newList = new ArrayList<>();
+          newList.add(node);
+          childrenByParentMap.put(index, newList);
+        }
+      }
+
+
+      // For each node parent
+
+      for (Map.Entry<Integer, List<ViewerNode>> childrenNodes : childrenByParentMap.entrySet()) {
+
+        int parentsInDepth = childrenByParentMap.size();
+
+        Integer parentId = childrenNodes.getKey();
+
+        int nodeSpacing = LAYER_WIDTH * parentsInDepth / 2;
+        addNewNodesFromParent(parentId, childrenNodes.getValue(), nodeSpacing);
+        currParent++;
+      }
+      currParent = 1;
+    }
+  }
+
+  public Map<Integer, List<ViewerNode>> getNodeDepthMap(final List<ViewerNode> newNodeList) {
+    Map<Integer, List<ViewerNode>> castedMap = new HashMap<>();
+    for (ViewerNode newNode : newNodeList) {
+      final int nodeDepth = treeHelper.getNodeDepth(newNode.id);
+      if (castedMap.containsKey(nodeDepth)) {
+        final List<ViewerNode> viewerNodes = castedMap.get(nodeDepth);
+        viewerNodes.add(newNode);
+      } else {
+        List<ViewerNode> newList = new ArrayList<>();
+        newList.add(newNode);
+        castedMap.put(nodeDepth, newList);
+      }
+    }
+    return castedMap;
   }
 
   /**
@@ -292,24 +447,55 @@ public class TreeViewer implements ViewerListener {
     final Map<Integer, ViewerNode> nodeMap = new HashMap<>();
     viewerNodes.forEach(n -> nodeMap.put(n.id, n));
 
+    // Cleanup
+    for (Edge edge : graph.getEdgeSet()) {
+      edge.removeAttribute("ui.class");
+    }
+
+    // Get undendered nodes
+    List<ViewerNode> newNodeList = viewerNodes.stream().filter(node -> node.id > totalFixedNodes).collect(Collectors.toList());
+
+    // Add new nodes
+    updateExtraNodes(newNodeList);
+
+
     for (Node n : graph.getEachNode()) {
 
+      if (extraNodes.containsKey(Integer.parseInt(n.getId()))) {
+        continue;
+      }
+
       try {
-        final Sprite sprite = sman.getSprite("S" + n.getId());
+
         n.removeAttribute("ui.color");
-        sprite.removeAttribute("ui.label");
+        n.removeAttribute("ui.class");
+
+        final Sprite sprite = sman.getSprite("S" + n.getId());
+        if (sprite != null) {
+          sprite.removeAttribute("ui.label");
+        }
 
         int nodeId = Integer.parseInt(n.getId());
 
+        // If node was created
         if (nodeMap.containsKey(nodeId)) {
 
           final ViewerNode viewerNode = nodeMap.get(nodeId);
 
           // Add value to balance color
+          n.addAttribute("ui.class", "selected");
           n.setAttribute("ui.color", viewerNode.value);
 
           // Update data sprite
-          sprite.setAttribute("ui.label", viewerNode);
+          if (sprite != null) {
+            sprite.setAttribute("ui.label", viewerNode);
+          }
+
+          // Activate related edge
+          final Edge relatedEdge = childrenEdgeMap.get(nodeId);
+          if (relatedEdge != null) {
+            relatedEdge.setAttribute("ui.class", "populated");
+          }
 
           // Add Action label to first level nodes
           final Collection<Edge> edgeSet = edgesMap.get(0);
@@ -318,15 +504,14 @@ public class TreeViewer implements ViewerListener {
             final ViewerNode tempNode = nodeMap.get(Integer.parseInt(node1.getId()));
 
             if (tempNode != null && tempNode.action != null) {
-              edge.removeAttribute("ui.class");
               if (selectedAction != null && tempNode.action.equals(selectedAction.toString())) {
-                edge.addAttribute("ui.class", "selected");
+                edge.setAttribute("ui.class", "selected");
               }
               edge.addAttribute("ui.label", tempNode.action);
             }
           });
-        }
 
+        }
       } catch (Exception ex) {
         ex.printStackTrace();
       }
@@ -355,6 +540,12 @@ public class TreeViewer implements ViewerListener {
 
       // Get element
       TreeNode currentNode = queue.remove();
+
+      // Remove unvisited children
+      if (currentNode.visits == 0) {
+        continue;
+      }
+
       viewerNodeList.add(new ViewerNode(currentNode.id, currentNode));
       if (currentNode.children != null && currentNode.children.size() > 0) {
         queue.addAll(currentNode.children);

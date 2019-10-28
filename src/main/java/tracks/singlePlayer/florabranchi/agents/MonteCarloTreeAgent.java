@@ -57,7 +57,7 @@ public class MonteCarloTreeAgent extends AbstractPlayer {
                                   final ElapsedCpuTimer elapsedTimer) {
 
     // Perform tree Search
-    treeController.treeSearch(10, stateObs);
+    treeController.treeSearch(20, stateObs);
     final TreeNode bestChild = treeController.getMostVisitedChild(treeController.rootNode);
     final ACTIONS bestFoundAction = bestChild.previousAction;
 

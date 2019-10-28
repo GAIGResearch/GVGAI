@@ -15,6 +15,9 @@ public class TreeHelper {
   }
 
   public static Map<Integer, Map<Types.ACTIONS, Integer>> nodeIdsMap = new HashMap<>();
+  public static Map<Integer, Integer> nodeDepthInfoMap = new HashMap<>();
+  public static Map<Integer, Integer> nodeToParentMap = new HashMap<>();
+  public static Map<Integer, Integer> nodesPerDepth = new HashMap<>();
 
   public static void main(String[] args) {
 
@@ -25,6 +28,17 @@ public class TreeHelper {
 
     TreeHelper helper = new TreeHelper(availableActions);
     System.out.println("did it work");
+  }
+  public int getNodeParent(final Integer id) {
+    return nodeToParentMap.getOrDefault(id, -1);
+  }
+
+  public int getNodeDepth(final Integer id) {
+    return nodeDepthInfoMap.getOrDefault(id, -1);
+  }
+
+  public int getTotalLayerNodes(final Integer depth) {
+    return nodesPerDepth.getOrDefault(depth, -1);
   }
 
 
@@ -50,10 +64,13 @@ public class TreeHelper {
     for (int depth = 0; depth < treeDepth; depth++) {
 
       double currentLayerNodes = Math.pow(levelNodes, depth);
+      nodesPerDepth.put(depth, (int) currentLayerNodes);
+
       firstLayerNode = nodeCount;
 
       for (int layerNode = 0; layerNode < currentLayerNodes; layerNode++) {
         currentLayerNodesList.add(nodeCount);
+        nodeDepthInfoMap.put(nodeCount, depth);
         nodeCount++;
       }
 
@@ -64,6 +81,7 @@ public class TreeHelper {
           // for each node in last
           // link to n = levelNodes edges in last layer
           addChildrenNodes(lastLayerNode, firstLayerNode, availableActions);
+          nodeToParentMap.put(lastLayerNode, firstLayerNode);
           firstLayerNode += levelNodes;
         }
       }

@@ -13,6 +13,8 @@ public class ViewerNode {
 
   public List<Integer> children;
 
+  public Integer parent;
+
   public ViewerNode(final Integer id,
                     final double value,
                     final List<Integer> children) {
@@ -26,6 +28,7 @@ public class ViewerNode {
     this.id = id;
     this.value = node.value / (node.visits != 0 ? node.visits : 1);
     this.action = String.valueOf(node.previousAction);
+    this.parent = node.parent != null ? node.parent.id : -1;
     this.children = node.children.stream().map(c -> c.id).collect(Collectors.toList());
   }
 
