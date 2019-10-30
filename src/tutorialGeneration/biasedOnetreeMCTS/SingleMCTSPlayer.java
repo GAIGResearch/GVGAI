@@ -99,9 +99,9 @@ public class SingleMCTSPlayer
 	    		m_root.numIterations = 500;
 	    	    m_root.mctsSearch(improved, critPath);
 	    	    int action = m_root.mostVisitedAction();
-	    	    if(visualize) {
-	    	    	return action;
-	    	    }
+//	    	    if(visualize) {
+//	    	    	return action;
+//	    	    }
 
 	    	    Types.ACTIONS act = actions[action];
 	    	    a_gameState.advance(act);
