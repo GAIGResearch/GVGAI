@@ -42,7 +42,8 @@ public class SingleMCTSPlayer
 
     public boolean improved;
     public static SingleTreeNode currentNode;
-    
+    public int numIterations = 2000;
+
 
     public boolean done = false;
     public boolean visualize = false;
@@ -70,7 +71,7 @@ public class SingleMCTSPlayer
     {
         //Set the game observation to a newly root node.
         //System.out.println("learning_style = " + learning_style);
-        m_root = new SingleTreeNode(m_rnd, num_actions, actions);
+        m_root = new SingleTreeNode(m_rnd, num_actions, numIterations, actions);
         m_root.rootState = a_gameState;
         SingleMCTSPlayer.currentNode = m_root;
     }

@@ -299,6 +299,11 @@ public class StateObservation {
          return model.getHistoricEventsHistory();
     }
     
+    /**
+     * This method retrieves a list of all events that happened so far in the game, where events are equivalent to any interaction
+     * that can possibly occur according to the game rules.
+     * @return
+     */
     public ArrayList<GameEvent> getFirstTimeEventsHistory() {
     	return model.getFirstTimeEventsHistory();
     }  

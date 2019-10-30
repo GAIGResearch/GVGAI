@@ -945,11 +945,12 @@ public abstract class Game {
 	
 	public void storeActionsAndInteractions() {
 		//stores the interaction in a JSONFile
-		storeInteraction.writeInteractionJSONFile(InteractionStaticData.gameName + "/" + InteractionStaticData.agentName + "/" + InteractionStaticData.levelCount + "/" + InteractionStaticData.playthroughCount +
-				"/interactions/interaction.json");
-		
-		storePlayerAction.writePlayerActionJSONFile(InteractionStaticData.gameName + "/" + InteractionStaticData.agentName + "/" + InteractionStaticData.levelCount + "/" + InteractionStaticData.playthroughCount +
-				"/actions/actions.json");
+		File f = new File(InteractionStaticData.gameName, InteractionStaticData.agentName + "_" + InteractionStaticData.levelCount + "_" + InteractionStaticData.playthroughCount +
+				"_interaction.json");
+		storeInteraction.writeInteractionJSONFile(f.toString());
+		f = new File(InteractionStaticData.gameName, InteractionStaticData.agentName + "_" + InteractionStaticData.levelCount + "_" + InteractionStaticData.playthroughCount +
+				"_actions.json");
+		storePlayerAction.writePlayerActionJSONFile(f.toString());
 		
 		InteractionStaticData.counter += 1;
 	}
@@ -976,6 +977,7 @@ public abstract class Game {
 
 			storeFramesAndActions(players, frameStorer);
 		}
+		
 			storeActionsAndInteractions();
 
 		// Update the forward model for the game state sent to the controller.
@@ -1309,10 +1311,10 @@ public abstract class Game {
 			storeGameSimulationResult.
 			storeGameSimulationResult(String.valueOf((avatars[0].getWinState().key()))
 					,String.valueOf(gameTick));
-			
+			File f = new File(InteractionStaticData.gameName, InteractionStaticData.agentName + "_" + InteractionStaticData.levelCount + "_" + InteractionStaticData.playthroughCount +
+					"_result.json");
 			storeGameSimulationResult.
-			writeResultToAJSONFile(InteractionStaticData.gameName + "/" + InteractionStaticData.agentName + "/" + InteractionStaticData.levelCount + "/" + InteractionStaticData.playthroughCount +
-					"/" + "result/result.json");
+			writeResultToAJSONFile(f.toString());
 			InteractionStaticData.resultsCounter += 1;
 		}
 
@@ -1333,11 +1335,12 @@ public abstract class Game {
 			JSONObject obj = spriteCapture.toJSONObject();
 			storeSpriteCapture.storeAllSpritesCaptured(obj);
 		}
+//		File f = new File(InteractionStaticData.gameName, InteractionStaticData.agentName + "_" + InteractionStaticData.levelCount + "_" + InteractionStaticData.playthroughCount +
+//				"_capture.json");
+//		storeSpriteCapture.
+//			writeSpriteCaptureJSONFile
+//				(f.toString());
 		
-		storeSpriteCapture.
-			writeSpriteCaptureJSONFile
-				(InteractionStaticData.gameName + "/" + InteractionStaticData.agentName + "/" + InteractionStaticData.levelCount + "/" + InteractionStaticData.playthroughCount +
-						"/" + "capture/capture.json");
 		InteractionStaticData.spriteCaptureCounter += 1;
 		
 		// System.out.println("Result (1->win; 0->lose):"+ winner.key() + ",

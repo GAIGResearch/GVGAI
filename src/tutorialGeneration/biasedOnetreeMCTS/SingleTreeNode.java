@@ -31,7 +31,7 @@ public class SingleTreeNode
     private final double K_DECAY = 0.00;
     private final double BONUS_DECAY = 0.10;
     // number of MCTS iterations
-    public int numIterations = 2000;
+    public int numIterations;
     
     public float bonus = 0;
     public double epsilon = 1e-6;
@@ -60,8 +60,9 @@ public class SingleTreeNode
     
     public ArrayList<GameEvent> critPath;
 
-    public SingleTreeNode(Random rnd, int num_actions, Types.ACTIONS[] actions) {
+    public SingleTreeNode(Random rnd, int num_actions, int numIterations, Types.ACTIONS[] actions) {
         this(null,null, -1, rnd, num_actions, actions, new ArrayList<GameEvent>());
+        this.numIterations = numIterations;
         rootNode = this;
     }
 

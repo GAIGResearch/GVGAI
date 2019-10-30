@@ -31,6 +31,7 @@ public class SingleMCTSPlayer
     public Random m_rnd;
 
     public int num_actions;
+    public int numIterations = 2000;
     public Types.ACTIONS[] actions;
     
     public ArrayList<GameEvent> critPath;
@@ -51,7 +52,7 @@ public class SingleMCTSPlayer
     {
         //Set the game observation to a newly root node.
         //System.out.println("learning_style = " + learning_style);
-        m_root = new SingleTreeNode(m_rnd, num_actions, actions);
+        m_root = new SingleTreeNode(m_rnd, num_actions, numIterations, actions);
         m_root.rootState = a_gameState;
     }
 

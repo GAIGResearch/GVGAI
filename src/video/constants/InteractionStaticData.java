@@ -1,5 +1,9 @@
 package video.constants;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -71,6 +75,17 @@ public class InteractionStaticData {
 		json.add("}");
 		json.add("}");
 		InteractionStaticData.itypesJson = json;
+    }
+    
+    public static void createFolders() {
+    	File resultsDir = new File(InteractionStaticData.gameName);
+    	try {
+			Files.createDirectories(resultsDir.toPath());
+			System.out.println("results dir created");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 }
 

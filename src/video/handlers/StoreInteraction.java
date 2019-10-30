@@ -39,7 +39,6 @@ public class StoreInteraction {
 	{
 		try (FileWriter file = new FileWriter("interaction/interaction.json")) {
 
-//			file.write(interactionArray.toJSONString() + "\n");
 			file.flush();
 			file.close();
 
@@ -62,7 +61,6 @@ public class StoreInteraction {
 				}
 			}
 			file.write("]");
-//			file.write(interactionArray.toJSONString() + "\n");
 			file.flush();
 			file.close();
 
