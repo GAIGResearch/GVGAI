@@ -27,7 +27,7 @@ public class SingleTreeNode
     private final double K_DECAY = 0.05;
     private final double BONUS_DECAY = 0.10;
     // number of MCTS iterations
-    public int numIterations = 5 * 1000;
+    public int numIterations = 500;
     
     public double epsilon = 1e-6;
     public double egreedyEpsilon = 0.05;

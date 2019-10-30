@@ -31,7 +31,7 @@ public class SingleTreeNode
     private final double K_DECAY = 0.00;
     private final double BONUS_DECAY = 0.10;
     // number of MCTS iterations
-    public int numIterations = 500;
+    public int numIterations = 2000;
     
     public float bonus = 0;
     public double epsilon = 1e-6;
@@ -47,7 +47,7 @@ public class SingleTreeNode
 
     public int num_actions;
     Types.ACTIONS[] actions;
-    public int ROLLOUT_DEPTH = 1;
+    public int ROLLOUT_DEPTH = 50;
     public int bonus_count = 0;
     
     public double K = Math.sqrt(2);
@@ -164,7 +164,7 @@ public class SingleTreeNode
 
         // add any interactions that occured during this event
         
-        SingleTreeNode tn = new SingleTreeNode(this.rootNode, this,bestAction, this.m_rnd, num_actions, actions, interactions);
+        SingleTreeNode tn = new SingleTreeNode(this.rootNode, this, bestAction, this.m_rnd, num_actions, actions, interactions);
         tn.bonus = this.bonus;
         children[bestAction] = tn;
         
