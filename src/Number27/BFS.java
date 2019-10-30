@@ -223,7 +223,7 @@ public class BFS extends CustomAbstractPlayer {
 			ActionNode node = iter.next();
 			state = node.getCurrentState();
 			score = state.getGameScore();
-			eventCount = state.getEventsHistory().size();
+			eventCount = state.getHistoricEventsHistory().size();
 			
 			// Choose the highest score with minimal events
 			if(score >= maxScore) {
@@ -273,7 +273,7 @@ public class BFS extends CustomAbstractPlayer {
 		while(iter.hasNext()) {
 			ActionNode node = iter.next();
 			StateObservation state = node.getCurrentState();
-			int events = state.getEventsHistory().size();
+			int events = state.getHistoricEventsHistory().size();
 			double score = state.getGameScore();
 			
 			if(events < eventsMin) {
@@ -298,7 +298,7 @@ public class BFS extends CustomAbstractPlayer {
 				while(iter.hasNext()) {
 					ActionNode node = iter.next();
 					StateObservation state = node.getCurrentState();
-					int events = state.getEventsHistory().size();
+					int events = state.getHistoricEventsHistory().size();
 					double score = state.getGameScore();
 					
 					if(events <= eventsMax - ((eventsMax - eventsMin) / 3) && score < scoreMax) {

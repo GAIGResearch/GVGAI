@@ -1,10 +1,14 @@
 package tracks.singlePlayer.advanced.sampleMCTS;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import core.game.StateObservation;
 import ontology.Types;
 import tools.ElapsedCpuTimer;
+
+import tutorialGeneration.biasedOnetreeMCTS.SingleTreeNode;
+import video.basics.GameEvent;
 
 /**
  * Created with IntelliJ IDEA.
@@ -28,6 +32,8 @@ public class SingleMCTSPlayer
 
     public int num_actions;
     public Types.ACTIONS[] actions;
+    
+    public ArrayList<GameEvent> critPath;
 
     public SingleMCTSPlayer(Random a_rnd, int num_actions, Types.ACTIONS[] actions)
     {
@@ -56,7 +62,7 @@ public class SingleMCTSPlayer
     public int run(ElapsedCpuTimer elapsedTimer)
     {
         //Do the search within the available time.
-        m_root.mctsSearch(elapsedTimer);
+        m_root.mctsSearch(false, critPath);
 
         //Determine the best action to take and return it.
         int action = m_root.mostVisitedAction();

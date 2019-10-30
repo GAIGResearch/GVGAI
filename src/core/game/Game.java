@@ -53,9 +53,10 @@ import tools.pathfinder.Node;
 import tools.pathfinder.PathFinder;
 import video.basics.Interaction;
 import video.basics.PlayerAction;
+import video.basics.GameEvent;
 import video.basics.SpriteCapture;
 import video.basics.StoreFrame;
-import video.constants.SimulationCounter;
+import video.constants.InteractionStaticData;
 import video.handlers.StoreGameSimulationResult;
 import video.handlers.StoreInteraction;
 import video.handlers.StorePlayerAction;
@@ -141,6 +142,11 @@ public abstract class Game {
 	 * entries are ordered asc. by game step.
 	 */
 	protected TreeSet<Event> historicEvents;
+	
+	/***
+	 * All events in the game
+	 */
+	protected ArrayList<GameEvent> firstTimeEvents;
 
 	/**
 	 * For each entry, int identifier of sprite type, a list with all the itypes
@@ -321,6 +327,7 @@ public abstract class Game {
 		charMapping = new HashMap<Character, ArrayList<String>>();
 		terminations = new ArrayList<Termination>();
 		historicEvents = new TreeSet<Event>();
+		firstTimeEvents = new ArrayList<GameEvent>();
 		timeEffects = new TreeSet<TimeEffect>();
 		spriteCopies = new ArrayList<VGDLSprite>();
 		storeInteraction = new StoreInteraction();
@@ -925,23 +932,26 @@ public abstract class Game {
 			PlayerAction playerAction = 
 					new PlayerAction(String.valueOf(this.gameTick), action);
 			storePlayerAction.storeAllPlayerActions(playerAction);
+			
+			firstTimeEvents.add(playerAction);
 		}
 		
 		ArrayList<Observation>[][] data = this.getData();
-		storeFrame.saveGameState(new File(
-				SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
-				"/" + "frames/frame" + this.gameTick + ".state"), data);
+		/** Uncomment if you want game states saved! **/
+//		storeFrame.saveGameState(new File(
+//				InteractionStaticData.gameName + "/" + InteractionStaticData.agentName + "/" + InteractionStaticData.levelCount + "/" + InteractionStaticData.playthroughCount +
+//				"/" + "frames/frame" + this.gameTick + ".state"), data);
 	}
 	
 	public void storeActionsAndInteractions() {
 		//stores the interaction in a JSONFile
-		storeInteraction.writeInteractionJSONFile(SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
+		storeInteraction.writeInteractionJSONFile(InteractionStaticData.gameName + "/" + InteractionStaticData.agentName + "/" + InteractionStaticData.levelCount + "/" + InteractionStaticData.playthroughCount +
 				"/interactions/interaction.json");
 		
-		storePlayerAction.writePlayerActionJSONFile(SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
+		storePlayerAction.writePlayerActionJSONFile(InteractionStaticData.gameName + "/" + InteractionStaticData.agentName + "/" + InteractionStaticData.levelCount + "/" + InteractionStaticData.playthroughCount +
 				"/actions/actions.json");
 		
-		SimulationCounter.counter += 1;
+		InteractionStaticData.counter += 1;
 	}
 	/**
 	 * Runs a game, without graphics.
@@ -1301,9 +1311,9 @@ public abstract class Game {
 					,String.valueOf(gameTick));
 			
 			storeGameSimulationResult.
-			writeResultToAJSONFile(SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
+			writeResultToAJSONFile(InteractionStaticData.gameName + "/" + InteractionStaticData.agentName + "/" + InteractionStaticData.levelCount + "/" + InteractionStaticData.playthroughCount +
 					"/" + "result/result.json");
-			SimulationCounter.resultsCounter += 1;
+			InteractionStaticData.resultsCounter += 1;
 		}
 
 		System.out.println("Result (1->win; 0->lose): " + sb1 + sb2 + "timesteps:" + this.getGameTick());
@@ -1326,9 +1336,9 @@ public abstract class Game {
 		
 		storeSpriteCapture.
 			writeSpriteCaptureJSONFile
-				(SimulationCounter.gameName + "/" + SimulationCounter.agentName + "/" + SimulationCounter.levelCount + "/" + SimulationCounter.playthroughCount +
+				(InteractionStaticData.gameName + "/" + InteractionStaticData.agentName + "/" + InteractionStaticData.levelCount + "/" + InteractionStaticData.playthroughCount +
 						"/" + "capture/capture.json");
-		SimulationCounter.spriteCaptureCounter += 1;
+		InteractionStaticData.spriteCaptureCounter += 1;
 		
 		// System.out.println("Result (1->win; 0->lose):"+ winner.key() + ",
 		// Score:" + score + ", timesteps:" + this.getGameTick());
@@ -1540,6 +1550,10 @@ public abstract class Game {
 	 */
 	@SuppressWarnings("unchecked")
 	protected void eventHandling() {
+		// log player actions
+		if(this.avatarLastAction[0].toString().equals(Types.ACTIONS.ACTION_USE.toString())) {
+			this.firstTimeEvents.add(new PlayerAction(String.valueOf(this.gameTick), this.avatarLastAction[0].toString()));
+		}
 		// Array to indicate that the sprite type has no representative in
 		// collisions.
 		boolean noSprites[] = new boolean[spriteGroups.length];
@@ -1704,7 +1718,7 @@ public abstract class Game {
 		// Add to events history.
 		if (s1 != null && s2list != null)
 			for(VGDLSprite s2 : s2list)
-				addEvent(s1, s2);
+				addEvent(s1, s2, ef);
 
 		if (ef.count) {
 			for (int i = 0; i < no_counters; i++) {
@@ -1735,7 +1749,7 @@ public abstract class Game {
 
 		// Add to events history.
 		if (s1 != null && s2 != null)
-			addEvent(s1, s2);
+			addEvent(s1, s2, ef);
 
 		if (ef.count) {
 			for (int i = 0; i < no_counters; i++) {
@@ -1768,22 +1782,32 @@ public abstract class Game {
 		}
 	}
 
-	private void addEvent(VGDLSprite s1, VGDLSprite s2) {
-		if (s1.is_avatar)
+	private void addEvent(VGDLSprite s1, VGDLSprite s2, Effect ef) {
+		if (s1.is_avatar) {
 			historicEvents.add(
 					new Event(gameTick, false, s1.getType(), s2.getType(), s1.spriteID, s2.spriteID, s1.getPosition()));
+		}
 
 		else if (s1.is_from_avatar)
+		{
 			historicEvents.add(
 					new Event(gameTick, true, s1.getType(), s2.getType(), s1.spriteID, s2.spriteID, s1.getPosition()));
+		}
 
-		else if (s2.is_avatar)
+		else if (s2.is_avatar){
 			historicEvents.add(
 					new Event(gameTick, false, s2.getType(), s1.getType(), s2.spriteID, s1.spriteID, s2.getPosition()));
 
-		else if (s2.is_from_avatar)
+		}
+		else if (s2.is_from_avatar){
 			historicEvents.add(
 					new Event(gameTick, true, s2.getType(), s1.getType(), s2.spriteID, s1.spriteID, s2.getPosition()));
+		}
+		
+		// add this event to the all events list
+		Interaction newInt = new Interaction(String.valueOf(this.gameTick), ef.getClass().getName(), VGDLRegistry.GetInstance().getRegisteredSpriteKey(s1.getType()), VGDLRegistry.GetInstance().getRegisteredSpriteKey(s2.getType()));
+		firstTimeEvents.add(newInt);
+		
 	}
 
 	/**

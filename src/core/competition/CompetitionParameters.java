@@ -12,7 +12,7 @@ public class CompetitionParameters
     /**
      * Milliseconds allowed per controller action.
      */
-    public static final int ACTION_TIME = 200;
+    public static final int ACTION_TIME = 500;
 
     /**
      * Milliseconds for controller disqualification, if it returns an action after this time.
@@ -112,7 +112,8 @@ public class CompetitionParameters
     /**
      * Delay for human play.
      */
-    public static int DELAY = 15;
+//    public static int DELAY = 15;
+    public static int DELAY = 10;
 
     /**
      * Longer delay for human play.

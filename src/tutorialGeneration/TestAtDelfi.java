@@ -42,8 +42,8 @@ public class TestAtDelfi {
     
     String gameFile, levelFile, recordTutorialFile;
 
-    int levelIdx = 0; // level names from 0 to 4 (game_lvlN.txt).
-    int gameIdx = 0;
+    int levelIdx = 2; // level names from 0 to 4 (game_lvlN.txt).
+    int gameIdx = 30;
 
     public TestAtDelfi() {
         // settings        
@@ -59,6 +59,8 @@ public class TestAtDelfi {
 		
 //		tester.testAllGames(seed);
 		tester.testOneGame(seed, tester.gameIdx);
+		
+//		tester.testOneGame_HPC(seed, Integer.parseInt(args[0]));
 //		tester.testFirstGames(seed);
 //		tester.testSecondGames(seed);
 //		tester.testThirdGames(seed);
@@ -75,7 +77,7 @@ public class TestAtDelfi {
 
 			AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, gameInfo[1], seed, this.verbose);
 //			atdelfi.playGames();
-			atdelfi.buildGraph();
+			atdelfi.buildGraph("adrienctx.Agent", 0);
 
 		}
 	}
@@ -147,7 +149,38 @@ public class TestAtDelfi {
 
 		AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, this.getGame(this.gameIdx)[1], seed, this.verbose);
 //		atdelfi.testPlayGames();
-		atdelfi.buildGraph();	
+		atdelfi.buildGraph("human", levelIdx);	
+		
+//		CriticalPather criticalPather = new GreedyPather(atdelfi.getGameGraph());
+//		
+//		List<Mechanic> critPath = atdelfi.criticalPath(criticalPather, "adrienctx.Agent", true);
+//		
+//		for (Mechanic m : critPath) {
+//			System.out.println(m.getSprites().get(0).getName() + " " + m.getReadibleAction() + " " + m.getActions().get(0).getName());
+//		}
+	}
+	
+	public void testOneGame_HPC(int seed, int id) {
+		
+		int gameIdx;
+		
+		
+		if(id > 57) {
+			gameIdx = 47;
+		} else if(id > 28) {
+			gameIdx = 34;
+		} else {
+			gameIdx = 39;
+		}
+		this.gameFile = this.generateTutorialPath + games[gameIdx][1] + ".txt";
+		this.levelFile = this.gamesPath + games[gameIdx][1] + "_lvl" + this.levelIdx + ".txt";
+        this.recordTutorialFile = this.generateTutorialPath + games[gameIdx][1] + "_tutorial.txt";
+
+        
+		AtDelfi atdelfi = new AtDelfi(this.gameFile, this.levelFile, this.getGame(gameIdx)[1], seed, this.verbose);
+		atdelfi.path = this.gamesPath + games[gameIdx][1] + "_lvl";
+		atdelfi.playGames(id);
+//		atdelfi.buildGraph();	
 		
 //		CriticalPather criticalPather = new GreedyPather(atdelfi.getGameGraph());
 //		

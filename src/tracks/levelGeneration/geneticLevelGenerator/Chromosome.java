@@ -501,7 +501,7 @@ public class Chromosome implements Comparable<Chromosome>{
 	private double getUniqueRuleScore(StateObservation gameState, double minUniqueRule){
 		double unique = 0;
 		HashMap<Integer, Boolean> uniqueEvents = new HashMap<Integer, Boolean>();
-		for(Event e:gameState.getEventsHistory()){
+		for(Event e:gameState.getHistoricEventsHistory()){
 			int code = e.activeTypeId + 10000 * e.passiveTypeId;
 			if(!uniqueEvents.containsKey(code)){
 				unique += 1;

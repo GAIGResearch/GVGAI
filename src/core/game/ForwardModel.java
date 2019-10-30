@@ -11,6 +11,9 @@ import ontology.Types;
 import ontology.avatar.MovingAvatar;
 import ontology.effects.TimeEffect;
 import tools.*;
+import video.basics.GameEvent;
+import video.basics.Interaction;
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -128,6 +131,7 @@ public class ForwardModel extends Game
         kill_list = new ArrayList<VGDLSprite>();
         bucketList = new Bucket[numSpriteTypes];
         historicEvents = new TreeSet<Event>();
+        firstTimeEvents = new ArrayList<GameEvent>();
         shieldedEffects = new ArrayList[numSpriteTypes];
 
         //Copy of sprites from the game.
@@ -179,7 +183,11 @@ public class ForwardModel extends Game
         for (Event historicEvent : a_gameState.historicEvents) {
             historicEvents.add(historicEvent.copy());
         }
-
+        
+        for (GameEvent event : a_gameState.firstTimeEvents) {
+            firstTimeEvents.add(event);
+        }
+        
         //copy the time effects:
         this.timeEffects = new TreeSet<TimeEffect>();
         Iterator<TimeEffect> timeEffects = a_gameState.timeEffects.descendingIterator();
@@ -1011,9 +1019,18 @@ public class ForwardModel extends Game
      * Returns the list of historic events happened in this game so far.
      * @return list of historic events happened in this game so far.
      */
-    public TreeSet<Event> getEventsHistory()
+    public TreeSet<Event> getHistoricEventsHistory()
     {
         return historicEvents;
+    }
+    
+    /**
+     * Returns the list of historic events happened in this game so far.
+     * @return list of historic events happened in this game so far.
+     */
+    public ArrayList<GameEvent> getFirstTimeEventsHistory()
+    {
+        return firstTimeEvents;
     }
 
     /**

@@ -33,9 +33,20 @@ public class StorePlayerAction {
 	
 	public void writePlayerActionJSONFile(String playerActionFile)
 	{
-		try (FileWriter file = new FileWriter(playerActionFile)) {
+		try (FileWriter file = new FileWriter(playerActionFile, false)) {
 
-			file.write(playerActionArray.toJSONString());
+			
+			file.write("[");
+			int i = 0;
+			for(Object obj : playerActionArray) {
+				file.write(((JSONObject)obj).toString());
+				if(i < playerActionArray.size()-1) {
+					file.write(",\n");
+					i++;
+				}
+			}
+			file.write("]");
+//			file.write(playerActionArray.toJSONString());
 			file.flush();
 			file.close();
 

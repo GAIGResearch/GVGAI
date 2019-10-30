@@ -16,7 +16,7 @@ import video.handlers.StoreInteraction;
  * Date: 24/02/2018
  * @author Tiago Machado
  */
-public class SimulationCounter {
+public class InteractionStaticData {
 
 	public static int counter = 0;
 	public static int resultsCounter = 0;
@@ -70,7 +70,7 @@ public class SimulationCounter {
 		}
 		json.add("}");
 		json.add("}");
-		SimulationCounter.itypesJson = json;
+		InteractionStaticData.itypesJson = json;
     }
 }
 

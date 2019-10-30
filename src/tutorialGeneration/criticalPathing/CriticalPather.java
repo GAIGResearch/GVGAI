@@ -14,8 +14,8 @@ public abstract class CriticalPather {
 		this.setGraph(graph);
 	}
 	
-	public abstract List<Mechanic> findCriticalPath(String agent, boolean isWin);
-//	public abstract List<Mechanic> findCriticalPathLoss(String agent);
+	public abstract List<Mechanic> findCriticalPath(String agent, boolean isWin, int level);
+//	public abstract List<Mechanic> findCriticalPath(boolean isWin);
 	
 	public void resetVisits() {
 		for(Mechanic mech : getGraph().getMechanics()) {

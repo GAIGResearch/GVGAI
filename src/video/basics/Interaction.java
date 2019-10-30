@@ -1,23 +1,25 @@
 package video.basics;
+
+import core.game.Event;
+
 /**
  * Code written by Tiago Machado (tiago.machado@nyu.edu)
  * Date: 12/02/2018
  * @author Tiago Machado
  */
-public class Interaction {
+public class Interaction extends GameEvent{
 	
 	public String rule;
 	public String sprite1;
 	public String sprite2;
 	public String pairInteractionTick;
-	public String tick;
 	
 	public Interaction(String tick, String interaction, String sprite1, String sprite2)
 	{
 		this.rule = interactionName(interaction);
 		this.sprite1 = sprite1;
 		this.sprite2 = sprite2;
-		this.tick = tick;
+		this.gameTick = tick;
 		this.pairInteractionTick = tick + " - " + this.rule;
 	}
 	
@@ -57,5 +59,12 @@ public class Interaction {
 	{
 		System.out.println(interactionName("class.xyz.killSprite"));
 	}
+	
+	
+	public String toString() {
+		return sprite1 + " " + sprite2 + " " + rule; 
+	}
+
+
 
 }

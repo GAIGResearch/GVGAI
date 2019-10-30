@@ -173,10 +173,10 @@ public class AtDelfiGraph {
 		spaceAllNodes(graph);
 	}
 	
-	public void visualizeMechanicGraph() {
+	public void visualizeMechanicGraph(String agent, int level) {
 		mechanicGraph = new MultiGraph("Mechanic Graph");
 		for (Mechanic mech : mechanics) {
-			MultiNode n = createMechanicNode(mechanicGraph, mech);
+			MultiNode n = createMechanicNode(mechanicGraph, mech, agent, level);
 		}
 		
 		for(Mechanic mech : mechanics) {
@@ -596,7 +596,7 @@ public class AtDelfiGraph {
 		return c;
 	}
 	
-	public MultiNode createMechanicNode(Graph graph, Mechanic mech) {
+	public MultiNode createMechanicNode(Graph graph, Mechanic mech, String agent, int level) {
 		String details = mechanicAttributes;
 		MultiNode c = graph.addNode("" + mech.getId());
 		
@@ -605,7 +605,7 @@ public class AtDelfiGraph {
 			beginLabel += sprite.getName() + " ";
 		}
 		beginLabel += mech.getConditions().get(0).getName() + " ";
-		c.addAttribute("ui.label", beginLabel + mech.getReadibleAction() + " : " + mech.getFrames().get("adrienctx.Agent")[1]);
+		c.addAttribute("ui.label", beginLabel + mech.getReadibleAction() + " : " + mech.getFrames().get(agent)[level]);
 //		c.addAttribute("ui.label", beginLabel + mech.getReadibleAction());
 		c.addAttribute("ui.style", details);
 		return c;
@@ -734,22 +734,35 @@ public class AtDelfiGraph {
 	}
 	
 
-	public void insertFrameInfo(VisualDemonstrationInterfacer vdi, String[] agents) {
-		for (Mechanic mech : mechanics) {
-			try {
-				int isWin;
-				HashMap<String, int[]> firstDict = vdi.oneMechanicQuery(mech, agents);
-				mech.setFrames(firstDict);
-				if (verbose) {
-					System.out.println(mech.toString());
-				}
-				frames.put(agent, framesForAgent);
+	public void insertFrameInformation(VisualDemonstrationInterfacer vdi) {
+
+			ArrayList<String> agents = vdi.getAgents(this.name);
+			int levelCount = vdi.getLevelCount(this.name);
+			int playthroughCount = vdi.getPlaythroughCount(this.name);
+
+			for(Mechanic mech: mechanics) {
+
+				// keeps track of avg frames by agent-level 
+				HashMap<String, int[]> frames = new HashMap<String, int[]>();
+
+
+				for (String agent : agents) {
+					int[] framesForAgent = new int[levelCount];
+					for(int i = 0; i < levelCount; i++) {
+						try {
+							framesForAgent[i] = vdi.mechAgentLevelQuery(mech, agent, i, 1);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							framesForAgent[i] = -1;
+						}
+						frames.put(agent, framesForAgent);
 					
-			}
+					}
 				
-			mech.setFrames(frames);
-		} 
-		
+					mech.setFrames(frames);
+				}
+			}						
 	}
 		
 	public void colorizeCriticalPath(List<Mechanic> criticalPath) {
@@ -757,6 +770,7 @@ public class AtDelfiGraph {
 			for (Mechanic mech : criticalPath) {
 				MultiNode mechNode = findVisualGraphNode(this.mechanicGraph, mech.getId());
 				mechNode.changeAttribute("ui.style", this.critPathAttributes);
+				System.out.println(mech);
 			}
 		}
 	}
