@@ -1,0 +1,6 @@
+{"interaction":"KillSprite","tick":"4","pairInteractionTick":"4 - KillSprite","sprite2":"sword","sprite1":"monsterQuick"}
+{"interaction":"StepBack","tick":"10","pairInteractionTick":"10 - StepBack","sprite2":"monsterSlow","sprite1":"monsterQuick"}
+{"interaction":"KillSprite","tick":"21","pairInteractionTick":"21 - KillSprite","sprite2":"sword","sprite1":"monsterSlow"}
+{"interaction":"TransformTo","tick":"25","pairInteractionTick":"25 - TransformTo","sprite2":"key","sprite1":"nokey"}
+{"interaction":"StepBack","tick":"34","pairInteractionTick":"34 - StepBack","sprite2":"wall","sprite1":"monsterQuick"}
+{"interaction":"KillSprite","tick":"35","pairInteractionTick":"35 - KillSprite","sprite2":"withkey","sprite1":"goal"}

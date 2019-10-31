@@ -737,6 +737,7 @@ public class AtDelfiGraph {
 	public void insertFrameInformation(VisualDemonstrationInterfacer vdi) {
 
 			ArrayList<String> agents = vdi.getAgents(this.name);
+			//System.out.println(agents.size());
 			int levelCount = vdi.getLevelCount(this.name);
 			int playthroughCount = vdi.getPlaythroughCount(this.name);
 

@@ -89,7 +89,7 @@ public class ArcadeMachine {
 	    String actionFile, int randomSeed, int playerID) throws IOException {
 		VGDLFactory.GetInstance().init(); // This always first thing to do.
 		VGDLRegistry.GetInstance().init();
-
+		
 		if (VERBOSE)
 			System.out.println(" ** Playing game " + game_file + ", level " + level_file + " **");
 
@@ -180,6 +180,7 @@ public class ArcadeMachine {
 
 		// This, the last thing to do in this method, always:
 		toPlay.handleResult();
+		//System.out.println("cool");
 		toPlay.printResult();
 
 		return toPlay.getFullResult();

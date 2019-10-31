@@ -52,16 +52,16 @@ public class StoreInteraction {
 	{
 		try (FileWriter file = new FileWriter(interactionFile, false)) {
 
-			file.write("[");
+			//file.write("[");
 			int i = 0;
 			for(Object obj : interactionArray) {
 				file.write(((JSONObject)obj).toString());
 				if(i < interactionArray.size()-1) {
-					file.write(",\n");
+					file.write("\n");
 					i++;
 				}
 			}
-			file.write("]");
+			//file.write("]");
 //			file.write(interactionArray.toJSONString() + "\n");
 			file.flush();
 			file.close();

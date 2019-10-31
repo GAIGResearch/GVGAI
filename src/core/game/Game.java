@@ -953,6 +953,16 @@ public abstract class Game {
 		
 		InteractionStaticData.counter += 1;
 	}
+	
+	
+	//exports the interactions done in the game run to a JSON file
+	//for use with the AtDelphi+ chromosome dimension calculation
+	public void storeInteractionsJSON(String json_file) {
+		storeInteraction.writeInteractionJSONFile(json_file);
+		//System.out.println("Interactions exported @ " + json_file);
+	}
+	
+	
 	/**
 	 * Runs a game, without graphics.
 	 *
@@ -974,9 +984,14 @@ public abstract class Game {
 		while (!isEnded) {
 			this.gameCycle(); // Execute a game cycle.
 
-			storeFramesAndActions(players, frameStorer);
+			///  PUT THIS BACK LATER  ///
+			//storeFramesAndActions(players, frameStorer);
 		}
-			storeActionsAndInteractions();
+			///  PUT THIS BACK LATER  ///
+			//storeActionsAndInteractions();
+		
+		//saves to a dummy json file (for use with AtDelphi+ to get dimensionality)
+		storeInteractionsJSON("src/atdelphi_plus/generatedLevels/interactions.json");
 
 		// Update the forward model for the game state sent to the controller.
 		fwdModel.update(this);
@@ -1304,6 +1319,7 @@ public abstract class Game {
 			}
 		}
 		
+		/* UNCOMMENT LATER
 		if(avatars[0] != null)
 		{
 			storeGameSimulationResult.
@@ -1315,9 +1331,11 @@ public abstract class Game {
 					"/" + "result/result.json");
 			InteractionStaticData.resultsCounter += 1;
 		}
+		*/
 
 		System.out.println("Result (1->win; 0->lose): " + sb1 + sb2 + "timesteps:" + this.getGameTick());
 		
+		/* UNCOMMENT LATER
 		ArrayList<SpriteCapture> spritesCaptured = new ArrayList<>();
 		for (int i = 0; i < spriteCopies.size(); i++) {
 			SpriteCapture sc = 
@@ -1344,6 +1362,7 @@ public abstract class Game {
 		// Score:" + score + ", timesteps:" + this.getGameTick());
 		if(frame != null)
 			frame.closeWindow();
+		*/
 	}
 
 	/**
