@@ -26,7 +26,9 @@ import tracks.ArcadeMachine;
 import tracks.levelGeneration.LevelGenMachine;
 
 public class Chromosome implements Comparable<Chromosome>{
-	//custom level generator directly based off randomLevelGenerator.java
+	//custom level generator directly based off randomLevelGenerator.java 
+	// - differences:
+	//     is the constant size of the level
 	static private String chromoLevelGenerator = "atdelphi_plus.ChromosomeLevelGenerator";
 
 	//the default level generator saves the text output to a file - so just write it and read it back in
@@ -52,6 +54,8 @@ public class Chromosome implements Comparable<Chromosome>{
 
 	private char borderChar;
 
+	
+	
 	//constructor for random initialization
 	public Chromosome(Random seed, String gn, String gp, ArrayList<String[]> r) {
 		_rnd = seed;

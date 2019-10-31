@@ -16,8 +16,8 @@ public class ChildEvaluator {
     private String _outputFolder;
     
     public ChildEvaluator(int id, int size, String inputFolder, String outputFolder) {
-	this._id = id;
-	this._size = size;
+	this._id = id;					//unique id of the child 
+	this._size = size;				//how many levels this  child will handle
 	this._inputFolder = inputFolder;
 	this._outputFolder = outputFolder;
     }
