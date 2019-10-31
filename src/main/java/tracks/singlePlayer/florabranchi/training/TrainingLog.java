@@ -6,6 +6,8 @@ import java.util.List;
 
 public class TrainingLog {
 
+  final boolean saveToLog = false;
+
   private final static String filePath = "./tests/trainer_it%d_logs.txt";
 
   final List<String> trainingLog;
@@ -20,6 +22,8 @@ public class TrainingLog {
 
   public void saveToFile(int iteration) {
 
+    if (!saveToLog) return;
+
     trainingLog.add(String.format("FINISHED ITERATION %d", iteration));
 
     try {
@@ -30,12 +34,10 @@ public class TrainingLog {
     } catch (IOException e) {
       e.printStackTrace();
     }
-
-
   }
 
   public void write(final String log) {
-    System.out.println(log);
+    //System.out.println(log);
     trainingLog.add(log);
   }
 }

@@ -109,19 +109,17 @@ public class TreeController {
     }
 
     double finalScore = copyState.getGameScore();
-    double stateReward = 0.5;
-    double scoreDelta = initialScore - finalScore;
-    stateReward += 0.01 * scoreDelta;
+    double scoreDelta = 0;
 
     final Types.WINNER gameWinner = copyState.getGameWinner();
 
     if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_WINS)) {
-      stateReward = 1;
+      scoreDelta = 1;
     } else if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
-      stateReward = 0;
+      scoreDelta = 0;
     }
 
-    return stateReward;
+    return scoreDelta;
   }
 
   public void updateTree(final TreeNode selectedNode,

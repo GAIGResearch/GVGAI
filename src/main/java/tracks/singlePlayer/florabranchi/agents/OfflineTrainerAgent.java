@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.TreeMap;
 
 import javax.swing.*;
@@ -20,32 +19,32 @@ import core.game.StateObservation;
 import core.player.AbstractPlayer;
 import ontology.Types;
 import tools.ElapsedCpuTimer;
+import tracks.singlePlayer.florabranchi.GameResulsTracker;
+import tracks.singlePlayer.florabranchi.GameResults;
 import tracks.singlePlayer.florabranchi.training.FeatureVectorController;
-import tracks.singlePlayer.florabranchi.training.OffilneTrainerResults;
+import tracks.singlePlayer.florabranchi.training.LearningAgentDebug;
+import tracks.singlePlayer.florabranchi.training.OfflineTrainerResults;
 import tracks.singlePlayer.florabranchi.training.TrainingLog;
 import tracks.singlePlayer.florabranchi.training.TrainingWeights;
 
 public class OfflineTrainerAgent extends AbstractPlayer {
 
-  boolean showJframe = true;
-
   private static final String resultsPath = "./previousResults.txt";
+  private static final String statisticsPath = "./offlineTrainingRecords.txt";
+
   private final TrainingLog log;
 
-  private JPanel panel;
+  private final LearningAgentDebug learningAgentDebug;
 
   private FeatureVectorController featureVectorController;
 
   protected Random randomGenerator = new Random();
 
+  private GameResulsTracker gameTracker = new GameResulsTracker(statisticsPath);
+
   private Map<String, JLabel> labelMap = new HashMap<>();
 
-  private static final String propertyLabelName = "_VALUE_LABEL";
-  private static final String weightVectorLabelName = "_WEIGHT_LABEL";
-  private static final String qValueLabelName = "_Q_VALUE";
-
-  // deterministico - mais alto
-  private static final double ALFA = 0.3;
+  private static final double ALFA = 0.5;
 
   private static final double GAMMA = 0.9;
 
@@ -53,16 +52,15 @@ public class OfflineTrainerAgent extends AbstractPlayer {
   private static final double EXPLORATION_EPSILON = 10;
 
   // Data
-
   public TrainingWeights trainingWeights;
 
-  public OffilneTrainerResults previousResults;
+  public OfflineTrainerResults previousResults;
 
   // State related data
   private Types.ACTIONS previousAction;
   private StateObservation previousState;
   private double previousScore;
-  private JFrame frame;
+
 
   public OfflineTrainerAgent(final StateObservation stateObs,
                              final ElapsedCpuTimer elapsedTimer) {
@@ -71,9 +69,8 @@ public class OfflineTrainerAgent extends AbstractPlayer {
     featureVectorController = new FeatureVectorController();
     initializeTrainingWeightVector(featureVectorController.getSize());
 
-    if (showJframe) {
-      createJFrame(stateObs);
-    }
+    learningAgentDebug = new LearningAgentDebug(stateObs, previousResults);
+
   }
 
   @Override
@@ -82,7 +79,7 @@ public class OfflineTrainerAgent extends AbstractPlayer {
 
     log.write(String.format("Act for Game Tick %d", stateObs.getGameTick()));
 
-    return getActionAndupdateWeightVectorValues(stateObs, elapsedTimer);
+    return getActionAndUpdateWeightVectorValues(stateObs, elapsedTimer);
   }
 
   @Override
@@ -91,77 +88,85 @@ public class OfflineTrainerAgent extends AbstractPlayer {
 
     // last update - reward if won, negative if loss
     final Types.WINNER gameWinner = stateObs.getGameWinner();
-    double reward = 20;
+    double reward = 5000;
+    boolean won = false;
     if (gameWinner.equals(Types.WINNER.PLAYER_LOSES)) {
-      reward = -50;
+      reward = -reward;
       log.write("Player lost");
     } else {
+      won = true;
       log.write("Player won");
     }
-    getActionAndupdateWeightVectorValues(stateObs, elapsedCpuTimer, reward);
+
+    updateRecord(won);
+    updateAfterLastAction(reward, previousAction, previousState);
 
     logCurrentWeights();
-    saveResults();
-    closeJframe();
+    saveResults(won, stateObs.getGameScore());
+    learningAgentDebug.closeJframe();
     super.result(stateObs, elapsedCpuTimer);
   }
 
-  public void createJFrame(final StateObservation stateObs) {
-    frame = new JFrame("Weight Vector Debug");
-    panel = new JPanel();
-    panel.setLayout(null);
-    frame.add(panel);
-
-    frame.setSize(1200, 1000);
-    frame.setVisible(true);
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    frame.setResizable(false);
-    frame.setLayout(null);
-
-    createUI(stateObs);
+  public void updateRecord(boolean won) {
+    GameResults previousResults = this.gameTracker.readFromFile();
+    if (previousResults == null) {
+      previousResults = new GameResults(statisticsPath);
+    }
+    previousResults.updateResults(won);
+    gameTracker.saveToFile(previousResults);
   }
 
-  public void closeJframe() {
-    if (frame != null) {
-      frame.dispose();
+
+  private void updateWeightVectorForAction(final Types.ACTIONS previousAction,
+                                           final TreeMap<String, Double> featureVectorForState,
+                                           final double delta) {
+
+    // Get Weight vector for previous action (a) (W i a)
+    final TreeMap<String, Double> relatedWeightVector = trainingWeights.getWeightVectorForAction(previousAction);
+
+    for (Map.Entry<String, Double> weightMapEntry : relatedWeightVector.entrySet()) {
+
+      final String featureType = weightMapEntry.getKey();
+
+      // w = w + lambda * delta * f()
+      final double updatedWeight = weightMapEntry.getValue() + (ALFA * delta * featureVectorForState.get(featureType));
+
+      // Update
+      trainingWeights.updateWeightVector(previousAction, featureType, updatedWeight);
     }
   }
 
   // need: a', s', a, s, r
-  public void getActionAndupdateWeightVectorValues(final double stateReward,
+  public void getActionAndUpdateWeightVectorValues(final double stateReward,
                                                    final Types.ACTIONS previousAction,
                                                    final StateObservation previousState,
                                                    final Types.ACTIONS currentAction,
                                                    final StateObservation currentState) {
 
-
-    // Get Weight vector for previous action (a)
-    final TreeMap<String, Double> weightVectorForPreviousAction = trainingWeights.getWeightVectorForAction(previousAction);
-
     // Get feature values for previous state (s)
     final TreeMap<String, Double> initialFeatureVector = featureVectorController.extractFeatureVector(previousState);
 
-    // Get Weight vector for new action (a')
-    final TreeMap<String, Double> weightVectorForCurrentAction = trainingWeights.getWeightVectorForAction(currentAction);
-
-    // Extract feature values (s')
-    final TreeMap<String, Double> featureVectorAfterAction = featureVectorController.extractFeatureVector(currentState);
-
     // delta = r + gamma (Qa'(s')) - Qa(s)
-    double delta = stateReward + GAMMA * (dotProduct(weightVectorForCurrentAction, featureVectorAfterAction))
-        - dotProduct(weightVectorForPreviousAction, initialFeatureVector);
+    double delta = stateReward + (GAMMA * getQValueForAction(currentState, currentAction)) - getQValueForAction(previousState, previousAction);
 
     // Update weights
-    for (Map.Entry<String, Double> weightMapEntry : weightVectorForPreviousAction.entrySet()) {
+    updateWeightVectorForAction(previousAction, initialFeatureVector, delta);
 
-      double initialW = weightMapEntry.getValue();
+  }
 
-      // w = w + lambda * delta * f()
-      final double updatedWeight = initialW + (ALFA * delta * initialFeatureVector.getOrDefault(weightMapEntry.getKey(), 0d));
+  public void updateAfterLastAction(final double stateReward,
+                                    final Types.ACTIONS previousAction,
+                                    final StateObservation previousState) {
 
-      // Update global weights
-      trainingWeights.updateWeightVector(currentAction, weightMapEntry.getKey(), updatedWeight);
-    }
+
+    // delta = r - Qa(s)
+    double delta = stateReward - getQValueForAction(previousState, previousAction);
+
+    // Get feature values for previous state (s)
+    // fi(s, a)
+    final TreeMap<String, Double> featureVector = featureVectorController.extractFeatureVector(previousState);
+
+    updateWeightVectorForAction(previousAction, featureVector, delta);
 
   }
 
@@ -180,24 +185,19 @@ public class OfflineTrainerAgent extends AbstractPlayer {
   /**
    * Uses default game score to update values
    */
-  public Types.ACTIONS getActionAndupdateWeightVectorValues(final StateObservation stateObs,
+  public Types.ACTIONS getActionAndUpdateWeightVectorValues(final StateObservation stateObs,
                                                             final ElapsedCpuTimer elapsedTimer) {
 
     // Reward = curr score - previous score
     double stateScore = stateObs.getGameScore();
     double reward = stateScore - previousScore;
-    return getActionAndupdateWeightVectorValues(stateObs, elapsedTimer, reward);
-  }
-
-  public Types.ACTIONS getActionAndupdateWeightVectorValues(final StateObservation stateObs,
-                                                            final ElapsedCpuTimer elapsedTimer,
-                                                            final double reward) {
 
     log.write(String.format("Updating weights with reward %s after action: ", reward));
+
+    // First play
     if (previousAction == null) {
       final Types.ACTIONS randomAction = returnRandomAction(stateObs);
 
-      // Update last values
       // a
       previousAction = randomAction;
       // s
@@ -207,16 +207,16 @@ public class OfflineTrainerAgent extends AbstractPlayer {
       return randomAction;
     }
 
-    // Select best action given current weight vector (a')
+    // Select best action given current q values for (s') / exploration play
     final Types.ACTIONS selectedAction = selectBestPerceivedAction(stateObs);
 
-    // need: a, s, r, a', s1
-    getActionAndupdateWeightVectorValues(reward, previousAction, previousState, selectedAction, stateObs);
+    // need: s, a r, s', a'
+    getActionAndUpdateWeightVectorValues(reward, previousAction, previousState, selectedAction, stateObs);
 
     final TreeMap<String, Double> featuresForCurrState = featureVectorController.extractFeatureVector(stateObs);
 
-    if (showJframe) {
-      writeResultsToUi(featuresForCurrState, selectedAction);
+    if (learningAgentDebug.showJframe) {
+      learningAgentDebug.writeResultsToUi(featuresForCurrState, selectedAction, trainingWeights);
     }
 
     // Update last values
@@ -227,11 +227,15 @@ public class OfflineTrainerAgent extends AbstractPlayer {
     return selectedAction;
   }
 
-  public double getQValueForAction(final StateObservation initialState,
+
+  /**
+   * Execute dot product between weights and features
+   */
+  public double getQValueForAction(final StateObservation state,
                                    final Types.ACTIONS action) {
 
     // Extract feature array
-    final TreeMap<String, Double> featureAfterAction = featureVectorController.extractFeatureVector(initialState);
+    final TreeMap<String, Double> featureAfterAction = featureVectorController.extractFeatureVector(state);
 
     // Get related weight vector
     final TreeMap<String, Double> weightVectorForAction = trainingWeights.getWeightVectorForAction(action);
@@ -239,9 +243,10 @@ public class OfflineTrainerAgent extends AbstractPlayer {
     return dotProduct(featureAfterAction, weightVectorForAction);
   }
 
-  public void saveResults() {
+  public void saveResults(final boolean won,
+                          final double score) {
 
-    final int episode = previousResults.addNewEpisode(trainingWeights);
+    final int episode = previousResults.update(trainingWeights, won, score);
     log.saveToFile(episode);
     saveToFile(previousResults);
   }
@@ -266,6 +271,8 @@ public class OfflineTrainerAgent extends AbstractPlayer {
     Types.ACTIONS bestAction = Types.ACTIONS.ACTION_NIL;
 
     List<Types.ACTIONS> duplicatedActions = new ArrayList<>();
+
+
     for (Types.ACTIONS action : stateObservation.getAvailableActions()) {
       final double actionExpectedReward = getQValueForAction(stateObservation, action);
       if (actionExpectedReward >= maxValue) {
@@ -279,9 +286,9 @@ public class OfflineTrainerAgent extends AbstractPlayer {
         maxValue = actionExpectedReward;
         bestAction = action;
 
-        if (showJframe) {
-          final JLabel jLabel = labelMap.get(buildQvalueKey(action));
-          jLabel.setText(String.format("%.4f", maxValue));
+        // Update Q Values in UI
+        if (learningAgentDebug.showJframe) {
+          learningAgentDebug.updateQLabel(action, maxValue);
         }
       }
     }
@@ -299,140 +306,6 @@ public class OfflineTrainerAgent extends AbstractPlayer {
     return bestAction;
   }
 
-  public void createUI(final StateObservation stateObs) {
-
-    int initialXDisplacement = 10;
-    int initialYDisplacement = 10;
-    int lineHeight = 20; //y
-    int lineWidth = 200; //x
-
-    int currElement = 0;
-
-    // Add Header
-    int elementX = initialXDisplacement + currElement;
-    int elementY = initialYDisplacement + currElement;
-
-
-    JLabel hPropertyLabel = new JLabel("PROPERTY", JLabel.CENTER);
-    hPropertyLabel.setBounds(elementX, elementY, lineWidth, lineHeight);
-
-    JLabel hValueLabel = new JLabel("FEATURE VALUE", JLabel.CENTER);
-    hValueLabel.setBounds(elementX + lineWidth, elementY, lineWidth, lineHeight);
-
-
-    final List<Types.ACTIONS> avallableGameActions = stateObs.getAvailableActions();
-
-    int multiplier = 2;
-    for (Types.ACTIONS action : avallableGameActions) {
-      JLabel HFeatureValue = new JLabel(String.format("WEIGHT %s", action));
-      HFeatureValue.setBounds(elementX + (multiplier * lineWidth), elementY, lineWidth, lineHeight);
-      panel.add(HFeatureValue);
-      multiplier++;
-    }
-
-    panel.add(hPropertyLabel);
-    panel.add(hValueLabel);
-
-    currElement++;
-
-    final Set<String> propertyValueMap = FeatureVectorController.getAvailableProperties();
-
-    if (propertyValueMap != null) {
-
-      for (String entry : propertyValueMap) {
-
-        // Update position
-        elementY = initialYDisplacement + currElement;
-
-
-        JLabel propertyLabel = new JLabel(entry, JLabel.CENTER);
-        propertyLabel.setBounds(elementX, elementY + (currElement * lineHeight), lineWidth, lineHeight);
-
-        JLabel valueLabel = new JLabel(String.valueOf(0), JLabel.CENTER);
-        valueLabel.setBounds(elementX + lineWidth, elementY + (currElement * lineHeight), lineWidth, lineHeight);
-
-
-        multiplier = 2;
-        for (Types.ACTIONS action : avallableGameActions) {
-          JLabel weightVectorValue = new JLabel(String.valueOf(0), JLabel.CENTER);
-          weightVectorValue.setBounds(elementX + multiplier * lineWidth, elementY + (currElement * lineHeight), lineWidth, lineHeight);
-          multiplier++;
-          panel.add(weightVectorValue);
-          labelMap.put(buildWeightVectorKey(entry, action), weightVectorValue);
-        }
-
-        // Update label map
-        labelMap.put(buildPropertyKey(entry), valueLabel);
-        panel.add(propertyLabel);
-        panel.add(valueLabel);
-
-        currElement++;
-      }
-    }
-
-    int qValuesDisplacementY = 50;
-    int qValuesLineSize = 300;
-
-    // Create Q values debug
-    for (Types.ACTIONS action : avallableGameActions) {
-
-      JLabel newLabel = new JLabel(String.format("Q VALUE FOR %s", action), JLabel.CENTER);
-      newLabel.setBounds(initialXDisplacement, qValuesDisplacementY + elementY + (currElement * lineHeight), qValuesLineSize, lineHeight);
-
-      JLabel weightVectorValue = new JLabel(String.valueOf(0), JLabel.CENTER);
-      weightVectorValue.setBounds(initialXDisplacement + qValuesLineSize, qValuesDisplacementY + elementY + (currElement * lineHeight), lineWidth, lineHeight);
-
-      multiplier++;
-      panel.add(weightVectorValue);
-      panel.add(newLabel);
-
-      labelMap.put(buildQvalueKey(action), weightVectorValue);
-      currElement++;
-    }
-
-    panel.repaint();
-
-  }
-
-  public String buildPropertyKey(final String property) {
-    return String.format("%s%s", property, propertyLabelName);
-  }
-
-  public String buildWeightVectorKey(final String property,
-                                     final Types.ACTIONS action) {
-    return String.format("%s%s%s", property, action, weightVectorLabelName);
-  }
-
-  public String buildQvalueKey(final Types.ACTIONS action) {
-    return String.format("%s%s", action, qValueLabelName);
-  }
-
-  public void writeResultsToUi(final TreeMap<String, Double> featureVectorAfterAction,
-                               final Types.ACTIONS selectedAction) {
-
-    final TreeMap<String, Double> weightVectorForAction = trainingWeights.getWeightVectorForAction(selectedAction);
-
-    if (featureVectorAfterAction != null) {
-
-      int i = 0;
-      for (Map.Entry<String, Double> entry : featureVectorAfterAction.entrySet()) {
-
-        JLabel propertyRelatedLabel = labelMap.getOrDefault(buildPropertyKey(entry.getKey()), null);
-        if (propertyRelatedLabel != null) {
-          propertyRelatedLabel.setText(String.format("%.4f", entry.getValue()));
-        }
-
-        JLabel weightVectorRelatedLabel = labelMap.getOrDefault(buildWeightVectorKey(entry.getKey(), selectedAction), null);
-        if (weightVectorRelatedLabel != null) {
-          weightVectorRelatedLabel.setText(String.format("%.4f", weightVectorForAction.get(entry.getKey())));
-        }
-        i++;
-
-      }
-    }
-
-    panel.repaint();
-  }
 
   public void logCurrentWeights() {
     final TreeMap<Types.ACTIONS, TreeMap<String, Double>> weightVectorMap = trainingWeights.getWeightVectorMap();
@@ -457,25 +330,25 @@ public class OfflineTrainerAgent extends AbstractPlayer {
     // if could not load initialize
     if (previousResults == null) {
       log.write("No previous results, creating new Weights");
-      previousResults = new OffilneTrainerResults(new ArrayList<>());
+      previousResults = new OfflineTrainerResults(featureVectorSize);
       trainingWeights = new TrainingWeights(featureVectorSize);
       logCurrentWeights();
     } else {
-      int previousEpisode = previousResults.getEpsiodes().size() - 1;
+      int previousEpisode = previousResults.getTotalGames();
       log.write(String.format("Loading previous results from episode %s", previousEpisode));
-      trainingWeights = previousResults.getEpsiodes().get(previousEpisode).getWeightVector();
+      trainingWeights = previousResults.getWeightVector();
       logCurrentWeights();
     }
   }
 
-  private OffilneTrainerResults readFromFile() {
-    OffilneTrainerResults pr1 = null;
+  private OfflineTrainerResults readFromFile() {
+    OfflineTrainerResults pr1 = null;
     try {
       FileInputStream fi = new FileInputStream(resultsPath);
       ObjectInputStream oi = new ObjectInputStream(fi);
 
       // Read objects
-      pr1 = (OffilneTrainerResults) oi.readObject();
+      pr1 = (OfflineTrainerResults) oi.readObject();
       return pr1;
 
     } catch (FileNotFoundException fileNotFoundException) {
@@ -487,12 +360,13 @@ public class OfflineTrainerAgent extends AbstractPlayer {
     return pr1;
   }
 
-  private void saveToFile(final OffilneTrainerResults results) {
+  private void saveToFile(final OfflineTrainerResults results) {
 
     try {
 
       FileOutputStream fileOut = new FileOutputStream(resultsPath);
       ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
+      System.out.println(results.toString());
       objectOut.writeObject(results);
       objectOut.close();
       System.out.println("The Object  was succesfully written to a file");
@@ -502,19 +376,11 @@ public class OfflineTrainerAgent extends AbstractPlayer {
     }
   }
 
-  public static double dotProduct(double[] a, double[] b) {
-    double sum = 0;
-    for (int i = 0; i < a.length; i++) {
-      sum += a[i] * b[i];
-    }
-    return sum;
-  }
-
   public double dotProduct(TreeMap<String, Double> a,
                            TreeMap<String, Double> b) {
     double sum = 0;
     for (String property : FeatureVectorController.getAvailableProperties()) {
-      sum += a.getOrDefault(property, 0d) * b.getOrDefault(property, 0d);
+      sum += a.get(property) * b.get(property);
     }
 
     return sum;

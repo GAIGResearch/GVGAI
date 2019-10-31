@@ -33,7 +33,36 @@ public class TrainMultipleGames {
 
 
     // Game and level to play
-    int gameIdx = 0;
+    int aliens = 0;
+    int weirdDragons = 1;
+    int katanaGame = 3;
+
+    int knightMaze = 4;
+
+    int weirdButtons = 5;
+
+    int dwarfGame = 6;
+
+    int sokobanWithLasers = 7;
+    int sokobanWithWater = 8;
+
+    int spidersAndScorpions = 9;
+    int dwarfMineWithEnemies = 10;
+    int dwarfMineWithEnemiesIdk = 11;
+
+    int zeldaGame = 12;
+    int butterflies = 13;
+    int cookersGame = 14;
+    int raceGame = 15;
+    int vampirePuzzle = 16;
+    int yetiGame = 17;
+    int zeldaAndPigeons = 18;
+    int idk = 19;
+
+    int spaceship = 21;
+
+  
+    int gameIdx = aliens;
     int levelIdx = 0; // level names from 0 to 4 (game_lvlN.txt).
 
     String gameName = games[gameIdx][1];
@@ -43,7 +72,7 @@ public class TrainMultipleGames {
 
     // TOTAL GAMES
 
-    final int totalGames = 100;
+    final int totalGames = 50;
     String[] levelFiles;
     levelFiles = new String[1];
     levelFiles[0] = level1;
