@@ -31,6 +31,9 @@ public class TrainMultipleGames {
     String spGamesCollection = "examples/all_games_sp.csv";
     String[][] games = Utils.readGames(spGamesCollection);
 
+    // TOTAL GAMES
+    final int totalGames = 600;
+
 
     // Game and level to play
     int aliens = 0;
@@ -61,7 +64,7 @@ public class TrainMultipleGames {
 
     int spaceship = 21;
 
-  
+
     int gameIdx = aliens;
     int levelIdx = 0; // level names from 0 to 4 (game_lvlN.txt).
 
@@ -70,9 +73,6 @@ public class TrainMultipleGames {
     String level1 = game.replace(gameName, gameName + "_lvl" + levelIdx);
 
 
-    // TOTAL GAMES
-
-    final int totalGames = 50;
     String[] levelFiles;
     levelFiles = new String[1];
     levelFiles[0] = level1;

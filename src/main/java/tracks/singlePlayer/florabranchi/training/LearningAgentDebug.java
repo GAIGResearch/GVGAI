@@ -1,10 +1,19 @@
 package tracks.singlePlayer.florabranchi.training;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+
+import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import javax.swing.*;
 
@@ -13,8 +22,8 @@ import ontology.Types;
 
 public class LearningAgentDebug {
 
-  public boolean showJframe = false;
-  //public boolean showJframe = true;
+  //public boolean showJframe = false;
+  public boolean showJframe = true;
 
   private Map<String, JLabel> labelMap = new HashMap<>();
 
@@ -24,9 +33,12 @@ public class LearningAgentDebug {
 
   String HTMLlabelStr = "<html> %s </html>";
 
-  private JPanel panel;
+  private JPanel qPanel;
+  private JPanel graphPanel;
+  private JPanel debugValuesPanel;
 
   private JFrame frame;
+
 
   public LearningAgentDebug(final StateObservation stateObs,
                             final OfflineTrainerResults previousResult) {
@@ -34,6 +46,57 @@ public class LearningAgentDebug {
     if (showJframe) {
       createJFrame(stateObs, previousResult);
     }
+  }
+
+  public void createJFrame(final StateObservation stateObs,
+                           final OfflineTrainerResults previousResult) {
+
+    frame = new JFrame("Weight Vector Debug");
+    frame.setSize(1200, 1000);
+    frame.setVisible(true);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setResizable(false);
+    frame.setLayout(null);
+
+    // Main panel
+    JPanel mainPanel = (JPanel) frame.getContentPane();
+
+    // Q Panel
+    int qPanelx = 0;
+    int qPaney = 0;
+    int qPanelHeight = 300;
+    int qPanelWidth = 600;
+
+    qPanel = new JPanel();
+    qPanel.setLayout(null);
+    qPanel.setBounds(qPanelx, qPaney, qPanelWidth, qPanelHeight);
+    //qPanel.setBackground(Color.LIGHT_GRAY);
+    //qPanel.setLayout(new BoxLayout(qPanel, BoxLayout.X_AXIS));
+
+    // Graph panel
+    int graphPanelY = 0;
+    int graphPanelHeight = 300;
+    int graphPanellWidth = 400;
+
+    graphPanel = new JPanel();
+    graphPanel.setBounds(qPanelWidth, graphPanelY, graphPanellWidth, graphPanelHeight);
+
+    // Debug panel
+    int debugPanelX = 0;
+    int debugPaneHeight = 800;
+    int debugPanelWidth = 1000;
+
+    debugValuesPanel = new JPanel();
+    debugValuesPanel.setLayout(null);
+    debugValuesPanel.setBounds(debugPanelX, qPanelHeight, debugPanelWidth, debugPaneHeight);
+
+    mainPanel.add(qPanel);
+    mainPanel.add(graphPanel);
+    mainPanel.add(debugValuesPanel);
+
+    frame.setVisible(true);
+
+    createUI(stateObs, previousResult);
   }
 
 
@@ -46,6 +109,10 @@ public class LearningAgentDebug {
   public void createUI(final StateObservation stateObs,
                        final OfflineTrainerResults previousResult) {
 
+    /// info panel
+    // q panel
+    // debug panel
+
     final List<Types.ACTIONS> avallableGameActions = stateObs.getAvailableActions();
 
     final int lineHeight = 20; //y
@@ -57,49 +124,48 @@ public class LearningAgentDebug {
     int headerElements = 2;
 
     // Q DEBUG
-    int spacingBetweenHeaderAndQ = 0;
+    int spacingBetweenHeaderAndQ = 10;
     final int initialQDisplacementX = 10;
     final int initialQDisplacementY = initialYDisplacement + spacingBetweenHeaderAndQ + (headerElements * lineHeight);
     final int qValuesLineSize = 200;
 
     // PROPERTY DEBUG
-    int spacingBetweenQAndProperties = 100;
     int initialPropertiesDisplacementX = 10;
-    int initialPropertiedDisplacementY = spacingBetweenQAndProperties + initialQDisplacementY + (avallableGameActions.size() + 1) * lineHeight;
+    int initialPropertiedDisplacementY = 0;
 
     int currElement = 0;
 
-    // Debug Header
+    // Build Debug Header
 
     JLabel title = new JLabel(String.format(HTMLlabelStr, "Learning Agent Debug"), JLabel.CENTER);
     title.setBounds(initialXDisplacement, initialYDisplacement, lineWidth, lineHeight);
-    panel.add(title);
+    qPanel.add(title);
     currElement++;
 
     JLabel totalGames = new JLabel(String.format("Total Games: %s", previousResult.totalGames), JLabel.CENTER);
     totalGames.setBounds(initialXDisplacement, initialYDisplacement + (currElement * lineHeight), lineWidth, lineHeight);
-    panel.add(totalGames);
+    qPanel.add(totalGames);
     currElement++;
 
     JLabel totalWins = new JLabel(String.format("Total Wins: %s", previousResult.wins), JLabel.CENTER);
     totalWins.setBounds(initialXDisplacement, initialYDisplacement + (currElement * lineHeight), lineWidth, lineHeight);
-    panel.add(totalWins);
+    qPanel.add(totalWins);
     currElement++;
 
-    JLabel avgScore = new JLabel(String.format("Average score: %s", previousResult.getTotalScore() /
+    JLabel avgScore = new JLabel(String.format("Average score: %.4f", previousResult.getTotalScore() /
         previousResult.getTotalGames()), JLabel.CENTER);
     avgScore.setBounds(initialXDisplacement, initialYDisplacement + (currElement * lineHeight), lineWidth, lineHeight);
-    panel.add(avgScore);
+    qPanel.add(avgScore);
     currElement++;
 
     int elementX;
     int elementY;
 
-    // Q Values
+    // Build Q Values panel
 
     JLabel currentQValuesLabel = new JLabel("CURRENT Q VALUES", JLabel.CENTER);
     currentQValuesLabel.setBounds(initialQDisplacementX, initialQDisplacementY + (currElement * lineHeight), qValuesLineSize, lineHeight);
-    panel.add(currentQValuesLabel);
+    qPanel.add(currentQValuesLabel);
     currElement++;
 
     // Create Q values debug
@@ -111,13 +177,14 @@ public class LearningAgentDebug {
       JLabel weightVectorValue = new JLabel(String.valueOf(0), JLabel.CENTER);
       weightVectorValue.setBounds(initialQDisplacementX + qValuesLineSize, initialQDisplacementY + (currElement * lineHeight), qValuesLineSize, lineHeight);
 
-      panel.add(weightVectorValue);
-      panel.add(newLabel);
+      qPanel.add(weightVectorValue);
+      qPanel.add(newLabel);
 
       labelMap.put(buildQvalueKey(action), weightVectorValue);
       currElement++;
     }
 
+    // Build debugValuesPanel
 
     // Properties
     currElement = 0;
@@ -128,20 +195,20 @@ public class LearningAgentDebug {
     for (Types.ACTIONS action : avallableGameActions) {
       JLabel HFeatureValue = new JLabel(String.format("WEIGHT %s", action), JLabel.CENTER);
       HFeatureValue.setBounds(elementX + (multiplier * lineWidth), initialPropertiedDisplacementY, lineWidth, lineHeight);
-      panel.add(HFeatureValue);
+      debugValuesPanel.add(HFeatureValue);
       multiplier++;
     }
 
     JLabel hPropertyLabel = new JLabel("PROPERTY", JLabel.CENTER);
     hPropertyLabel.setBounds(elementX, initialPropertiedDisplacementY, lineWidth, lineHeight);
+    currElement++;
 
     JLabel hValueLabel = new JLabel("FEATURE VALUE", JLabel.CENTER);
     hValueLabel.setBounds(elementX + lineWidth, initialPropertiedDisplacementY, lineWidth, lineHeight);
-
-    panel.add(hPropertyLabel);
-    panel.add(hValueLabel);
-
     currElement++;
+
+    debugValuesPanel.add(hPropertyLabel);
+    debugValuesPanel.add(hValueLabel);
 
     // Populate available properties
     final Set<String> propertyValueMap = FeatureVectorController.getAvailableProperties();
@@ -152,7 +219,6 @@ public class LearningAgentDebug {
 
         // Update position
         elementY = initialPropertiedDisplacementY + currElement;
-
 
         JLabel propertyLabel = new JLabel(entry, JLabel.CENTER);
         propertyLabel.setBounds(elementX, elementY + (currElement * lineHeight), lineWidth, lineHeight);
@@ -165,22 +231,22 @@ public class LearningAgentDebug {
           JLabel weightVectorValue = new JLabel(String.valueOf(0), JLabel.CENTER);
           weightVectorValue.setBounds(elementX + multiplier * lineWidth, elementY + (currElement * lineHeight), lineWidth, lineHeight);
           multiplier++;
-          panel.add(weightVectorValue);
+          debugValuesPanel.add(weightVectorValue);
           labelMap.put(buildWeightVectorKey(entry, action), weightVectorValue);
         }
 
         // Update label map
         labelMap.put(buildPropertyKey(entry), valueLabel);
-        panel.add(propertyLabel);
-        panel.add(valueLabel);
+        debugValuesPanel.add(propertyLabel);
+        debugValuesPanel.add(valueLabel);
 
         currElement++;
       }
     }
 
 
-    panel.repaint();
-
+    debugValuesPanel.repaint();
+    qPanel.repaint();
   }
 
   public String buildPropertyKey(final String property) {
@@ -198,7 +264,11 @@ public class LearningAgentDebug {
 
   public void writeResultsToUi(final TreeMap<String, Double> featureVectorAfterAction,
                                final Types.ACTIONS selectedAction,
-                               final TrainingWeights trainingWeights) {
+                               final TrainingWeights trainingWeights,
+                               final Map<Integer, Double> episodeTotalScoreMap) {
+
+    // Fill Chart panel
+    drawGraph(episodeTotalScoreMap);
 
     final TreeMap<String, Double> weightVectorForAction = trainingWeights.getWeightVectorForAction(selectedAction);
 
@@ -221,23 +291,48 @@ public class LearningAgentDebug {
       }
     }
 
-    panel.repaint();
+    qPanel.repaint();
   }
 
-  public void createJFrame(final StateObservation stateObs,
-                           final OfflineTrainerResults previousResult) {
-    frame = new JFrame("Weight Vector Debug");
-    panel = new JPanel();
-    panel.setLayout(null);
-    frame.add(panel);
+  public void drawGraph(final Map<Integer, Double> rewardPerEpisodeMap) {
 
-    frame.setSize(1200, 1000);
-    frame.setVisible(true);
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    frame.setResizable(false);
-    frame.setLayout(null);
 
-    createUI(stateObs, previousResult);
+    final XYSeries series = new XYSeries("Score over Episodes");
+
+    // Show only last n elements
+    int elementsToShow = 50;
+    final int size = rewardPerEpisodeMap.size();
+
+    int firstElement = 0;
+
+    if (elementsToShow > size) {
+      firstElement = size - elementsToShow;
+    } else {
+      firstElement = size - elementsToShow;
+    }
+
+    final int finalFirstElement = firstElement;
+    final Map<Integer, Double> collectedValues = rewardPerEpisodeMap.entrySet().stream()
+        .filter(entry -> entry.getKey() >= finalFirstElement)
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+    collectedValues.forEach(series::add);
+
+    final XYSeriesCollection data = new XYSeriesCollection(series);
+    final JFreeChart chart = ChartFactory.createXYLineChart(
+        "Previous Game Scores",
+        "Episode",
+        "Game score",
+        data,
+        PlotOrientation.VERTICAL,
+        true,
+        true,
+        false
+    );
+
+    final ChartPanel chartPanel = new ChartPanel(chart);
+    chartPanel.setPreferredSize(new java.awt.Dimension(400, 300));
+    graphPanel.add(chartPanel, BorderLayout.CENTER);
   }
 
 

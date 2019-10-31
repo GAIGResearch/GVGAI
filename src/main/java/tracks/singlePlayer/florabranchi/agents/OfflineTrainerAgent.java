@@ -42,7 +42,6 @@ public class OfflineTrainerAgent extends AbstractPlayer {
 
   private GameResulsTracker gameTracker = new GameResulsTracker(statisticsPath);
 
-  private Map<String, JLabel> labelMap = new HashMap<>();
 
   private static final double ALFA = 0.5;
 
@@ -216,7 +215,7 @@ public class OfflineTrainerAgent extends AbstractPlayer {
     final TreeMap<String, Double> featuresForCurrState = featureVectorController.extractFeatureVector(stateObs);
 
     if (learningAgentDebug.showJframe) {
-      learningAgentDebug.writeResultsToUi(featuresForCurrState, selectedAction, trainingWeights);
+      learningAgentDebug.writeResultsToUi(featuresForCurrState, selectedAction, trainingWeights, previousResults.getEpisodeTotalScoreMap());
     }
 
     // Update last values

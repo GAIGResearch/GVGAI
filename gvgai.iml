@@ -28,5 +28,6 @@
     <orderEntry type="library" name="Maven: org.apache.commons:commons-math:2.1" level="project" />
     <orderEntry type="library" name="Maven: org.graphstream:gs-ui:1.1.1" level="project" />
     <orderEntry type="library" name="Maven: org.scala-lang:scala-library:2.9.0" level="project" />
+    <orderEntry type="library" name="Maven: org.jfree:jfreechart:1.5.0" level="project" />
   </component>
 </module>

@@ -15,6 +15,10 @@ public class OfflineTrainerResults implements Serializable {
 
   int wins;
 
+  double totalScore;
+
+  Map<Integer, Double> episodeTotalScoreMap = new HashMap<>();
+
   public int getTotalGames() {
     return totalGames;
   }
@@ -32,8 +36,6 @@ public class OfflineTrainerResults implements Serializable {
   }
 
 
-  double totalScore;
-
   @Override
   public String toString() {
     return new StringJoiner(", ", OfflineTrainerResults.class.getSimpleName() + "[", "]")
@@ -42,9 +44,6 @@ public class OfflineTrainerResults implements Serializable {
         .add("episodeTotalScoreMap=" + episodeTotalScoreMap)
         .toString();
   }
-
-
-  Map<Integer, Double> episodeTotalScoreMap = new HashMap<>();
 
 
   public TrainingWeights getWeightVector() {
