@@ -18,6 +18,7 @@ public class ParentEvaluator {
 	this._outputFolder = outputFolder;
     }
     
+    //write the input chromosomes (age, hasborder, and level) for the child to use and run
     public void writeChromosomes(String[] chromosomes) throws FileNotFoundException, UnsupportedEncodingException {
 	for(int i=0; i<chromosomes.length; i++) {
 	    PrintWriter writer = new PrintWriter(this._inputFolder + i + ".txt", "UTF-8");
@@ -26,6 +27,7 @@ public class ParentEvaluator {
 	}
     }
     
+    //check if all of the children have finished running their simulations
     public boolean checkChromosomes(int size) {
 	for(int i=0; i<size; i++) {
 	    File f = new File(this._outputFolder + i + ".txt");
@@ -36,6 +38,7 @@ public class ParentEvaluator {
 	return true;
     }
     
+    //read back in the children's output results
     public String[] assignChromosomes(int size) throws IOException {
 	String[] results = new String[size];
 	for(int i=0; i<size; i++) {
@@ -44,6 +47,7 @@ public class ParentEvaluator {
 	return results;
     }
     
+    //delete the old output chromosomes files
     public void clearOutputFiles(int size) {
 	for(int i=0; i<size; i++) {
 	    File f = new File(this._outputFolder + i + ".txt");

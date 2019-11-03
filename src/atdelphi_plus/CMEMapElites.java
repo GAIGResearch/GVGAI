@@ -5,11 +5,12 @@ package atdelphi_plus;
 
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -22,9 +23,6 @@ import org.json.simple.parser.ParseException;
 
 public class CMEMapElites {
 	private String _gameName;
-	private String _gameLoc;
-	
-	private Random _rnd;
 	private double _coinFlip;
 	
 	private HashMap<String, Chromosome> _map = new HashMap<String, Chromosome>();		//as a test use just the chromosome as the value
@@ -36,18 +34,18 @@ public class CMEMapElites {
 	
 	public CMEMapElites(String gn, String gl, Random seed, double coinFlip) {
 		this._gameName = gn;
-		this._gameLoc = gl;
-		this._rnd = seed;
 		this._coinFlip = coinFlip;
 		
 		ParseTutorialRules();
+		Chromosome.SetStaticVar(seed, gn, gl, tutInteractionDict);
 	}
 	
 	//returns a batch of randomly created chromosomes
-	public Chromosome[] randomChromosomes(int batchSize) {
+	public Chromosome[] randomChromosomes(int batchSize, String placeholder) {
 		Chromosome[] randos = new Chromosome[batchSize];
 		for(int i=0;i<batchSize;i++) {
-			randos[i] = new Chromosome(_rnd, _gameName, _gameLoc, tutInteractionDict);
+			randos[i] = new Chromosome();
+			randos[i].randomInit(placeholder);
 		}
 		return randos;
 	}
@@ -173,16 +171,52 @@ public class CMEMapElites {
 		//write the game name and # of elite cells first
 		str += "GAME: " + this._gameName + "\n";
 		str += "TOTAL CELLS: " + this._map.size() + "\n";
+		str += "\n\n";
 		
 		//print the map to the file
 		Set<String> keys = this._map.keySet();
 		for(String k : keys) {
-			str += ("[" + k + "]\n");
-			str += (this._map.get(k).toString());
+			Chromosome l = this._map.get(k);
+			
+			str += ("Dimensions: [" + k + "]\n");
+			str += ("Age: " + l.get_age());
+			str += ("Constraints: " + l.getConstraints());
+			str += ("Fitness: " + l.getFitness());
+			str += "Level: \n";
+			str += (l.toString());
+			
 			str += "\n\n";
 		} 
 		
 		return str;
+	}
+	
+	//prints each dimension chromosome to their own file
+	public void deepExport(String exportPath) throws Exception {
+		
+		Set<String> keys = this._map.keySet();
+		
+		//individually writes every level dimension, age, constraints, fitness, and text level
+		for(String k : keys) {
+			String wholePath = exportPath + "/" + this._gameName + "_" + k + ".txt";
+			BufferedWriter bw = new BufferedWriter(new FileWriter(wholePath));
+			
+			Chromosome l = this._map.get(k);
+			String str = "";
+			
+			str += ("Dimensions: [" + k + "]\n");
+			str += ("Age: " + l.get_age());
+			str += ("Constraints: " + l.getConstraints());
+			str += ("Fitness: " + l.getFitness());
+			str += "Level: \n";
+			str += (l.toString());
+			
+			str += "\n\n";
+			
+			
+			bw.write(str);
+			bw.close();
+		}
 	}
 	
 }

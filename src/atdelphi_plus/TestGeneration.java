@@ -66,7 +66,7 @@ public class TestGeneration{
 		
 		
 		//initialize the 10 random chromosomes
-		Chromosome[] myChromos = map.randomChromosomes(popNum);
+		Chromosome[] myChromos = map.randomChromosomes(popNum, null);
 		
 		//TODO: for parallelization, write to the files and read them back in
 		
@@ -80,7 +80,7 @@ public class TestGeneration{
 				System.out.println("");
 				System.out.println(c._textLevel);
 				//System.out.println(String.join(" ", c._allChar));
-				c.calculateResults(aiRunner);
+				c.calculateResults(aiRunner, null);
 				System.out.println("Constraints score: " + c._constraints);
 				System.out.println("Fitness score: " + c._fitness);
 				System.out.println("Dimension vector: " + Arrays.toString(c._dimensions));

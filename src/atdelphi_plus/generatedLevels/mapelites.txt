@@ -1,99 +1,74 @@
 GAME: zelda
-TOTAL CELLS: 8
+TOTAL CELLS: 6
 [0101]
 wwwwwwwwwwwwwww
-w3       3  3 w
-w    w   A 3  w
-w g .     2   w
-w       2     w
-w+     w  +   w
-w .3     w    w
-w      1      w
-w    +   1    w
+w+      2   1 w
+ww  2    + 2  w
+w     g+  A   w
+w   3         w
+w.            w
+w          2  w
+w  .1g3       w
+w  3    .  +  w
 wwwwwwwwwwwwwww
 
 [1101]
 wwwwwwwwwwwwwww
-w3       3  3 w
-w    w   A 3  w
-w g .         w
-w       2     w
-w+     w  +   w
-w .3     w    w
-w      1      w
-w    +   1    w
-wwwwwwwwwwwwwww
-
-
-[0000]
-wwwwwwwwwwwwwww
-w3       3  3 w
-w    w   A 3 +w
-w . .    .    w
-w     2 2     w
-w+     w  +   w
-w .3     w 3  w
-w      1      w
-w w  +   1    w
+w+      2   1 w
+ww  2      2  w
+w     g+      w
+w   3         w
+w.            w
+w          2  w
+w  .1g3       w
+w  3    A     w
 wwwwwwwwwwwwwww
 
 [1111]
 wwwwwwwwwwwwwww
-w             w
-w   2   w     w
-w w   .  g   .w
-w 1+   g   +  w
-w  A gw +g   3w
-w     2      .w
-w3 .        1 w
-w    .    g   w
+w+      2   1 w
+ww  2    + 2  w
+w     g+  A + w
+w   3       . w
+w.            w
+w          2  w
+w2 .1g3       w
+w  3    .  +  w
 wwwwwwwwwwwwwww
 
 [1001]
 wwwwwwwwwwwwwww
-w             w
-w       w     w
-w A   .  g   .w
-w  +   3   +  w
-w     w +g    w
-w     2      .w
-w3 .        1 w
-w    .    g   w
+w+      2   1 w
+ww  2         w
+w   A g+      w
+w   3         w
+w.          w w
+w    +     2  w
+w  .1g3       w
+w    .        w
 wwwwwwwwwwwwwww
 
 [0111]
 wwwwwwwwwwwwwww
-w    1 +      w
-w             w
-w  2      ++22w
-wA    w       w
-w    +     w. w
-w    g   .    w
-w +     g    1w
-w 3         ..w
-wwwwwwwwwwwwwww
-
-[0001]
-wwwwwwwwwwwwwww
-w             w
-w       w     w
-w A   .  g   .w
-w  +   g   +  w
-w     w +g    w
-w     2      .w
-w3 .        1 w
-w    .    g   w
+w+      2   1 w
+ww  2    + 2  w
+w     g+  A   w
+w   3         w
+w.            w
+w     w    2  w
+w  .1g3       w
+w  3    .  +  w
 wwwwwwwwwwwwwww
 
 [1011]
 wwwwwwwwwwwwwww
-w3       3  3 w
-w    w   A 3 1w
-w g .         w
-w       2     w
-w+2  . w  +   w
-w .3     w    w
-w      1      w
-w    +   1    w
+w+      2   1 w
+ww  2         w
+w   A g+      w
+w   3         w
+w.          w w
+w    +     2  w
+w  .1g3       w
+w    .        w
 wwwwwwwwwwwwwww
 

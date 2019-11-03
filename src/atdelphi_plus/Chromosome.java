@@ -13,8 +13,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Random;
 
 import org.json.simple.JSONObject;
@@ -26,89 +24,132 @@ import tracks.ArcadeMachine;
 import tracks.levelGeneration.LevelGenMachine;
 
 public class Chromosome implements Comparable<Chromosome>{
+	
+	/********************
+	 * STATIC VARIABLES *
+	 ********************/
+	
 	//custom level generator directly based off randomLevelGenerator.java 
-	// - differences:
-	//     is the constant size of the level
-	static private String chromoLevelGenerator = "atdelphi_plus.ChromosomeLevelGenerator";
+	//  differences is the constant size of the level
+		static private String chromoLevelGenerator = "atdelphi_plus.ChromosomeLevelGenerator";
+		
+	//open the json file that the run just exported the interactions to
+		static private String outputInteractionJSON = "src/atdelphi_plus/generatedLevels/interactions.json";
+	
 
 	//the default level generator saves the text output to a file - so just write it and read it back in
-	public String placeholderLoc = "src/atdelphi_plus/generatedLevels/placeholder.txt";
+		static private String placeholderLoc = "src/atdelphi_plus/generatedLevels/placeholder.txt";
+	
+	//taken directly from Chromosome.java [MarioAI]
+		static protected Random _rnd;
+		//protected int _appendingSize;		//size is dependent on the game itself
+	
+	//extended variables
+		static protected String _gameName;
+		static protected String _gamePath;
+		static protected String[] _allChar;
+		static protected ArrayList<String[]> _rules;
 
-
+	
+	/********************
+	 * OBJECT VARIABLES *
+	 ********************/
+		
+	
 	//taken directly from Chromosome.java [MarioAI]		
-	static protected Random _rnd;
-	//protected int _appendingSize;		//size is dependent on the game itself
-	protected double _constraints;	
-	protected double _fitness;
-	protected int[] _dimensions;		//binary vector for the interactions that occured for this chromosome
-	private int _age;					//age of the current chromosome
+		protected double _constraints;	
+		protected double _fitness;
+		protected int[] _dimensions;		//binary vector for the interactions that occured for this chromosome
+		private int _age;					//age of the current chromosome
 
 	//extended variables
-	static protected String _gameName;
-	static protected String _gamePath;
-	protected String _textLevel;
-	protected String _fullTextLevel;
-	static protected String[] _allChar;
-	protected boolean _hasBorder;
-	static protected ArrayList<String[]> _rules;
+		protected String _textLevel;
+		protected boolean _hasBorder;
 
-	private char borderChar;
-
+	
+	//sets the static variables for the Chromsome class - shared between all chromosomes
+	public static void SetStaticVar(Random seed, String gn, String gp, ArrayList<String[]> r) {
+		Chromosome._rnd = seed;
+		Chromosome._gameName = gn;
+		Chromosome._gamePath = gp;
+		Chromosome._rules = r;
+		Chromosome._allChar = getMapChar();
+	}
 	
 	
 	//constructor for random initialization
-	public Chromosome(Random seed, String gn, String gp, ArrayList<String[]> r) {
-		_rnd = seed;
-		_constraints = 0;
-		_fitness = 0;
-		_dimensions = null;
-		_age = 0;
-		_textLevel = "";
-		_fullTextLevel = "";
+	public Chromosome() {
+		this._constraints = 0;
+		this._fitness = 0;
+		this._dimensions = null;
+		this._age = 0;
 		
-		_rules = r;
-		randomInit(gn, gp);
+		this._textLevel = "";
+		this._hasBorder = false;
 	}
 
 	//constructor for cloning and mutation
-	public Chromosome(Random seed, String level, String[] mapChar, boolean hasborder, String gn, String gp, ArrayList<String[]> r) {
-		_constraints = 0;
-		_fitness = 0;
-		_dimensions = null;
-		_age = 0;
-		_fullTextLevel = "";
+	public Chromosome(String level, boolean hasborder) {
+		this._constraints = 0;
+		this._fitness = 0;
+		this._dimensions = null;
+		this._age = 0;
 
-		this._rnd = seed;
 		this._textLevel = level;
-		this._allChar = mapChar;
 		this._hasBorder = hasborder;
-		this._gamePath = gp;
-		this._gameName = gn;
-		this._rules = r; 
 	}
 
 
 	//random level initialization function using LevelGenMachine.java and ChromosomeLevelGenerator (AtDelphi+ exclusive class)
-	public void randomInit(String gamename, String gamePath) {
-		this._gameName = gamename;
-		this._gamePath = gamePath;
+	public void randomInit(String placeholder) {
 		this._textLevel = "";
-
+		
+		//default to the class variable
+		if(placeholder == null) {
+			placeholder = Chromosome.placeholderLoc;
+		}
 
 		try {
 			//run the default level gen and write to the placeholder file
-			LevelGenMachine.generateOneLevel(gamePath, chromoLevelGenerator, placeholderLoc);
-			this._fullTextLevel = fullLevel();
-			this._allChar = getMapChar();
-			this._textLevel = parseLevel();
+			LevelGenMachine.generateOneLevel(Chromosome._gamePath, chromoLevelGenerator, placeholder);
+			this._textLevel = parseLevel(fullLevel());
 			this._hasBorder = level_has_border();
 
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+
+	//file-based chromosome initialization function (uncalculated)
+	//public void fileInit(int age, boolean hasBorder, String extLevel) {
+	public void fileInit(String fileContents) {
+		String[] fileStuff = fileContents.split("\n");
+
+		this._age = Integer.parseInt(fileStuff[0]);
+		this._hasBorder = (fileStuff[1] == "0" ? false : true);
+		this._textLevel = "";
+		for(int i=2;i<fileStuff.length;i++) {
+			this._textLevel += fileStuff[i];
+		}
+	}
+	
+	//overwrites the results from an already calculated chromosome of a child process
+	public void saveResults(String fileContents) {
+		String[] fileStuff = fileContents.split("\n");
+		
+		this._age = Integer.parseInt(fileStuff[0]);
+		this._hasBorder = (fileStuff[1] == "0" ? false : true);
+		this._constraints = Double.parseDouble(fileStuff[2]);
+		this._fitness = Double.parseDouble(fileStuff[3]);
+			String[] d = fileStuff[4].split("");
+			this._dimensions = new int[d.length];
+			for(int i=0;i<d.length;i++) {
+				this._dimensions[i] = Integer.parseInt(d[i]);
+			}
+	}
+	
+	
 
 	//returns the full level
 	private String fullLevel() {
@@ -117,10 +158,10 @@ public class Chromosome implements Comparable<Chromosome>{
 	}
 
 	//stripped from LevelGenMachine's loadGeneratedFile() method
-	private String parseLevel() {
+	private String parseLevel(String fullLevel) {
 		String level = "";
 
-		String[] lines = this._fullTextLevel.split("\n");
+		String[] lines = fullLevel.split("\n");
 		int mode = 0;
 		for(String line: lines) {
 			if(line.equals("LevelDescription")) {
@@ -134,17 +175,17 @@ public class Chromosome implements Comparable<Chromosome>{
 	}
 
 	//returns a list of characters used for the map (map character key)
-	private String[] getMapChar() {
-		String level = "";
-		String[] lines = this._fullTextLevel.split("\n");
+	private static String[] getMapChar() {
+		String[] lines = new IO().readFile(Chromosome._gamePath);
 
 		String charList = "";
 		int mode = 0;
 		for(String line: lines) {
+			line = line.trim();
 			if(line.equals("LevelMapping")) {
 				mode = 1;
 				continue;
-			}else if(line.contentEquals("LevelDescription")) {
+			}else if(line.contentEquals("InteractionSet")) {
 				mode = 0;
 				continue;
 			}
@@ -184,18 +225,13 @@ public class Chromosome implements Comparable<Chromosome>{
 
 
 
-	//text level initialization function
-	public void stringInit(String gamename, String extLevel) {
-		_gameName = gamename;
-		_textLevel = extLevel;
-	}
-
-
 	//chromosome level runner
-	public void calculateResults(String aiAgent) throws IOException {
-		copyLevelToPlaceholder();
-		System.out.println("Playing game...");
-		double[] results = ArcadeMachine.runOneGame(this._gamePath, placeholderLoc, false, aiAgent, null, this._rnd.nextInt(), 0);
+	public void calculateResults(String aiAgent, String outFile) throws IOException {
+		if(outFile == null)
+			outFile = Chromosome.placeholderLoc;
+		copyLevelToFile(outFile);
+		//System.out.println("Playing game...");
+		double[] results = ArcadeMachine.runOneGame(Chromosome._gamePath, outFile, false, aiAgent, null, Chromosome._rnd.nextInt(), 0);
 		/*
 		for(double d : results) {
 			System.out.println(d);
@@ -230,12 +266,12 @@ public class Chromosome implements Comparable<Chromosome>{
 	//gets the entropy of unique tiles for the level to be used to calculate fitness
 	private double calculateFitnessEntropy() {
 		char[] charLevel = this._textLevel.toCharArray();
-		int[] charCt = new int[this._allChar.length];
+		int[] charCt = new int[Chromosome._allChar.length];
 
 		//make a new char set from allChar[] because Java is a problematic whiny little shit
-		char[] achar = new char[this._allChar.length];
-		for(int c=0;c<this._allChar.length;c++) {
-			achar[c] = this._allChar[c].charAt(0);
+		char[] achar = new char[Chromosome._allChar.length];
+		for(int c=0;c<Chromosome._allChar.length;c++) {
+			achar[c] = Chromosome._allChar[c].charAt(0);
 		}
 
 		//initialize charCt to 0
@@ -273,51 +309,9 @@ public class Chromosome implements Comparable<Chromosome>{
 		return entropy;
 	}
 
-//	
-//	// Fitness calculator - should look at time completed and amount of open space
-//	// higher score = worse fitness
-//	private void calculateRawFitness(double aiTime, String map) {
-//		//setConstraints(results[0]);		//set the constraints (win/lose)
-//
-//		/*
-//		//count the non open spaces (~" ")
-//		int openSpace = 0;
-//		String[] lines = map.split("\n");
-//		for(int i=0;i<lines.length;i++) {
-//
-//			//skip the border lines
-//			if(this._hasBorder && ((i == 0) || (i == lines.length-1)))
-//				continue;
-//
-//			String curline = lines[i];
-//			for(int j=0;j<curline.length();j++) {
-//				//skip the wall border
-//				if(this._hasBorder && (j == 0 || j == curline.length()))
-//					continue;
-//
-//				if(curline.charAt(j) == ' ')
-//					openSpace++;
-//
-//			}
-//		}
-//		 */
-//		double openSpace = 0.0;
-//
-//		//get the distance for the time completed (difference from best time to actual time)
-//		double timeDiff = Math.abs(Chromosome.bestTime - aiTime);
-//
-//		//add 1000 points if the agent didn't finish the level [1->win; 0->lose]
-//		double finishScore = (1-this._constraints) * 1000;
-//
-//		//add up the scores and set the fitness 
-//		double fitnessScore = openSpace + timeDiff + finishScore;
-//		this._fitness = fitnessScore;
-//	}
-
 
 	//calculates level dimensions based on the game's interaction ruleset
 	//and results in a binary vector for whether the rule was triggered during the agent's run of the level
-	
 	//DEMO: use Zelda rules (player killed enemy? [0-2] player picked up key? [3])
 	private void calculateDimensions() {
 		//System.out.println("calculating dimensions...");
@@ -328,12 +322,10 @@ public class Chromosome implements Comparable<Chromosome>{
 			this._dimensions[d] = 0;
 		}
 		
-		//open the json file that the run just exported the interactions to
-		String outputInteractionJSON = "src/atdelphi_plus/generatedLevels/interactions.json";
 		
 		try {
 	        //read the file
-			BufferedReader interRead = new BufferedReader(new FileReader(outputInteractionJSON));
+			BufferedReader interRead = new BufferedReader(new FileReader(Chromosome.outputInteractionJSON));
 
 			//parse each line (assuming 1 object per line)
 			String line = interRead.readLine();
@@ -367,6 +359,7 @@ public class Chromosome implements Comparable<Chromosome>{
 	}
 	
 	
+	//checks if a rule was enacted during the agent's run (parse through the JSON file)
 	private int hasRule(String[] interaction) {
 		//iterates through the whole set to see if the arrays match
 		for(int r=0;r<_rules.size();r++) {
@@ -386,7 +379,7 @@ public class Chromosome implements Comparable<Chromosome>{
 	//mutates a random tile (within the border if applicable) based on a "coin flip" (given probability between 0-1)
 	public void mutate(double coinFlip) {
 		double f = 0.0;
-		int ct = 0;
+		//int ct = 0;
 
 		//if it meets the coin flip, then pick a tile and mutate
 		do {
@@ -405,15 +398,15 @@ public class Chromosome implements Comparable<Chromosome>{
 				c = new Random().nextInt(rows[r].length()-2)+1;
 			}
 
-			int n = new Random().nextInt(this._allChar.length);
+			int n = new Random().nextInt(Chromosome._allChar.length);
 
 			//replace the character at the random tile with another character
-			String replaceRow = rows[r].substring(0, c) + this._allChar[n] + rows[r].substring(c+1);
+			String replaceRow = rows[r].substring(0, c) + Chromosome._allChar[n] + rows[r].substring(c+1);
 			rows[r] = replaceRow;
 			this._textLevel = String.join("\n", rows);
 
 			f = Math.random();
-			ct++;
+			//ct++;
 		}while(f < coinFlip);
 
 		//System.out.println("Mutated " + ct + " times");
@@ -430,8 +423,8 @@ public class Chromosome implements Comparable<Chromosome>{
 				}else {
 					//keep replacing the character until it's not an A anymore
 					do{
-						int n = new Random().nextInt(this._allChar.length);
-						charLevel[a] = this._allChar[n].charAt(0);				//TODO: Convert to char array
+						int n = new Random().nextInt(Chromosome._allChar.length);
+						charLevel[a] = Chromosome._allChar[n].charAt(0);				
 					}while (charLevel[a] == 'A');
 				}
 			}
@@ -461,8 +454,11 @@ public class Chromosome implements Comparable<Chromosome>{
 	 * Copies the textLevel to the placeholder file
 	 * (for use with LevelGenMachine)
 	 */
-	public void copyLevelToPlaceholder() throws IOException {
-		BufferedWriter writer = new BufferedWriter(new FileWriter(placeholderLoc));
+	public void copyLevelToFile(String file) throws IOException {
+		if(file == null)
+			file = Chromosome.placeholderLoc;
+		
+		BufferedWriter writer = new BufferedWriter(new FileWriter(file));
 		writer.write(this._textLevel);
 		//writer.write(this._fullTextLevel); 
 
@@ -472,7 +468,7 @@ public class Chromosome implements Comparable<Chromosome>{
 
 	//clone chromosome function
 	public Chromosome clone() {
-		return new Chromosome(this._rnd, this._textLevel, this._allChar, this._hasBorder, this._gameName, this._gamePath, this._rules);
+		return new Chromosome(this._textLevel, this._hasBorder);
 	}
 
 	//override class toString() function
@@ -480,7 +476,27 @@ public class Chromosome implements Comparable<Chromosome>{
 		return _textLevel;
 	}
 
-
+	//creates an input file format for the level (for use with parallelization)
+	public String toInputFile() {
+		String output = "";
+		output += this._age + "\n";
+		output += (this._hasBorder ? "1\n" : "0\n");
+		output += (this.toString());
+		return output;
+	}
+	
+	//creates an output file format for the level (for use with parallelization)
+	public String toOutputFile() {
+		String output = "";
+		output += (this._age) + "\n";
+		output += (this._hasBorder ? "1\n" : "0\n");
+		output += (this._constraints) + "\n";
+		output += (this._fitness) + "\n";
+		for(int i=0;i<this._dimensions.length;i++) {output += ("" + this._dimensions[i]);} output += "\n";
+		//output += (this.toString());
+		return output;
+		
+	}
 
 	/**
 	 * compares the constraints and fitness of 2 chromosomes

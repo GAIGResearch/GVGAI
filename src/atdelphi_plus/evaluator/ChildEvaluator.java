@@ -22,6 +22,7 @@ public class ChildEvaluator {
 	this._outputFolder = outputFolder;
     }
     
+    //check if all the input files for this child have been created yet
     public boolean checkChromosomes() {
 	int startIndex = this._id * this._size;
 	for(int i=0; i<this._size; i++) {
@@ -33,6 +34,8 @@ public class ChildEvaluator {
 	return true;
     }
     
+    
+    //read in the string input chromosomes produced by the parents
     public String[] readChromosomes() throws IOException {
 	String[] result = new String[this._size];
 	int startIndex = this._id * this._size;
@@ -42,6 +45,7 @@ public class ChildEvaluator {
 	return result;
     }
     
+    //write the results (age, hasborder, constraints, fitness, dimension, and level) back to the parent to assign
     public void writeResults(String[] values) throws FileNotFoundException, UnsupportedEncodingException {
 	int startIndex = this._id * this._size;
 	for(int i=0; i<values.length; i++) {
@@ -51,6 +55,7 @@ public class ChildEvaluator {
 	}
     }
     
+    //delete all the input files that were used to make the chromosomes
     public void clearInputFiles() {
 	int startIndex = this._id * this._size;
 	for(int i=0; i<this._size; i++) {

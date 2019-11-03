@@ -1,9 +1,12 @@
 package atdelphi_plus;
 
+import java.io.BufferedWriter;
+
 //for use on the NYU HPC server
 
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -59,7 +62,13 @@ public class ADPParentRunner {
 		}
 		
 		return gameSet;
-		
+	}
+	
+	//export the map to a file
+	public static void simpleExportMap(CMEMapElites m, String outFile) throws Exception{
+		BufferedWriter bw = new BufferedWriter(new FileWriter(outFile));
+		bw.write(m.toString());
+		bw.close();
 	}
 	
 	public static void main(String[] args)  throws IOException{
@@ -78,6 +87,7 @@ public class ADPParentRunner {
 		int gameIndex = Integer.parseInt(parameters.get("gameIndex"));
 		int popSize = Integer.parseInt(parameters.get("populationSize"));
 		double coinFlip = Double.parseDouble("coinFlip");
+		int exportFreq = Integer.parseInt(parameters.get("exportFreq"));
 		
 		//import the game list
 		HashMap<Integer, String[]> gameList = readGamesCSV(parameters.get("gameListCSV"));
@@ -96,15 +106,70 @@ public class ADPParentRunner {
 		CMEMapElites map = new CMEMapElites(gameName, gameLoc, seed, coinFlip);
 		ParentEvaluator parent = new ParentEvaluator(parameters.get("inputFolder"), parameters.get("outputFolder"));
 		System.out.println("First Batch of Chromosomes");
-		Chromosome[] chromosomes = map.randomChromosomes(popSize);
+		Chromosome[] chromosomes = map.randomChromosomes(popSize, null);
 		int iteration = 0;
 		int maxIterations = -1;
 		if(args.length > 0) {
 			maxIterations = Integer.parseInt(args[0]);
 		}
 		
+		//run forever, or until all the iterations have been completed
 		while(true) {
-			break;
+			try {
+				// 1p) export the chromosomes to the files for the children
+				// 		in the form [age\n hasborder\n level]
+				System.out.println("P: Writing in files for children...");
+				String[] levelOut = new String[chromosomes.length];
+				for(int i=0;i<chromosomes.length;i++) {
+					levelOut[i] = chromosomes[i].toInputFile();
+				}
+				
+				// 2p-5p) wait for the children to return results from running the AI agent
+				parent.writeChromosomes(levelOut);
+				System.out.println("P: Waiting for children to finish...");
+				while(!parent.checkChromosomes(chromosomes.length)) {
+					Thread.sleep(500);
+				}
+				Thread.sleep(1000);
+				
+				// 6p) read in the results of the child output chromosomes
+				System.out.println("P: Reading children results...");
+				String[] values = parent.assignChromosomes(chromosomes.length);
+				for(int i=0; i<chromosomes.length; i++) {
+					chromosomes[i].saveResults(values[i]);
+				}
+				
+				// 7p) assign the chromosomes to the MAP
+				System.out.println("P: Assigning chromosomes to the MAP...");
+				map.assignChromosomes(chromosomes);
+				
+				// 7.5p) delete the old output files
+				parent.clearOutputFiles(chromosomes.length);
+				
+				// 8p) write map results and info to the results folder (done every x iterations)
+				if(iteration % exportFreq == 0) {
+					System.out.println("Writing results");
+					File f = new File(parameters.get("resultFolder") + iteration + "/");
+					f.mkdir();
+					map.deepExport(parameters.get("resultFolder") + iteration + "/");
+					deleteDirectory(new File(parameters.get("resultFolder") + (iteration - exportFreq) + "/"));
+				}
+				
+				//if completed all iterations, then finish
+				if(maxIterations > 0 && iteration >= maxIterations) {
+					break;
+				}
+				
+				// 9p) otherwise generate a new batch of chromosomes
+				System.out.println("Generate next batch");
+				chromosomes = map.makeNextGeneration(popSize);
+				iteration += 1;
+				
+				// 10p) repeat back to (1p)
+				
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
 		}
 		
 	}
