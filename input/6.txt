@@ -1,0 +1,12 @@
+0
+1
+wwwwwwwwwwwwwww
+w    3  1 +   w
+w +  3        w
+w 31       .  w
+w  w  . 21    w
+w   w   Ag    w
+w             w
+w     3    3  w
+w+     22 g   w
+wwwwwwwwwwwwwww

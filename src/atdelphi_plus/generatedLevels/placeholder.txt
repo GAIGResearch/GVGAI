@@ -1,10 +1,10 @@
 wwwwwwwwwwwwwww
-w       2     w
-w   3  3 1    w
-w .w    1     w
-w  w        3.w
-w +   2+      w
-w     3   w   w
-w    g        w
-w A2       g 1w
+w   A  21     w
+w +    +     3w
+w 1   1     g w
+w  w       w 1w
+w2     .      w
+w. 3     g    w
+w 2     1   g w
+w   3      .  w
 wwwwwwwwwwwwwww

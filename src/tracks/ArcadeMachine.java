@@ -85,110 +85,213 @@ public class ArcadeMachine {
      *            ID of the human player
      * @throws IOException 
      */
+    
+
     public static double[] runOneGame(String game_file, String level_file, boolean visuals, String agentNames,
-	    String actionFile, int randomSeed, int playerID) throws IOException {
-		VGDLFactory.GetInstance().init(); // This always first thing to do.
-		VGDLRegistry.GetInstance().init();
-		
-		if (VERBOSE)
-			System.out.println(" ** Playing game " + game_file + ", level " + level_file + " **");
+    	    String actionFile, int randomSeed, int playerID) throws IOException {
+    		VGDLFactory.GetInstance().init(); // This always first thing to do.
+    		VGDLRegistry.GetInstance().init();
+    		
+    		if (VERBOSE)
+    			System.out.println(" ** Playing game " + game_file + ", level " + level_file + " **");
 
-		if (CompetitionParameters.OS_WIN)
-		{
-			System.out.println(" * WARNING: Time limitations based on WALL TIME on Windows * ");
-		}
+    		if (CompetitionParameters.OS_WIN)
+    		{
+    			System.out.println(" * WARNING: Time limitations based on WALL TIME on Windows * ");
+    		}
 
-		// First, we create the game to be played..
-		Game toPlay = new VGDLParser().parseGame(game_file);
-		toPlay.buildLevel(level_file, randomSeed);
+    		// First, we create the game to be played..
+    		Game toPlay = new VGDLParser().parseGame(game_file);
+    		toPlay.buildLevel(level_file, randomSeed);
 
-		if(InteractionStaticData.saveSpriteGroup) {
-			InteractionStaticData.createJSONInfo(toPlay);
-		}
-		
-		// Warm the game up.
-		ArcadeMachine.warmUp(toPlay, CompetitionParameters.WARMUP_TIME);
+    		if(InteractionStaticData.saveSpriteGroup) {
+    			InteractionStaticData.createJSONInfo(toPlay);
+    		}
+    		
+    		// Warm the game up.
+    		ArcadeMachine.warmUp(toPlay, CompetitionParameters.WARMUP_TIME);
 
-		// Create the players.
-		String[] names = agentNames.split(" ");
-		int no_players = toPlay.no_players;
-		if (no_players > 1 && no_players != names.length) {
-			// We fill with more human players
-			String[] newNames = new String[no_players];
-			System.arraycopy(names, 0, newNames, 0, names.length);
-			for (int i = names.length; i < no_players; ++i)
-			newNames[i] = "tracks.multiPlayer.tools.human.Agent";
-			names = newNames;
-		}
+    		// Create the players.
+    		String[] names = agentNames.split(" ");
+    		int no_players = toPlay.no_players;
+    		if (no_players > 1 && no_players != names.length) {
+    			// We fill with more human players
+    			String[] newNames = new String[no_players];
+    			System.arraycopy(names, 0, newNames, 0, names.length);
+    			for (int i = names.length; i < no_players; ++i)
+    			newNames[i] = "tracks.multiPlayer.tools.human.Agent";
+    			names = newNames;
+    		}
 
-		boolean humans[] = new boolean[no_players];
-		boolean anyHuman = false;
+    		boolean humans[] = new boolean[no_players];
+    		boolean anyHuman = false;
 
-		// System.out.println("Number of players: " + no_players);
+    		// System.out.println("Number of players: " + no_players);
 
-		Player[] players;
-		if (no_players > 1) {
-			// multi player games
-			players = new AbstractMultiPlayer[no_players];
-		} else {
-			// single player games
-			players = new AbstractPlayer[no_players];
-		}
+    		Player[] players;
+    		if (no_players > 1) {
+    			// multi player games
+    			players = new AbstractMultiPlayer[no_players];
+    		} else {
+    			// single player games
+    			players = new AbstractPlayer[no_players];
+    		}
 
-		for (int i = 0; i < no_players; i++) {
+    		for (int i = 0; i < no_players; i++) {
 
-			humans[i] = isHuman(names[i]);
-			anyHuman |= humans[i];
+    			humans[i] = isHuman(names[i]);
+    			anyHuman |= humans[i];
 
-			if (no_players > 1) {
-			// multi player
-			players[i] = ArcadeMachine.createMultiPlayer(names[i], actionFile, toPlay.getObservationMulti(i),
-				randomSeed, i, humans[i]);
-			} else {
-			// single player
-			players[i] = ArcadeMachine.createPlayer(names[i], actionFile, toPlay.getObservation(), randomSeed,
-				humans[i]);
-			}
+    			if (no_players > 1) {
+    			// multi player
+    			players[i] = ArcadeMachine.createMultiPlayer(names[i], actionFile, toPlay.getObservationMulti(i),
+    				randomSeed, i, humans[i]);
+    			} else {
+    			// single player
+    			players[i] = ArcadeMachine.createPlayer(names[i], actionFile, toPlay.getObservation(), randomSeed,
+    				humans[i]);
+    			}
 
-			if (players[i] == null) {
-			// Something went wrong in the constructor, controller
-			// disqualified
-			if (no_players > 1) {
-				// multi player
-				toPlay.getAvatars()[i].disqualify(true);
-			} else {
-				// single player
-				toPlay.disqualify();
-			}
+    			if (players[i] == null) {
+    			// Something went wrong in the constructor, controller
+    			// disqualified
+    			if (no_players > 1) {
+    				// multi player
+    				toPlay.getAvatars()[i].disqualify(true);
+    			} else {
+    				// single player
+    				toPlay.disqualify();
+    			}
 
-			// Get the score for the result.
-			toPlay.handleResult();
-			toPlay.printResult();
-			return toPlay.getFullResult();
-			}
-		}
+    			// Get the score for the result.
+    			toPlay.handleResult();
+    			toPlay.printResult();
+    			return toPlay.getFullResult();
+    			}
+    		}
 
-		// Then, play the game.
-		double[] score;
-		if (visuals)
-			score = toPlay.playGame(players, randomSeed, anyHuman, playerID);
-		else
-			score = toPlay.runGame(players, randomSeed);
+    		// Then, play the game.
+    		double[] score;
+    		if (visuals)
+    			score = toPlay.playGame(players, randomSeed, anyHuman, playerID);
+    		else
+    			score = toPlay.runGame(players, randomSeed);
 
-		// Finally, when the game is over, we need to tear the players down.
-		ArcadeMachine.tearPlayerDown(toPlay, players, actionFile, randomSeed, true);
+    		// Finally, when the game is over, we need to tear the players down.
+    		ArcadeMachine.tearPlayerDown(toPlay, players, actionFile, randomSeed, true);
 
-		// This, the last thing to do in this method, always:
-		toPlay.handleResult();
-		//System.out.println("cool");
-		toPlay.printResult();
+    		// This, the last thing to do in this method, always:
+    		toPlay.handleResult();
+    		//System.out.println("cool");
+    		toPlay.printResult();
 
-		return toPlay.getFullResult();
-	}
+    		return toPlay.getFullResult();
+    	}
 
+    //same as above but extended for json file input
+    public static double[] runOneGame(String game_file, String level_file, boolean visuals, String agentNames,
+    	    String actionFile, int randomSeed, int playerID, String jsonFile) throws IOException {
+    		VGDLFactory.GetInstance().init(); // This always first thing to do.
+    		VGDLRegistry.GetInstance().init();
+    		
+    		if (VERBOSE)
+    			System.out.println(" ** Playing game " + game_file + ", level " + level_file + " **");
 
+    		if (CompetitionParameters.OS_WIN)
+    		{
+    			System.out.println(" * WARNING: Time limitations based on WALL TIME on Windows * ");
+    		}
 
+    		// First, we create the game to be played..
+    		Game toPlay = new VGDLParser().parseGame(game_file);
+    		toPlay.buildLevel(level_file, randomSeed);
 
+    		if(InteractionStaticData.saveSpriteGroup) {
+    			InteractionStaticData.createJSONInfo(toPlay);
+    		}
+    		
+    		// Warm the game up.
+    		ArcadeMachine.warmUp(toPlay, CompetitionParameters.WARMUP_TIME);
+
+    		// Create the players.
+    		String[] names = agentNames.split(" ");
+    		int no_players = toPlay.no_players;
+    		if (no_players > 1 && no_players != names.length) {
+    			// We fill with more human players
+    			String[] newNames = new String[no_players];
+    			System.arraycopy(names, 0, newNames, 0, names.length);
+    			for (int i = names.length; i < no_players; ++i)
+    			newNames[i] = "tracks.multiPlayer.tools.human.Agent";
+    			names = newNames;
+    		}
+
+    		boolean humans[] = new boolean[no_players];
+    		boolean anyHuman = false;
+
+    		// System.out.println("Number of players: " + no_players);
+
+    		Player[] players;
+    		if (no_players > 1) {
+    			// multi player games
+    			players = new AbstractMultiPlayer[no_players];
+    		} else {
+    			// single player games
+    			players = new AbstractPlayer[no_players];
+    		}
+
+    		for (int i = 0; i < no_players; i++) {
+
+    			humans[i] = isHuman(names[i]);
+    			anyHuman |= humans[i];
+
+    			if (no_players > 1) {
+    			// multi player
+    			players[i] = ArcadeMachine.createMultiPlayer(names[i], actionFile, toPlay.getObservationMulti(i),
+    				randomSeed, i, humans[i]);
+    			} else {
+    			// single player
+    			players[i] = ArcadeMachine.createPlayer(names[i], actionFile, toPlay.getObservation(), randomSeed,
+    				humans[i]);
+    			}
+
+    			if (players[i] == null) {
+    			// Something went wrong in the constructor, controller
+    			// disqualified
+    			if (no_players > 1) {
+    				// multi player
+    				toPlay.getAvatars()[i].disqualify(true);
+    			} else {
+    				// single player
+    				toPlay.disqualify();
+    			}
+
+    			// Get the score for the result.
+    			toPlay.handleResult();
+    			toPlay.printResult();
+    			return toPlay.getFullResult();
+    			}
+    		}
+
+    		// Then, play the game.
+    		double[] score;
+    		if (visuals)
+    			score = toPlay.playGame(players, randomSeed, anyHuman, playerID);
+    		else
+    			score = toPlay.runGame(players, randomSeed, jsonFile);
+
+    		// Finally, when the game is over, we need to tear the players down.
+    		ArcadeMachine.tearPlayerDown(toPlay, players, actionFile, randomSeed, true);
+
+    		// This, the last thing to do in this method, always:
+    		toPlay.handleResult();
+    		//System.out.println("cool");
+    		toPlay.printResult();
+
+    		return toPlay.getFullResult();
+    	}
+    
+    
+    
     /**
      * Runs a replay given a game, level and file with the actions to execute.
      * 

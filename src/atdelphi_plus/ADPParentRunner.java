@@ -18,6 +18,13 @@ import atdelphi_plus.evaluator.ParentEvaluator;
 
 public class ADPParentRunner {
 
+	private static void resetAllFolders(String in, String out) {
+		deleteDirectory(new File(in));
+		deleteDirectory(new File(out));
+		new File(in).mkdir();
+		new File(out).mkdir();
+	}
+	
 	//clear everything from a specified directory
 	private static void deleteDirectory(File directoryToBeDeleted) {
 		File[] allContents = directoryToBeDeleted.listFiles();
@@ -86,7 +93,7 @@ public class ADPParentRunner {
 		Random seed = new Random(Integer.parseInt(parameters.get("seed")));
 		int gameIndex = Integer.parseInt(parameters.get("gameIndex"));
 		int popSize = Integer.parseInt(parameters.get("populationSize"));
-		double coinFlip = Double.parseDouble("coinFlip");
+		double coinFlip = Double.parseDouble(parameters.get("coinFlip"));
 		int exportFreq = Integer.parseInt(parameters.get("exportFreq"));
 		
 		//import the game list
@@ -103,19 +110,27 @@ public class ADPParentRunner {
 		String gameLoc = gameList.get(gameIndex)[1];
 		
 		//setup map elites and the first chromosomes
-		CMEMapElites map = new CMEMapElites(gameName, gameLoc, seed, coinFlip);
+		CMEMapElites map = new CMEMapElites(gameName, gameLoc, seed, coinFlip, parameters.get("generatorFolder"), parameters.get("tutorialFolder"));
 		ParentEvaluator parent = new ParentEvaluator(parameters.get("inputFolder"), parameters.get("outputFolder"));
 		System.out.println("First Batch of Chromosomes");
-		Chromosome[] chromosomes = map.randomChromosomes(popSize, null);
+		Chromosome[] chromosomes = map.randomChromosomes(popSize, parameters.get("generatorFolder") + "init_ph.txt");
+		
+		//set iteration count
 		int iteration = 0;
 		int maxIterations = -1;
 		if(args.length > 0) {
 			maxIterations = Integer.parseInt(args[0]);
 		}
 		
+		//delete old folders 
+		System.out.println("P: Resetting input/output folders...");
+		resetAllFolders(parameters.get("inputFolder"), parameters.get("outputFolder"));
+		
 		//run forever, or until all the iterations have been completed
 		while(true) {
 			try {
+				System.out.println("\n\nITERATION #" + iteration + "/" + maxIterations);
+				
 				// 1p) export the chromosomes to the files for the children
 				// 		in the form [age\n hasborder\n level]
 				System.out.println("P: Writing in files for children...");
@@ -148,7 +163,7 @@ public class ADPParentRunner {
 				
 				// 8p) write map results and info to the results folder (done every x iterations)
 				if(iteration % exportFreq == 0) {
-					System.out.println("Writing results");
+					System.out.println("P: Writing results...");
 					File f = new File(parameters.get("resultFolder") + iteration + "/");
 					f.mkdir();
 					map.deepExport(parameters.get("resultFolder") + iteration + "/");
@@ -161,7 +176,7 @@ public class ADPParentRunner {
 				}
 				
 				// 9p) otherwise generate a new batch of chromosomes
-				System.out.println("Generate next batch");
+				System.out.println("P: Generating next batch...");
 				chromosomes = map.makeNextGeneration(popSize);
 				iteration += 1;
 				

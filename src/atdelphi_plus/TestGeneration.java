@@ -52,7 +52,7 @@ public class TestGeneration{
 	//String recordLevelFile = generateLevelPath + games[gameIdx] + "_glvl.txt";
 	static String gameLoc = gamesPath + games[gameIdx] + ".txt";
 	
-	static String aiRunner = "tracks.singlePlayer.advanced.olets.Agent";
+	static String aiRunner = "agents.adrienctx.Agent";
 	
 	//static int eliteNum = 2;			//for mapelites can only have 1 (which is the best out of the group)
 	static int popNum = 10;
@@ -62,7 +62,7 @@ public class TestGeneration{
 	public static void main(String[] args) throws IOException{
 		long startTime = System.nanoTime();
 		
-		CMEMapElites map = new CMEMapElites(gameName, gameLoc, seed, 0.5);
+		CMEMapElites map = new CMEMapElites(gameName, gameLoc, seed, 0.5, null, "src/atdelphi_plus/");
 		
 		
 		//initialize the 10 random chromosomes
@@ -80,7 +80,7 @@ public class TestGeneration{
 				System.out.println("");
 				System.out.println(c._textLevel);
 				//System.out.println(String.join(" ", c._allChar));
-				c.calculateResults(aiRunner, null);
+				c.calculateResults(aiRunner, null, 0);
 				System.out.println("Constraints score: " + c._constraints);
 				System.out.println("Fitness score: " + c._fitness);
 				System.out.println("Dimension vector: " + Arrays.toString(c._dimensions));

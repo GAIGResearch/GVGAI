@@ -1,0 +1,12 @@
+0
+1
+wwwwwwwwwwwwwww
+w      1  1+  w
+w      3      w
+w      w      w
+w .g          w
+w A  2     .  w
+w  +          w
+w         +   w
+w2    1  1+   w
+wwwwwwwwwwwwwww

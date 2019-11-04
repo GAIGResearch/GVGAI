@@ -68,12 +68,16 @@ public class Chromosome implements Comparable<Chromosome>{
 
 	
 	//sets the static variables for the Chromsome class - shared between all chromosomes
-	public static void SetStaticVar(Random seed, String gn, String gp, ArrayList<String[]> r) {
+	public static void SetStaticVar(Random seed, String gn, String gp, String genFolder, ArrayList<String[]> r) {
 		Chromosome._rnd = seed;
 		Chromosome._gameName = gn;
 		Chromosome._gamePath = gp;
 		Chromosome._rules = r;
 		Chromosome._allChar = getMapChar();
+		if(genFolder != null) {
+			Chromosome.outputInteractionJSON = genFolder + "interactions_%.json";
+		}
+			
 	}
 	
 	
@@ -112,7 +116,7 @@ public class Chromosome implements Comparable<Chromosome>{
 		try {
 			//run the default level gen and write to the placeholder file
 			LevelGenMachine.generateOneLevel(Chromosome._gamePath, chromoLevelGenerator, placeholder);
-			this._textLevel = parseLevel(fullLevel());
+			this._textLevel = parseLevel(fullLevel(placeholder));
 			this._hasBorder = level_has_border();
 
 
@@ -130,8 +134,9 @@ public class Chromosome implements Comparable<Chromosome>{
 		this._hasBorder = (fileStuff[1] == "0" ? false : true);
 		this._textLevel = "";
 		for(int i=2;i<fileStuff.length;i++) {
-			this._textLevel += fileStuff[i];
+			this._textLevel += (fileStuff[i] + "\n");
 		}
+		this._textLevel.trim();
 	}
 	
 	//overwrites the results from an already calculated chromosome of a child process
@@ -152,8 +157,8 @@ public class Chromosome implements Comparable<Chromosome>{
 	
 
 	//returns the full level
-	private String fullLevel() {
-		String[] lines = new IO().readFile(placeholderLoc);
+	private String fullLevel(String ph) {
+		String[] lines = new IO().readFile(ph);
 		return String.join("\n", lines);
 	}
 
@@ -226,12 +231,13 @@ public class Chromosome implements Comparable<Chromosome>{
 
 
 	//chromosome level runner
-	public void calculateResults(String aiAgent, String outFile) throws IOException {
+	public void calculateResults(String aiAgent, String outFile, int id) throws IOException {
 		if(outFile == null)
 			outFile = Chromosome.placeholderLoc;
 		copyLevelToFile(outFile);
 		//System.out.println("Playing game...");
-		double[] results = ArcadeMachine.runOneGame(Chromosome._gamePath, outFile, false, aiAgent, null, Chromosome._rnd.nextInt(), 0);
+		String json = Chromosome.outputInteractionJSON.replaceFirst("%", (""+id));
+		double[] results = ArcadeMachine.runOneGame(Chromosome._gamePath, outFile, false, aiAgent, null, Chromosome._rnd.nextInt(), 0, json);
 		/*
 		for(double d : results) {
 			System.out.println(d);
@@ -242,7 +248,7 @@ public class Chromosome implements Comparable<Chromosome>{
 		setConstraints(results); 	//set the constraints (win or lose)
 		//calculateRawFitness(results[2], this._textLevel);
 		this._fitness = calculateFitnessEntropy();		//set the fitness
-		calculateDimensions();							//set the dimensions
+		calculateDimensions(id);							//set the dimensions
 
 	}
 
@@ -313,7 +319,7 @@ public class Chromosome implements Comparable<Chromosome>{
 	//calculates level dimensions based on the game's interaction ruleset
 	//and results in a binary vector for whether the rule was triggered during the agent's run of the level
 	//DEMO: use Zelda rules (player killed enemy? [0-2] player picked up key? [3])
-	private void calculateDimensions() {
+	private void calculateDimensions(int id) {
 		//System.out.println("calculating dimensions...");
 		
 		//create a new dimension set based on the size of _rules and set all values to 0
@@ -325,7 +331,8 @@ public class Chromosome implements Comparable<Chromosome>{
 		
 		try {
 	        //read the file
-			BufferedReader interRead = new BufferedReader(new FileReader(Chromosome.outputInteractionJSON));
+			String json = Chromosome.outputInteractionJSON.replaceFirst("%", (""+id));
+			BufferedReader interRead = new BufferedReader(new FileReader(json));
 
 			//parse each line (assuming 1 object per line)
 			String line = interRead.readLine();
@@ -349,7 +356,7 @@ public class Chromosome implements Comparable<Chromosome>{
 	        }
 	        interRead.close();
 		}catch(FileNotFoundException e) {
-	        System.out.println("Unable to open file '" + outputInteractionJSON + "'");                
+	        System.out.println("Unable to open file '" + Chromosome.outputInteractionJSON.replaceFirst("%", (""+id)) + "'");                
 	    }
 	    catch(IOException e) {
 	        e.printStackTrace();

@@ -32,12 +32,12 @@ public class CMEMapElites {
 	
 	
 	
-	public CMEMapElites(String gn, String gl, Random seed, double coinFlip) {
+	public CMEMapElites(String gn, String gl, Random seed, double coinFlip, String genFolder, String tutFolder) {
 		this._gameName = gn;
 		this._coinFlip = coinFlip;
 		
-		ParseTutorialRules();
-		Chromosome.SetStaticVar(seed, gn, gl, tutInteractionDict);
+		ParseTutorialRules(tutFolder);
+		Chromosome.SetStaticVar(seed, gn, gl, genFolder, tutInteractionDict);
 	}
 	
 	//returns a batch of randomly created chromosomes
@@ -109,7 +109,7 @@ public class CMEMapElites {
 	}
 	
 	//sets the game interaction set (rules) for the dimensionality
-	private void ParseTutorialRules() {
+	private void ParseTutorialRules(String tutFolder) {
 		//assume that the rules will come from the game's specific json file
 		//as a test we will use one custom made for zelda
 		//however, for the real simulation - assume we can call a function from AtDelphi (original) 
@@ -117,7 +117,7 @@ public class CMEMapElites {
 		//the format of the JSON file is:
 		//		{inputs (sprite2) : [], outputs (sprite1) : [], action : ""}
 		
-		String gameRuleJSON = "src/atdelphi_plus/" + _gameName + "_tut.json";		//in this scenario it is in the same folder
+		String gameRuleJSON = tutFolder + _gameName + "_tut.json";		//in this scenario it is in the same folder
 		try {
 	        //read the file
 			BufferedReader jsonRead = new BufferedReader(new FileReader(gameRuleJSON));
@@ -146,7 +146,8 @@ public class CMEMapElites {
 	        jsonRead.close();         
 	    }
 	    catch(FileNotFoundException e) {
-	        System.out.println("Unable to open file '" + gameRuleJSON + "'");                
+	        System.out.println("ERROR: Unable to open file '" + gameRuleJSON + "'");    
+	        System.exit(0);
 	    }
 	    catch(IOException e) {
 	    	System.out.println("IO EXCEPTION");
@@ -180,9 +181,9 @@ public class CMEMapElites {
 			
 			str += ("Dimensions: [" + k + "]\n");
 			str += ("Age: " + l.get_age());
-			str += ("Constraints: " + l.getConstraints());
-			str += ("Fitness: " + l.getFitness());
-			str += "Level: \n";
+			str += ("\nConstraints: " + l.getConstraints());
+			str += ("\nFitness: " + l.getFitness());
+			str += "\nLevel: \n";
 			str += (l.toString());
 			
 			str += "\n\n";
@@ -206,9 +207,9 @@ public class CMEMapElites {
 			
 			str += ("Dimensions: [" + k + "]\n");
 			str += ("Age: " + l.get_age());
-			str += ("Constraints: " + l.getConstraints());
-			str += ("Fitness: " + l.getFitness());
-			str += "Level: \n";
+			str += ("\nConstraints: " + l.getConstraints());
+			str += ("\nFitness: " + l.getFitness());
+			str += "\nLevel: \n";
 			str += (l.toString());
 			
 			str += "\n\n";
