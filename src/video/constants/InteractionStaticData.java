@@ -35,6 +35,7 @@ public class InteractionStaticData {
 	public static ArrayList<String> itypesJson;
 	
 	
+	
     public static void createJSONInfo(Game toPlay) {
     	GameDescription gd = new GameDescription(toPlay);
 		SpriteGroup[] spriteGroups = toPlay.getSpriteGroups();

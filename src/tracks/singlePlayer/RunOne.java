@@ -17,7 +17,7 @@ import video.constants.InteractionStaticData;
 public class RunOne {
 
     public static void main(String[] args) throws IOException {
-
+    	
 		//Load available games
 		String spGamesCollection =  "examples/atDelfi_games.csv";
 		String[][] games = Utils.readGames(spGamesCollection);
@@ -26,7 +26,7 @@ public class RunOne {
 		String[] agents = RunOne.generateAgents();
 		
 		//Game settings
-		boolean visuals = true;
+		boolean visuals = false;
 		int seed = new Random().nextInt();
 
 		// Game and level to play
@@ -41,17 +41,21 @@ public class RunOne {
 						// where to record the actions
 						// executed. null if not to save.
 		
-		String agent = agents[Integer.parseInt(args[3])];
+		String agent = agents[Integer.parseInt(args[2])];
 
 		// set up InteractionStaticData
 		InteractionStaticData.gameName = gameName;
-		InteractionStaticData.agentName = args[3];
+		InteractionStaticData.agentName = args[2];
 		InteractionStaticData.levelCount = args[1];
-		InteractionStaticData.playthroughCount = args[2];
+		// play 20 per level
+		int playthroughTotal = Integer.parseInt(args[3]);
+//		InteractionStaticData.playthroughCount = args[2];
 		
 		InteractionStaticData.createFolders();
-		
-		ArcadeMachine.runOneGame(game, level1, visuals, agent, recordActionsFile, seed, 0);
+		for(int i = 0; i < playthroughTotal; i++) {
+			InteractionStaticData.playthroughCount = "" + i;
+			ArcadeMachine.runOneGame(game, level1, visuals, agent, recordActionsFile, seed, 0);
+		}
 
     }
     

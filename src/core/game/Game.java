@@ -946,7 +946,7 @@ public abstract class Game {
 	public void storeActionsAndInteractions() {
 		//stores the interaction in a JSONFile
 		File f = new File(InteractionStaticData.gameName, InteractionStaticData.agentName + "_" + InteractionStaticData.levelCount + "_" + InteractionStaticData.playthroughCount +
-				"_interaction.json");
+				"_mechanics.json");
 		storeInteraction.writeInteractionJSONFile(f.toString());
 		f = new File(InteractionStaticData.gameName, InteractionStaticData.agentName + "_" + InteractionStaticData.levelCount + "_" + InteractionStaticData.playthroughCount +
 				"_actions.json");
@@ -978,7 +978,7 @@ public abstract class Game {
 			storeFramesAndActions(players, frameStorer);
 		}
 		
-			storeActionsAndInteractions();
+//			storeActionsAndInteractions();
 
 		// Update the forward model for the game state sent to the controller.
 		fwdModel.update(this);
@@ -1311,10 +1311,12 @@ public abstract class Game {
 			storeGameSimulationResult.
 			storeGameSimulationResult(String.valueOf((avatars[0].getWinState().key()))
 					,String.valueOf(gameTick));
+			
+			storeGameSimulationResult.addMechanics(storeInteraction.interactionArray, storePlayerAction.playerActionArray);
 			File f = new File(InteractionStaticData.gameName, InteractionStaticData.agentName + "_" + InteractionStaticData.levelCount + "_" + InteractionStaticData.playthroughCount +
 					"_result.json");
 			storeGameSimulationResult.
-			writeResultToAJSONFile(f.toString());
+			writeAllInfo(f.toString());
 			InteractionStaticData.resultsCounter += 1;
 		}
 

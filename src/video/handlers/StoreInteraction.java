@@ -10,8 +10,7 @@ import video.basics.Interaction;
 
 public class StoreInteraction {
 	
-	JSONArray interactionArray;
-	
+	public JSONArray interactionArray;
 	public StoreInteraction()
 	{
 		interactionArray = new JSONArray();
@@ -68,5 +67,4 @@ public class StoreInteraction {
 			e.printStackTrace();
 		}
 	}
-
 }
