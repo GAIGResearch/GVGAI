@@ -7,7 +7,7 @@ import tutorialGeneration.AtDelfiGraph;
 import tutorialGeneration.Mechanic;
 import tutorialGeneration.Node;
 
-public class GreedyPather extends CriticalPather {
+public class BestFirstPather extends CriticalPather {
 	/***
 	 * This class creates critical paths by greedily choosing the lowest frames at each
 	 * step in the search
@@ -17,7 +17,7 @@ public class GreedyPather extends CriticalPather {
 	 * Constructs the First Frame Critical Pather 
 	 * @param graph
 	 */
-	public GreedyPather(AtDelfiGraph graph) {
+	public BestFirstPather(AtDelfiGraph graph) {
 		super(graph);
 	}
 

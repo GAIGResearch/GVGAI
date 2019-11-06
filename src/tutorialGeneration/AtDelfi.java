@@ -23,7 +23,7 @@ import tools.GameAnalyzer;
 import tools.IO;
 import tools.LevelAnalyzer;
 import tutorialGeneration.criticalPathing.CriticalPather;
-import tutorialGeneration.criticalPathing.GreedyPather;
+import tutorialGeneration.criticalPathing.BestFirstPather;
 import video.basics.BunchOfGames;
 
 public class AtDelfi {
@@ -130,7 +130,7 @@ public class AtDelfi {
 		if(gameGraph.isMechanicVisualization()) {
 			gameGraph.visualizeMechanicGraph(agent, level);
 			if(visualizeCriticalPath) {
-				CriticalPather cp = new GreedyPather(gameGraph);
+				CriticalPather cp = new BestFirstPather(gameGraph);
 				criticalPath(cp, agent, true, level);
 			}
 		}

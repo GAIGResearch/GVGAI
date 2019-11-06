@@ -13,7 +13,7 @@ import core.vgdl.VGDLRegistry;
 import tools.IO;
 import tools.Utils;
 import tutorialGeneration.criticalPathing.CriticalPather;
-import tutorialGeneration.criticalPathing.GreedyPather;
+import tutorialGeneration.criticalPathing.BestFirstPather;
 
 public class TestAtDelfi {
 	boolean verbose = true;
