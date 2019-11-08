@@ -1,0 +1,74 @@
+GAME: zelda
+TOTAL CELLS: 6
+[0101]
+wwwwwwwwwwwwwww
+w+      2   1 w
+ww  2    + 2  w
+w     g+  A   w
+w   3         w
+w.            w
+w          2  w
+w  .1g3       w
+w  3    .  +  w
+wwwwwwwwwwwwwww
+
+[1101]
+wwwwwwwwwwwwwww
+w+      2   1 w
+ww  2      2  w
+w     g+      w
+w   3         w
+w.            w
+w          2  w
+w  .1g3       w
+w  3    A     w
+wwwwwwwwwwwwwww
+
+[1111]
+wwwwwwwwwwwwwww
+w+      2   1 w
+ww  2    + 2  w
+w     g+  A + w
+w   3       . w
+w.            w
+w          2  w
+w2 .1g3       w
+w  3    .  +  w
+wwwwwwwwwwwwwww
+
+[1001]
+wwwwwwwwwwwwwww
+w+      2   1 w
+ww  2         w
+w   A g+      w
+w   3         w
+w.          w w
+w    +     2  w
+w  .1g3       w
+w    .        w
+wwwwwwwwwwwwwww
+
+[0111]
+wwwwwwwwwwwwwww
+w+      2   1 w
+ww  2    + 2  w
+w     g+  A   w
+w   3         w
+w.            w
+w     w    2  w
+w  .1g3       w
+w  3    .  +  w
+wwwwwwwwwwwwwww
+
+[1011]
+wwwwwwwwwwwwwww
+w+      2   1 w
+ww  2         w
+w   A g+      w
+w   3         w
+w.          w w
+w    +     2  w
+w  .1g3       w
+w    .        w
+wwwwwwwwwwwwwww
+

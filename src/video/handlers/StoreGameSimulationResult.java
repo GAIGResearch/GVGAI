@@ -29,6 +29,8 @@ public class StoreGameSimulationResult
 
 	public void writeResultToAJSONFile(String interactionFile) throws IOException
 	{
+		//System.out.println("IF:" + interactionFile);
+		
 		try (FileWriter file = new FileWriter(interactionFile)) {
 
 			file.write(gameResult.toJSONString());

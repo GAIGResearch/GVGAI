@@ -55,7 +55,7 @@ public class AtDelfi {
 	public static int playthroughCount = 30;
 	//	private String[] agents = {"adrienctx.Agent"};
 	
-	private boolean visualizeCriticalPath = true;
+	private boolean visualizeCriticalPath = false;
 
 	public AtDelfi(String gameFile, String levelFile, String gameName, int seed, boolean verbose) {
 		this.verbose = verbose;
