@@ -1,0 +1,13 @@
+seed = 1000
+gameListCSV = examples/all_games_sp.csv
+gameIndex = 108
+runner = agents.adrienctx.Agent
+inputFolder = input/
+generatorFolder = generator/
+tutorialFolder = rules/
+outputFolder = output/
+resultFolder = result/
+generatorLevelFile = generator/level_placeholder_%.txt
+populationSize = 10
+coinFlip = 0.5
+exportFreq = 100

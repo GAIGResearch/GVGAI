@@ -915,7 +915,6 @@ public class VisualDemonstrationInterfacer {
 	public ArrayList<String> getAgents(String gameName) {
 		ArrayList<String> agents = new ArrayList<String>();
 		
-
 		File folder = new File(gameName);
 		File[] listOfFiles = folder.listFiles();
 		

@@ -1,0 +1,2 @@
+{"input" : ["sword"], "output" : ["monsterSlow", "monsterNormal", "monsterQuick"], "action" : "KillSprite"}
+{"input" : ["key"], "output" : ["nokey"], "action" : "TransformTo"}
