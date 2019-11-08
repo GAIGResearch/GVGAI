@@ -5,7 +5,6 @@ import java.util.List;
 
 import tutorialGeneration.AtDelfiGraph;
 import tutorialGeneration.Mechanic;
-import tutorialGeneration.Node;
 
 public class BestFirstPather extends CriticalPather {
 	/***
@@ -23,7 +22,7 @@ public class BestFirstPather extends CriticalPather {
 
 	@Override
 	public List<Mechanic> findCriticalPath(String agent, boolean isWin, int level) {
-		List<Mechanic> criticalPath = new ArrayList<Mechanic>();
+List<Mechanic> criticalPath = new ArrayList<Mechanic>();
 		
 		List<Mechanic> currentChoices = new ArrayList<Mechanic>();
 		
@@ -82,7 +81,10 @@ public class BestFirstPather extends CriticalPather {
 			}
 		}
 		return criticalPath;
+		
+		
 	}
+	
 
 //	@Override
 //	public List<Mechanic> findCriticalPathLoss(String agent) {

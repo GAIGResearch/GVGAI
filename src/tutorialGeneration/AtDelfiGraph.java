@@ -49,6 +49,7 @@ public class AtDelfiGraph {
 	private List<String> bothSpriteTargetActions = Arrays.asList("KillBoth", "PullWithIt", "CollectResource");
 	private List<String> stypePlusTargetActions = Arrays.asList("TransformTo", "TransformToSingleton", "TransformToAll");
 	private List<String> stypeTargetActions = Arrays.asList("Spawn", "KillAll", "SpawnIfHasMore", "SpawnIfHasLess", "SpawnBehind");
+	private List<String> noTargetActions = Arrays.asList("UndoAll");
 	/**
 	 * Information parsed from the VGDL File
 	 */
@@ -356,9 +357,7 @@ public class AtDelfiGraph {
 			else if(intData.type.equals("TransformToAll")) {
 				System.out.println("TransformToAll");
 				action3 = new Node("Transformee", "n/a", "Action");
-				action4 = new Node("TransformTo", "n/a", "Action");
-				
-				
+				action4 = new Node("TransformTo", "n/a", "Action");	
 			}
 		} else if(stypeTargetActions.contains(intData.type)) {
 			if(intData.type.contains("Spawn")) {
@@ -368,7 +367,12 @@ public class AtDelfiGraph {
 			} else {
 				action1 = new Node("KillSprite", "n/a", "Action");
 			}
-		} else {
+		} else if(noTargetActions.contains(intData.type)) {
+			if(intData.type.contains("UndoAll")) {
+				action1 = new Node("UndoAll", "n/a", "Action");
+			}
+		}
+		else {
 			if(intData.type.equals("TeleportToExit")) {
 				Node stype = null;
 				if(sprite1.getType().equals("Portal")){
@@ -440,7 +444,7 @@ public class AtDelfiGraph {
 		// make mechanic
 		List<Node> sprites = Arrays.asList(new Node[]{sprite1, sprite2});
 		List<Node> conditions = Arrays.asList(new Node[]{condition});
-		createMechanic(sprites, conditions, actionList, readibleAction, false);
+		createMechanic(sprites, conditions, actionList, readibleAction);
 	}
 	
 	public void parseAllSpriteMechanics() {
@@ -545,11 +549,22 @@ public class AtDelfiGraph {
 			condition.addInput(time);
 		}
 		
-		createMechanic(mechSprites, mechConditions, mechActions, action.getName(), true);
+		createMechanic(mechSprites, mechConditions, mechActions, action.getName(), termination.win.equals("True"));
 	}
 	
-	public void createMechanic(List<Node> sprites2, List<Node> conditions2, List<Node> actionList, String readibleAction, boolean isTerminal) {
-		Mechanic mechanic = new Mechanic(isTerminal);
+	public void createMechanic(List<Node> sprites2, List<Node> conditions2, List<Node> actionList, String readibleAction) {
+		Mechanic mechanic = new Mechanic(false);
+		mechanic.setSprites(sprites2);
+		mechanic.setConditions(conditions2);
+		mechanic.setActions(actionList);
+		mechanic.setReadibleAction(readibleAction);
+		
+		mechanics.add(mechanic);
+		
+	}
+	
+	public void createMechanic(List<Node> sprites2, List<Node> conditions2, List<Node> actionList, String readibleAction, boolean isWin) {
+		Mechanic mechanic = new Mechanic(true);
 		mechanic.setSprites(sprites2);
 		mechanic.setConditions(conditions2);
 		mechanic.setActions(actionList);
@@ -605,7 +620,7 @@ public class AtDelfiGraph {
 			beginLabel += sprite.getName() + " ";
 		}
 		beginLabel += mech.getConditions().get(0).getName() + " ";
-		c.addAttribute("ui.label", beginLabel + mech.getReadibleAction() + " : " + mech.getFrames().get(agent)[level]);
+		c.addAttribute("ui.label", beginLabel + mech.getReadibleAction()); //+ " : " + mech.getFrames().get(agent)[level]);
 //		c.addAttribute("ui.label", beginLabel + mech.getReadibleAction());
 		c.addAttribute("ui.style", details);
 		return c;

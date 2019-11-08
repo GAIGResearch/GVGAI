@@ -192,7 +192,7 @@ public class Mechanic {
 	}
 	
 	public boolean isWin() {
-		if(this.getActions().get(0).equals("Win")) {
+		if(this.getActions().get(0).getName().equals("Win")) {
 			return true;
 		} else {
 			return false;

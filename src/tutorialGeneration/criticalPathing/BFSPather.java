@@ -5,7 +5,6 @@ import java.util.List;
 
 import tutorialGeneration.AtDelfiGraph;
 import tutorialGeneration.Mechanic;
-import tutorialGeneration.Node;
 
 public class BFSPather extends CriticalPather {
 	/***
@@ -24,73 +23,61 @@ public class BFSPather extends CriticalPather {
 	@Override
 	public List<Mechanic> findCriticalPath(String agent, boolean isWin, int level) {
 		List<Mechanic> criticalPath = new ArrayList<Mechanic>();
-		
-		List<Mechanic> currentChoices = new ArrayList<Mechanic>();
+		List<Node> currentChoices = new ArrayList<Node>();
 		
 		// get all the mechanics of the avatars
-		currentChoices.addAll(this.getGraph().getAvatars().get(0).getMechanics());
+		for(Mechanic mech : this.getGraph().getAvatars().get(0).getMechanics()) {
+			Node node = new Node(mech);
+			node.parent = null;
+			currentChoices.add(node);
+		}
 		
 		boolean terminate = false;
-		int count = 0;
-		int earliestFrame = 100000;
-		int floor = 0;
 
+		Node end = null;
+		int count = 0;
 		// terminate when its time or when currentChoices has no choices
 		while(!terminate && currentChoices.size() > 0) {
 			System.out.println(count++);
-			Mechanic earliestMech = null;
-			// loop thru all the mechs
-			for (Mechanic mech : currentChoices) {
-				// if the mech has an earlier frame then the current earliest, replace 
-				if (!mech.isVisted() && mech.getFrames().get(agent)[level] < earliestFrame 
-//						&& mech.getFrames().get(agent)[level] != -1 
-						&& mech.getFrames().get(agent)[level] != 0
-						&& mech.getFrames().get(agent)[level] >= floor) {
-					earliestMech = mech;
-					earliestFrame = mech.getFrames().get(agent)[level];
-				}
+			// remove from the top of the queue
+			Node current = currentChoices.remove(0);
+			if (count == 61) {
+				System.out.println(count);
 			}
-			
-			// break if earliestMech is null
-			if(earliestMech == null) {
-				break;
-			}
-			earliestMech.setVisted(true);
-			floor = earliestFrame;
-			earliestFrame = 100000;
-			
-
-			// reset currentChoices
-//			currentChoices = new ArrayList<Mechanic>();
-			for(Mechanic mech : earliestMech.getOutputs()) {
-				if(!mech.isVisted() 
-//						&& mech.getFrames().get(agent)[level] != -1 
-						&& mech.getFrames().get(agent)[level] != 0
-						&& mech.getFrames().get(agent)[level] >= floor) {
-					currentChoices.add(mech);
-				}
-			}
-//			currentChoices.addAll(this.getGraph().getAvatars().get(0).getMechanics());
-
-			
-			
-			// put this round in the critical path
-			criticalPath.add(earliestMech);
-			// check if the earliest was a terminal
-			if (earliestMech.isTerminal() && earliestMech.isWin() == isWin) {
+			if (current.mech.isWin()) {
+				end = current;
 				terminate = true;
 			}
+			else {
+				// loop thru all of current's children mechanics
+				for(Mechanic childMech : current.mech.getOutputs()) {
+					Node child = new Node(childMech);
+					// check if child is visited, add to choices if not
+					if (!childMech.isVisted()) {
+						childMech.setVisted(true);
+						child.parent = current;
+						currentChoices.add(child);
+					}
+				}
+			}
 		}
+		
+		// build critical path based on the found terminal mechanic
+		while(end.parent != null) {
+			criticalPath.add(end.mech);
+			end = end.parent;
+		}
+		criticalPath.add(end.mech);
 		return criticalPath;
 	}
+}
 
-//	@Override
-//	public List<Mechanic> findCriticalPathLoss(String agent) {
-//		ArrayList<Mechanic> criticalPath = new ArrayList<Mechanic>();
-//		
-//		
-//		
-//		return criticalPath;
-//	}
+
+class Node {
+	public Node parent;
+	public Mechanic mech;
 	
+	public Node(Mechanic mech) {
+		this.mech = mech;
+	}
 }

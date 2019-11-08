@@ -13,7 +13,7 @@ import core.vgdl.VGDLRegistry;
 import tools.IO;
 import tools.Utils;
 import tutorialGeneration.criticalPathing.CriticalPather;
-import tutorialGeneration.criticalPathing.BestFirstPather;
+import tutorialGeneration.criticalPathing.BFSPather;
 
 public class TestAtDelfi {
 	boolean verbose = true;
@@ -151,12 +151,13 @@ public class TestAtDelfi {
 //		atdelfi.testPlayGames();
 		atdelfi.buildGraph("human", levelIdx);	
 		
-//		CriticalPather criticalPather = new GreedyPather(atdelfi.getGameGraph());
+		CriticalPather criticalPather = new BFSPather(atdelfi.getGameGraph());
 //		
-//		List<Mechanic> critPath = atdelfi.criticalPath(criticalPather, "adrienctx.Agent", true);
-//		
+		List<Mechanic> critPath = atdelfi.criticalPath(criticalPather, "adrienctx.Agent", true, 0);
+
+		System.out.println("boop");
 //		for (Mechanic m : critPath) {
-//			System.out.println(m.getSprites().get(0).getName() + " " + m.getReadibleAction() + " " + m.getActions().get(0).getName());
+//			System.out.println(m.());
 //		}
 	}
 	

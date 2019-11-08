@@ -55,7 +55,7 @@ public class AtDelfi {
 	public static int playthroughCount = 30;
 	//	private String[] agents = {"adrienctx.Agent"};
 	
-	private boolean visualizeCriticalPath = true;
+	private boolean visualizeCriticalPath = false;
 
 	public AtDelfi(String gameFile, String levelFile, String gameName, int seed, boolean verbose) {
 		this.verbose = verbose;
@@ -125,7 +125,7 @@ public class AtDelfi {
 		this.gameGraph = new AtDelfiGraph(gd, sl, ga, la, this.gameName);
 		Graph graph = this.gameGraph.build();
 		changeGraphTitle(graph);
-		this.gameGraph.insertFrameInformation(vdi);
+//		this.gameGraph.insertFrameInformation(vdi);
 		
 		if(gameGraph.isMechanicVisualization()) {
 			gameGraph.visualizeMechanicGraph(agent, level);
