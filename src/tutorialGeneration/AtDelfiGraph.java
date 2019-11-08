@@ -621,6 +621,7 @@ public class AtDelfiGraph {
 		}
 		beginLabel += mech.getConditions().get(0).getName() + " ";
 		c.addAttribute("ui.label", beginLabel + mech.getReadibleAction()); //+ " : " + mech.getFrames().get(agent)[level]);
+
 //		c.addAttribute("ui.label", beginLabel + mech.getReadibleAction());
 		c.addAttribute("ui.style", details);
 		return c;
@@ -752,6 +753,7 @@ public class AtDelfiGraph {
 	public void insertFrameInformation(VisualDemonstrationInterfacer vdi) {
 
 			ArrayList<String> agents = vdi.getAgents(this.name);
+			//System.out.println(agents.size());
 			int levelCount = vdi.getLevelCount(this.name);
 			int playthroughCount = vdi.getPlaythroughCount(this.name);
 
