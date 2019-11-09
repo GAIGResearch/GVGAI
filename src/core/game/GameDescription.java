@@ -311,6 +311,14 @@ public class GameDescription {
 		return result;
 	}
 
+	public SpriteData findSprite(String name) {
+		for(SpriteData sprite : getAllSpriteData()) {
+			if(name.equals(sprite.name)) {
+				return sprite;
+			}
+		}
+		return null;
+	}
 	/**
 	 * Get a list of all effects happening to the first sprite
 	 *
@@ -436,6 +444,10 @@ public class GameDescription {
 
 			return s;
 		}
+		
+		public HashMap<String, String> getParameters() {
+			return this.parameters;
+		}
 	}
 
 	/**
@@ -499,9 +511,15 @@ public class GameDescription {
 		 * All the depending sprites on that
 		 */
 		public ArrayList<String> sprites;
+		
+		/**
+		 * All the param options like "stype" associated with this interaction
+		 */
+		public HashMap<String, String> parameters;
 
 		public InteractionData() {
 			sprites = new ArrayList<String>();
+			parameters = new HashMap<String, String>();
 		}
 
 		@Override

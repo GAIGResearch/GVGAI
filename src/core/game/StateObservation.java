@@ -11,6 +11,9 @@ import java.util.TreeSet;
 
 import core.competition.CompetitionParameters;
 import core.logging.Logger;
+import video.basics.GameEvent;
+import video.basics.Interaction;
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -291,10 +294,19 @@ public class StateObservation {
      *
      * @return list of events triggered by the avatar or sprites it created.
      */
-    public TreeSet<Event> getEventsHistory()
+    public TreeSet<Event> getHistoricEventsHistory()
     {
-         return model.getEventsHistory();
+         return model.getHistoricEventsHistory();
     }
+    
+    /**
+     * This method retrieves a list of all events that happened so far in the game, where events are equivalent to any interaction
+     * that can possibly occur according to the game rules.
+     * @return
+     */
+    public ArrayList<GameEvent> getFirstTimeEventsHistory() {
+    	return model.getFirstTimeEventsHistory();
+    }  
 
     /**
      * Returns a list of observations of NPC in the game. As there can be

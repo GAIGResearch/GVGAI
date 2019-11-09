@@ -332,6 +332,8 @@ public abstract class VGDLSprite {
      * Maximum speed of the sprites
      */
     public double max_speed;
+    
+    public ArrayList<String> tickCollector = new ArrayList<>();
 
     /**
      * Initializes the sprite, giving its position and dimensions.
@@ -1095,6 +1097,21 @@ public abstract class VGDLSprite {
         }catch(Exception e) {}
         return theImages;
     }
+    
+    /**
+	 * @param game
+	 */
+	public void captureSpriteAlongItsExistance(Game game, 
+			ArrayList<VGDLSprite> spriteCopies) {
+		
+		if(is_from_avatar)
+        {
+			tickCollector.add(String.valueOf(game.getGameTick()));
+			if(!spriteCopies.contains(this))
+				spriteCopies.add(this);
+        }
+		
+	}
 
 
     /**

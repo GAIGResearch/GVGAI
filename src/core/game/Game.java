@@ -1,5 +1,24 @@
 package core.game;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.ConcurrentModificationException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
+import javax.swing.JOptionPane;
+
+import org.json.simple.JSONObject;
+
 import core.competition.CompetitionParameters;
 import core.content.Content;
 import core.content.GameContent;
@@ -12,19 +31,36 @@ import core.logging.Logger;
 import core.logging.Message;
 import core.player.Player;
 import core.termination.Termination;
-import core.vgdl.*;
+import core.vgdl.SpriteGroup;
+import core.vgdl.VGDLFactory;
+import core.vgdl.VGDLRegistry;
+import core.vgdl.VGDLSprite;
+import core.vgdl.VGDLViewer;
 import ontology.Types;
 import ontology.avatar.MovingAvatar;
 import ontology.effects.Effect;
 import ontology.effects.TimeEffect;
 import ontology.sprites.Resource;
-import tools.*;
+import tools.Direction;
+import tools.JEasyFrame;
+import tools.KeyHandler;
+import tools.KeyInput;
+import tools.KeyPulse;
+import tools.Pair;
+import tools.Vector2d;
+import tools.WindowInput;
 import tools.pathfinder.Node;
 import tools.pathfinder.PathFinder;
-
-import javax.swing.*;
-import java.awt.*;
-import java.util.*;
+import video.basics.Interaction;
+import video.basics.PlayerAction;
+import video.basics.GameEvent;
+import video.basics.SpriteCapture;
+import video.basics.StoreFrame;
+import video.constants.InteractionStaticData;
+import video.handlers.StoreGameSimulationResult;
+import video.handlers.StoreInteraction;
+import video.handlers.StorePlayerAction;
+import video.handlers.StoreSpriteCapture;
 
 /**
  * Created with IntelliJ IDEA. User: Diego Date: 17/10/13 Time: 13:42 This is a
@@ -106,6 +142,11 @@ public abstract class Game {
 	 * entries are ordered asc. by game step.
 	 */
 	protected TreeSet<Event> historicEvents;
+
+	/***
+	 * All events in the game
+	 */
+	protected ArrayList<GameEvent> firstTimeEvents;
 
 	/**
 	 * For each entry, int identifier of sprite type, a list with all the itypes
@@ -256,6 +297,27 @@ public abstract class Game {
 	public static KeyHandler ki;
 
 	/**
+	 * Store the game ticks along the existence of this sprite if
+	 * it was created by an avatar
+	 */
+	public ArrayList<VGDLSprite> spriteCopies;
+
+	/*object that stores the interactions which happens in a game */
+	public StoreInteraction storeInteraction;
+
+	/*object that stores the player actions in a game */
+	public StorePlayerAction storePlayerAction;
+
+	/*object that stores the player actions in a game */
+	public StoreGameSimulationResult storeGameSimulationResult;
+
+	/*object that stores the ticks of sprites created by an avatar*/
+	public StoreSpriteCapture storeSpriteCapute;
+
+	/*object JEasyFrame - responsible for creating the game window*/
+	public JEasyFrame frame;
+
+	/**
 	 * Default constructor.
 	 */
 	public Game() {
@@ -265,7 +327,13 @@ public abstract class Game {
 		charMapping = new HashMap<Character, ArrayList<String>>();
 		terminations = new ArrayList<Termination>();
 		historicEvents = new TreeSet<Event>();
+		firstTimeEvents = new ArrayList<GameEvent>();
 		timeEffects = new TreeSet<TimeEffect>();
+		spriteCopies = new ArrayList<VGDLSprite>();
+		storeInteraction = new StoreInteraction();
+		storePlayerAction = new StorePlayerAction();
+		storeGameSimulationResult = new StoreGameSimulationResult();
+		storeSpriteCapute = new StoreSpriteCapture();
 
 		// Game attributes:
 		size = new Dimension();
@@ -335,7 +403,7 @@ public abstract class Game {
 	 */
 	@SuppressWarnings("unchecked")
 	public void initSprites(ArrayList<Integer> spOrder, ArrayList<Integer> sings,
-							HashMap<Integer, SpriteContent> constructors) {
+			HashMap<Integer, SpriteContent> constructors) {
 		ArrayList<Resource> resources = new ArrayList<Resource>();
 
 		// We need here the default 2 sprites:
@@ -483,9 +551,9 @@ public abstract class Game {
 			} else {
 				SpriteContent sc = (SpriteContent) classConst[current];
 				for(int s:sc.subtypes){
-				    if(!sc.itypes.contains(s)){
-					queue.add(s);
-				    }
+					if(!sc.itypes.contains(s)){
+						queue.add(s);
+					}
 				}
 			}
 			visited[current] = true;
@@ -557,28 +625,28 @@ public abstract class Game {
 		data.name = sc.identifier;
 		data.type = sc.referenceClass;
 		for(int pIndex:sc.itypes){
-		    if( VGDLRegistry.GetInstance().getRegisteredSpriteValue(data.name) != pIndex){
-			data.parents.add(VGDLRegistry.GetInstance().getRegisteredSpriteKey(pIndex));
-		    }
+			if( VGDLRegistry.GetInstance().getRegisteredSpriteValue(data.name) != pIndex){
+				data.parents.add(VGDLRegistry.GetInstance().getRegisteredSpriteKey(pIndex));
+			}
 		}
 
 		VGDLSprite sprite = VGDLFactory.GetInstance().createSprite(this, sc, new Vector2d(), new Dimension(1, 1));
 		switch (getSpriteCategory(sprite)) {
-			case Types.TYPE_NPC:
-				data.isNPC = true;
-				break;
-			case Types.TYPE_AVATAR:
-				data.isAvatar = true;
-				break;
-			case Types.TYPE_PORTAL:
-				data.isPortal = true;
-				break;
-			case Types.TYPE_RESOURCE:
-				data.isResource = true;
-				break;
-			case Types.TYPE_STATIC:
-				data.isStatic = true;
-				break;
+		case Types.TYPE_NPC:
+			data.isNPC = true;
+			break;
+		case Types.TYPE_AVATAR:
+			data.isAvatar = true;
+			break;
+		case Types.TYPE_PORTAL:
+			data.isPortal = true;
+			break;
+		case Types.TYPE_RESOURCE:
+			data.isResource = true;
+			break;
+		case Types.TYPE_STATIC:
+			data.isStatic = true;
+			break;
 		}
 
 		ArrayList<String> dependentSprites = sprite.getDependentSprites();
@@ -855,6 +923,46 @@ public abstract class Game {
 		return acum;
 	}
 
+	public void storeFramesAndActions(Player[] players, StoreFrame storeFrame) {
+
+		//storing player action
+		String action = players[0].getLastAction().toString();
+		if(action.equals(Types.ACTIONS.ACTION_USE.toString()))
+		{
+			PlayerAction playerAction = 
+					new PlayerAction(String.valueOf(this.gameTick), action);
+			storePlayerAction.storeAllPlayerActions(playerAction);
+
+			firstTimeEvents.add(playerAction);
+		}
+
+		ArrayList<Observation>[][] data = this.getData();
+		/** Uncomment if you want game states saved! **/
+		//		storeFrame.saveGameState(new File(
+		//				InteractionStaticData.gameName + "/" + InteractionStaticData.agentName + "/" + InteractionStaticData.levelCount + "/" + InteractionStaticData.playthroughCount +
+		//				"/" + "frames/frame" + this.gameTick + ".state"), data);
+	}
+
+	public void storeActionsAndInteractions() {
+		//stores the interaction in a JSONFile
+		File f = new File(InteractionStaticData.gameName, InteractionStaticData.agentName + "_" + InteractionStaticData.levelCount + "_" + InteractionStaticData.playthroughCount +
+				"_mechanics.json");
+		storeInteraction.writeInteractionJSONFile(f.toString());
+		f = new File(InteractionStaticData.gameName, InteractionStaticData.agentName + "_" + InteractionStaticData.levelCount + "_" + InteractionStaticData.playthroughCount +
+				"_actions.json");
+		storePlayerAction.writePlayerActionJSONFile(f.toString());
+		InteractionStaticData.counter += 1;
+	}
+
+
+	//exports the interactions done in the game run to a JSON file
+	//for use with the AtDelphi+ chromosome dimension calculation
+	public void storeInteractionsJSON(String json_file) {
+		storeInteraction.writeInteractionJSONFile(json_file);
+		//System.out.println("Interactions exported @ " + json_file);
+	}
+
+
 	/**
 	 * Runs a game, without graphics.
 	 *
@@ -864,14 +972,51 @@ public abstract class Game {
 	 *            sampleRandom seed for the whole game.
 	 * @return the score of the game played.
 	 */
-	public double[] runGame(Player[] players, int randomSeed) {
+	public double[] runGame(Player[] players, int randomSeed, String jsonFile) {
+
+		//Object responsible to store the game frames
+		StoreFrame frameStorer = new StoreFrame();
+
 		// Prepare some structures and references for this game.
 		prepareGame(players, randomSeed, -1);
 
 		// Play until the game is ended
 		while (!isEnded) {
 			this.gameCycle(); // Execute a game cycle.
+
+			///  PUT THIS BACK LATER  ///
+			//storeFramesAndActions(players, frameStorer);
 		}
+		///  PUT THIS BACK LATER  ///
+		//storeActionsAndInteractions();
+
+		//saves to a dummy json file (for use with AtDelphi+ to get dimensionality)
+		storeInteractionsJSON(jsonFile);
+
+		// Update the forward model for the game state sent to the controller.
+		fwdModel.update(this);
+
+		return handleResult();
+	}
+
+	public double[] runGame(Player[] players, int randomSeed) {
+
+		//Object responsible to store the game frames
+		StoreFrame frameStorer = new StoreFrame();
+
+		// Prepare some structures and references for this game.
+		prepareGame(players, randomSeed, -1);
+
+		// Play until the game is ended
+		while (!isEnded) {
+			this.gameCycle(); // Execute a game cycle.
+
+			/// TODO PUT THIS BACK LATER  ///
+			//storeFramesAndActions(players, frameStorer);
+		}
+
+		/// TODO PUT THIS BACK LATER  ///
+		//storeActionsAndInteractions();
 
 		// Update the forward model for the game state sent to the controller.
 		fwdModel.update(this);
@@ -894,12 +1039,15 @@ public abstract class Game {
 	 */
 
 	public double[] playGame(Player[] players, int randomSeed, boolean isHuman, int humanID) {
+
+		//Object responsible to store the game frames
+		StoreFrame frameStorer = new StoreFrame();
 		// Prepare some structures and references for this game.
 		prepareGame(players, randomSeed, humanID);
 
 		// Create and initialize the panel for the graphics.
 		VGDLViewer view = new VGDLViewer(this, players[humanID]);
-		JEasyFrame frame;
+
 		frame = new JEasyFrame(view, "Java-VGDL");
 
 		frame.addKeyListener(ki);
@@ -933,6 +1081,8 @@ public abstract class Game {
 			// Draw all sprites in the panel.
 			view.paint(this.spriteGroups);
 
+			storeFramesAndActions(players, frameStorer);
+
 			// Update the frame title to reflect current score and tick.
 			this.setTitle(frame);
 
@@ -944,6 +1094,8 @@ public abstract class Game {
 				firstRun = false;
 			}
 		}
+
+		storeActionsAndInteractions();
 
 		if (isHuman && !wi.windowClosed && CompetitionParameters.killWindowOnEnd) {
 			if (CompetitionParameters.dialogBoxOnStartAndEnd) {
@@ -973,6 +1125,13 @@ public abstract class Game {
 		fwdModel.update(this);
 
 		return handleResult();
+	}
+
+	public ArrayList<Observation>[][] getData()
+	{
+		ArrayList<Observation>[][] grid = this.getObservation().getObservationGrid();
+
+		return grid;
 	}
 
 	public double[] playOnlineGame(Player[] players, int randomSeed, boolean isHuman, int humanID) {
@@ -1133,7 +1292,12 @@ public abstract class Game {
 		}
 
 		// Prints the result: score, time and winner.
-		// printResult();
+		//		try {
+		//			printResult();
+		//		} catch (IOException e) {
+		//			// TODO Auto-generated catch block
+		//			e.printStackTrace();
+		//		}
 
 		double[] scores = new double[no_players];
 		for (int i = 0; i < no_players; i++) {
@@ -1165,8 +1329,9 @@ public abstract class Game {
 	/**
 	 * Prints the result of the game, indicating the winner, the score and the
 	 * number of game ticks played, in this order.
+	 * @throws IOException 
 	 */
-	public void printResult() {
+	public void printResult() throws IOException {
 		String sb1 = "";
 		String sb2 = "";
 		for (int i = 0; i < no_players; i++) {
@@ -1179,9 +1344,65 @@ public abstract class Game {
 			}
 		}
 
+		/* UNCOMMENT LATER
+		if(avatars[0] != null)
+		{
+			storeGameSimulationResult.
+			storeGameSimulationResult(String.valueOf((avatars[0].getWinState().key()))
+					,String.valueOf(gameTick));
+<<<<<<< HEAD
+			
+			storeGameSimulationResult.addMechanics(storeInteraction.interactionArray, storePlayerAction.playerActionArray);
+			File f = new File(InteractionStaticData.gameName, InteractionStaticData.agentName + "_" + InteractionStaticData.levelCount + "_" + InteractionStaticData.playthroughCount +
+					"_result.json");
+=======
+
+>>>>>>> ddd1506b6ac9f1a53697737532dcbb79a6fc785a
+			storeGameSimulationResult.
+			writeAllInfo(f.toString());
+			InteractionStaticData.resultsCounter += 1;
+		}
+		 */
+
 		System.out.println("Result (1->win; 0->lose): " + sb1 + sb2 + "timesteps:" + this.getGameTick());
+
+		/* UNCOMMENT LATER
+		ArrayList<SpriteCapture> spritesCaptured = new ArrayList<>();
+		for (int i = 0; i < spriteCopies.size(); i++) {
+			SpriteCapture sc = 
+					new SpriteCapture(String.valueOf(i),
+							spriteCopies.get(i).tickCollector);
+			spritesCaptured.add(sc);
+		}
+
+		StoreSpriteCapture storeSpriteCapture = new StoreSpriteCapture();
+
+		for (SpriteCapture spriteCapture : spritesCaptured) 
+		{
+			JSONObject obj = spriteCapture.toJSONObject();
+			storeSpriteCapture.storeAllSpritesCaptured(obj);
+		}
+<<<<<<< HEAD
+//		File f = new File(InteractionStaticData.gameName, InteractionStaticData.agentName + "_" + InteractionStaticData.levelCount + "_" + InteractionStaticData.playthroughCount +
+//				"_capture.json");
+//		storeSpriteCapture.
+//			writeSpriteCaptureJSONFile
+//				(f.toString());
+		
+=======
+
+		storeSpriteCapture.
+			writeSpriteCaptureJSONFile
+				(InteractionStaticData.gameName + "/" + InteractionStaticData.agentName + "/" + InteractionStaticData.levelCount + "/" + InteractionStaticData.playthroughCount +
+						"/" + "capture/capture.json");
+>>>>>>> ddd1506b6ac9f1a53697737532dcbb79a6fc785a
+		InteractionStaticData.spriteCaptureCounter += 1;
+
 		// System.out.println("Result (1->win; 0->lose):"+ winner.key() + ",
 		// Score:" + score + ", timesteps:" + this.getGameTick());
+		if(frame != null)
+			frame.closeWindow();
+		 */
 	}
 
 	/**
@@ -1377,9 +1598,9 @@ public abstract class Game {
 					if (!(sp instanceof MovingAvatar) && !sp.is_disabled()) {
 						sp.preMovement();
 						sp.update(this);
+						sp.captureSpriteAlongItsExistance(this, spriteCopies);				
 					}
 				}
-
 		}
 	}
 
@@ -1388,6 +1609,10 @@ public abstract class Game {
 	 */
 	@SuppressWarnings("unchecked")
 	protected void eventHandling() {
+		// log player actions
+		if(this.avatarLastAction[0].toString().equals(Types.ACTIONS.ACTION_USE.toString())) {
+			this.firstTimeEvents.add(new PlayerAction(String.valueOf(this.gameTick), this.avatarLastAction[0].toString()));
+		}
 		// Array to indicate that the sprite type has no representative in
 		// collisions.
 		boolean noSprites[] = new boolean[spriteGroups.length];
@@ -1552,7 +1777,7 @@ public abstract class Game {
 		// Add to events history.
 		if (s1 != null && s2list != null)
 			for(VGDLSprite s2 : s2list)
-				addEvent(s1, s2);
+				addEvent(s1, s2, ef);
 
 		if (ef.count) {
 			for (int i = 0; i < no_counters; i++) {
@@ -1583,7 +1808,7 @@ public abstract class Game {
 
 		// Add to events history.
 		if (s1 != null && s2 != null)
-			addEvent(s1, s2);
+			addEvent(s1, s2, ef);
 
 		if (ef.count) {
 			for (int i = 0; i < no_counters; i++) {
@@ -1596,24 +1821,52 @@ public abstract class Game {
 				this.counter[i] += ef.getCounterElse(i);
 			}
 		}
+
+		/*
+		 * This part stores the information of the interactions in a game
+		 * We use it (the stored interaction) later to retrieve the frames
+		 *  of the interaction we need
+		 */
+		if(s1 != null && s2 != null)
+		{
+			String rule = ef.getClass().getName();
+			String sprite1 = VGDLRegistry.GetInstance().getRegisteredSpriteKey(s1.getType());
+			String sprite2 = VGDLRegistry.GetInstance().getRegisteredSpriteKey(s2.getType());
+			Interaction interaction = new Interaction(String.valueOf(this.gameTick), 
+					rule, 
+					sprite1, 
+					sprite2);
+
+			storeInteraction.storeAllInteraction(interaction);
+		}
 	}
 
-	private void addEvent(VGDLSprite s1, VGDLSprite s2) {
-		if (s1.is_avatar)
+	private void addEvent(VGDLSprite s1, VGDLSprite s2, Effect ef) {
+		if (s1.is_avatar) {
 			historicEvents.add(
 					new Event(gameTick, false, s1.getType(), s2.getType(), s1.spriteID, s2.spriteID, s1.getPosition()));
+		}
 
 		else if (s1.is_from_avatar)
+		{
 			historicEvents.add(
 					new Event(gameTick, true, s1.getType(), s2.getType(), s1.spriteID, s2.spriteID, s1.getPosition()));
+		}
 
-		else if (s2.is_avatar)
+		else if (s2.is_avatar){
 			historicEvents.add(
 					new Event(gameTick, false, s2.getType(), s1.getType(), s2.spriteID, s1.spriteID, s2.getPosition()));
 
-		else if (s2.is_from_avatar)
+		}
+		else if (s2.is_from_avatar){
 			historicEvents.add(
 					new Event(gameTick, true, s2.getType(), s1.getType(), s2.spriteID, s1.spriteID, s2.getPosition()));
+		}
+
+		// add this event to the all events list
+		Interaction newInt = new Interaction(String.valueOf(this.gameTick), ef.getClass().getName(), VGDLRegistry.GetInstance().getRegisteredSpriteKey(s1.getType()), VGDLRegistry.GetInstance().getRegisteredSpriteKey(s2.getType()));
+		firstTimeEvents.add(newInt);
+
 	}
 
 	/**
@@ -1650,10 +1903,10 @@ public abstract class Game {
 		}
 		if(Logger.getInstance().getMessageCount() > CompetitionParameters.MAX_ALLOWED_WARNINGS){
 			System.out.println("Finishing the game due to number of warnings: " + Logger.getInstance().getMessageCount() +
-			 ". Messages will be flushed.");
+					". Messages will be flushed.");
 			Logger.getInstance().printMessages();
-		    isEnded = true;
-		    Logger.getInstance().flushMessages();
+			isEnded = true;
+			Logger.getInstance().flushMessages();
 		}
 	}
 
@@ -1768,8 +2021,8 @@ public abstract class Game {
 				// If this type is a singleton and we have one already
 				if (singletons[typeInt] && getNumSprites(typeInt) > 0) {
 					// that's it, no more creations of this type.
-				    anyother = true;
-				    break;
+					anyother = true;
+					break;
 				}
 			}
 		}
@@ -1780,7 +2033,7 @@ public abstract class Game {
 
 			Dimension spriteDim = new Dimension(block_size, block_size);
 			if (templateSprites[itype] == null) // don't have a template yet, so
-			// need to create one
+				// need to create one
 			{
 				newSprite = VGDLFactory.GetInstance().createSprite(this, content, position, spriteDim);
 
@@ -1804,7 +2057,7 @@ public abstract class Game {
 			this.addSprite(newSprite, itype);
 			return newSprite;
 		}
-		
+
 		return null;
 	}
 
@@ -1868,6 +2121,14 @@ public abstract class Game {
 	 */
 	public Iterator<VGDLSprite> getSpriteGroup(int spriteItype) {
 		return spriteGroups[spriteItype].getSpriteIterator();
+	}
+
+	/**
+	 * Returns the sprite groups data structure
+	 * @return the sprite groups data structure
+	 */
+	public SpriteGroup[] getSpriteGroups() {
+		return spriteGroups;
 	}
 
 	/**
@@ -2186,6 +2447,7 @@ public abstract class Game {
 	 * @return the win state of the specified player.
 	 */
 	public Types.WINNER getWinner(int playerID) {
+		System.out.println("*** = " + avatars[playerID].getWinState());
 		return avatars[playerID].getWinState();
 	}
 

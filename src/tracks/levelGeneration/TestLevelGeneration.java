@@ -1,11 +1,12 @@
 package tracks.levelGeneration;
 
+import java.io.IOException;
 import java.util.Random;
 
 public class TestLevelGeneration {
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
 		// Available Level Generators
 		String randomLevelGenerator = "tracks.levelGeneration.randomLevelGenerator.LevelGenerator";

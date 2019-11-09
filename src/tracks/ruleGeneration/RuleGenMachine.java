@@ -43,8 +43,9 @@ public class RuleGenMachine
 	 *            generated game description file.
 	 * @param level_file
 	 *            file with the level to be played.
+	 * @throws IOException 
 	 */
-	public static double[] playOneGame(String original_game, String generated_game, String level_file, String actionFile, int randomSeed) {
+	public static double[] playOneGame(String original_game, String generated_game, String level_file, String actionFile, int randomSeed) throws IOException {
 		String agentName = "tracks.singlePlayer.tools.human.Agent";
 		boolean visuals = true;
 		return runOneGame(original_game, generated_game, level_file, visuals, agentName, actionFile, randomSeed, 0);
@@ -72,9 +73,10 @@ public class RuleGenMachine
 	 *            sampleRandom seed for the sampleRandom generator.
 	 * @param playerID
 	 *            ID of the human player
+	 * @throws IOException 
 	 */
 	public static double[] runOneGame(String original_game, String generated_game, String level_file, boolean visuals, String agentNames,
-									  String actionFile, int randomSeed, int playerID) {
+									  String actionFile, int randomSeed, int playerID) throws IOException {
 		VGDLFactory.GetInstance().init(); // This always first thing to do.
 		VGDLRegistry.GetInstance().init();
 
@@ -179,8 +181,9 @@ public class RuleGenMachine
 	 * @param modifiedFile	the resulted game file
 	 * @param randomSeed	random seed used in encoding game sprites
 	 * @return			true if everything worked fine, false otherwise
+	 * @throws IOException 
 	 */
-	public static boolean generateRules(String gameFile, String levelFile, String ruleGenerator, String modifiedFile, int randomSeed) {
+	public static boolean generateRules(String gameFile, String levelFile, String ruleGenerator, String modifiedFile, int randomSeed) throws IOException {
 		VGDLFactory.GetInstance().init();
 		VGDLRegistry.GetInstance().init();
 

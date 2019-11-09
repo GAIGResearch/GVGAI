@@ -41,6 +41,9 @@ public class Node
      * The line number of the node's contents
      */
     public int lineNumber;
+    
+    public int sets[];
+
 
     /**
      * Constructor of the node.
@@ -58,6 +61,9 @@ public class Node
             this.parent = null;
         else
             parent.insert(this);
+        
+        this.sets = new int[4];
+
     }
 
     public Node(String contentLine, int indent, Node parent, int set, int lineNumber) throws Exception {
@@ -70,6 +76,9 @@ public class Node
             parent.insert(this);
 
         this.lineNumber = lineNumber;
+        
+        this.sets = new int[4];
+
     }
     /**
      * Creates a content for later creation of objects
@@ -157,6 +166,40 @@ public class Node
             return this.parent.getRoot();
         else
             return this;
+    }
+    
+    public void correctSetValues()
+    {
+    	Node n = this.getMainRoot();
+    	for (int i = 0; i < n.children.size(); i++) 
+    	{
+    		if(n.children.get(i).content.identifier.equals("SpriteSet"))
+    		{
+    			sets[Types.VGDL_SPRITE_SET-1] = i;
+    		}
+    		else if(n.children.get(i).content.identifier.equals("LevelMapping"))
+    		{
+    			sets[Types.VGDL_LEVEL_MAPPING-2] = i;
+    		}
+    		else if(n.children.get(i).content.identifier.equals("InteractionSet"))
+    		{
+    			sets[Types.VGDL_INTERACTION_SET] = i;
+    		}
+    		else if(n.children.get(i).content.identifier.equals("TerminationSet"))
+    		{
+    			sets[Types.VGDL_TERMINATION_SET-1] = i;
+    		}
+		}
+    }
+    
+    public Node getMainRoot()
+    {
+    	Node n = this;
+    	while (n.indent != 0)
+    	{
+    		n = n.parent;
+    	}
+    	return n;
     }
 
 }

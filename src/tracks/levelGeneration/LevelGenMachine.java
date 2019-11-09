@@ -36,8 +36,9 @@ public class LevelGenMachine
      * @param gameFile game description file.
      * @param levelGenerator level generator class path.
      * @param levelFile file to save the generated level in it
+     * @throws IOException 
      */
-    public static boolean generateOneLevel(String gameFile, String levelGenerator, String levelFile) {
+    public static boolean generateOneLevel(String gameFile, String levelGenerator, String levelFile) throws IOException {
         VGDLFactory.GetInstance().init(); // This always first thing to do.
         VGDLRegistry.GetInstance().init();
 
@@ -89,8 +90,9 @@ public class LevelGenMachine
      * @param gameFile The game description file path
      * @param levelGenerator The current used level generator
      * @param levelFile array of level files to save the generated levels
+     * @throws IOException 
      */
-    public static void generateLevels(String gameFile, String levelGenerator, String[] levelFile) {
+    public static void generateLevels(String gameFile, String levelGenerator, String[] levelFile) throws IOException {
         VGDLFactory.GetInstance().init(); // This always first thing to do.
         VGDLRegistry.GetInstance().init();
 
@@ -147,8 +149,9 @@ public class LevelGenMachine
      *            the action file name
      * @param levelFile
      *            a file to save the generated level
+     * @throws IOException 
      */
-    public static double playOneGeneratedLevel(String gameFile, String actionFile, String levelFile, int randomSeed) {
+    public static double playOneGeneratedLevel(String gameFile, String actionFile, String levelFile, int randomSeed) throws IOException {
         String agentName = "tracks.singlePlayer.tools.human.Agent";
         boolean visuals = true;
         return runOneGeneratedLevel(gameFile, visuals, agentName, actionFile, levelFile, randomSeed, true);
@@ -167,9 +170,10 @@ public class LevelGenMachine
      * @param randomSeed random seed for the game to be played
      * @param isHuman indicates if the game is played by a human or a bot
      * @return score of the game plaayed
+     * @throws IOException 
      */
     public static double runOneGeneratedLevel(String gameFile, boolean visuals, String agentName, String actionFile,
-                                              String levelFile, int randomSeed, boolean isHuman) {
+                                              String levelFile, int randomSeed, boolean isHuman) throws IOException {
         VGDLFactory.GetInstance().init(); // This always first thing to do.
         VGDLRegistry.GetInstance().init();
 
@@ -234,8 +238,9 @@ public class LevelGenMachine
      * @param actionFile  array of files to save the actions in
      * @param levelFile  array of level files to save the generated levels
      * @param isHuman indicates if the level will be played by a human or a bot.
+     * @throws IOException 
      */
-    public static void playGeneratedLevels(String gameFile, String[] actionFile, String[] levelFile, boolean isHuman) {
+    public static void playGeneratedLevels(String gameFile, String[] actionFile, String[] levelFile, boolean isHuman) throws IOException {
         String agentName = "tracks.singlePlayer.tools.human.Agent";
 
         VGDLFactory.GetInstance().init(); // This always first thing to do.
