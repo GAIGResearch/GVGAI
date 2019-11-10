@@ -43,7 +43,7 @@ public class TestAtDelfi {
     String gameFile, levelFile, recordTutorialFile;
 
     int levelIdx = 2; // level names from 0 to 4 (game_lvlN.txt).
-    int gameIdx = 47;
+    int gameIdx = 39;
 
     public TestAtDelfi() {
         // settings        
@@ -155,6 +155,8 @@ public class TestAtDelfi {
 //		
 		List<Mechanic> critPath = atdelfi.criticalPath(criticalPather, "adrienctx.Agent", true, 0);
 
+		atdelfi.saveGameMechanics("mechanics.json", atdelfi.getGameGraph().getMechanics());
+		atdelfi.saveGameMechanics("critical_mechanics.json", critPath);
 		System.out.println("boop");
 //		for (Mechanic m : critPath) {
 //			System.out.println(m.());

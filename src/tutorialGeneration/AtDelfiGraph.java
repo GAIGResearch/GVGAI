@@ -1,6 +1,7 @@
 package tutorialGeneration;
 
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +24,11 @@ import org.graphstream.graph.implementations.*;
 import org.graphstream.ui.*;
 import org.graphstream.ui.layout.Layout;
 import org.graphstream.ui.view.Viewer;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
+
+import com.google.gson.JsonObject;
 
 public class AtDelfiGraph {
 	/**
@@ -457,7 +462,7 @@ public class AtDelfiGraph {
 	}
 		
 	public void parseSpriteMechanics(Node sprite) {
-		if(sprite.getType().equals("SpawnPoint")) {
+		if(sprite.getType().equals("SpawnPoint") || sprite.getType().equals("Bomber")) {
 			
 			String name = "";
 			if(sprite.getAttributes().containsKey("cooldown")) {
@@ -481,6 +486,13 @@ public class AtDelfiGraph {
 			spawnee.addInput(action);
 			action.addInput(condition);
 			condition.addInput(sprite);
+			
+			Mechanic spriteMechanic = new Mechanic(false, this);
+			spriteMechanic.setConditions(Arrays.asList(condition));
+			spriteMechanic.setActions(Arrays.asList(action));
+			spriteMechanic.addSprite(sprite);
+			spriteMechanic.addSprite(spawnee);
+			mechanics.add(spriteMechanic);
 		}
 	}
 	public void parseAvatarMechanics(Node avatar) {
@@ -500,7 +512,7 @@ public class AtDelfiGraph {
 			action.addOutput(output);
 			output.addInput(action);
 			
-			Mechanic mech = new Mechanic(false);
+			Mechanic mech = new Mechanic(false, this);
 			mech.addAction(action);
 			mech.addCondition(condition);
 			mech.addSprite(avatar);
@@ -541,19 +553,27 @@ public class AtDelfiGraph {
 			}
 		}
 		
-		// if this is a time condition, then it wont have any sprites associated with it by default, so add the Time node to it
+		// if this is a time condition, then it wont have any sprites associated with it by default, so add the Time and the avatar nodes to it
+		boolean flag = false;
 		if (condition.getName().equals("Timeout")) {
 			Node time = findSpriteNode("Time");
 			mechSprites.add(time);
 			time.addOutput(condition);
 			condition.addInput(time);
-		}
-		
-		createMechanic(mechSprites, mechConditions, mechActions, action.getName(), termination.win.equals("True"));
+			for(Node avatar : this.getAvatarEntities()) {
+				avatar.addOutput(condition);
+				condition.addInput(avatar);
+				mechSprites.add(avatar);
+
+			}
+			flag = true;
+
+		} 
+			createMechanic(mechSprites, mechConditions, mechActions, action.getName(), termination.win.equals("True"), flag);
 	}
 	
 	public void createMechanic(List<Node> sprites2, List<Node> conditions2, List<Node> actionList, String readibleAction) {
-		Mechanic mechanic = new Mechanic(false);
+		Mechanic mechanic = new Mechanic(false, this);
 		mechanic.setSprites(sprites2);
 		mechanic.setConditions(conditions2);
 		mechanic.setActions(actionList);
@@ -563,14 +583,18 @@ public class AtDelfiGraph {
 		
 	}
 	
-	public void createMechanic(List<Node> sprites2, List<Node> conditions2, List<Node> actionList, String readibleAction, boolean isWin) {
-		Mechanic mechanic = new Mechanic(true);
+	public void createMechanic(List<Node> sprites2, List<Node> conditions2, List<Node> actionList, String readibleAction, boolean isWin, boolean isTimeout) {
+		Mechanic mechanic = new Mechanic(true, this);
 		mechanic.setSprites(sprites2);
 		mechanic.setConditions(conditions2);
 		mechanic.setActions(actionList);
 		mechanic.setReadibleAction(readibleAction);
 		
 		mechanics.add(mechanic);
+		
+		if (isTimeout) {
+			
+		}
 		
 	}
 	
@@ -791,6 +815,7 @@ public class AtDelfiGraph {
 			}
 		}
 	}
+
 	
 	public List<Mechanic> getMechanics() {
 		return mechanics;

@@ -41,9 +41,7 @@ public class BFSPather extends CriticalPather {
 			System.out.println(count++);
 			// remove from the top of the queue
 			Node current = currentChoices.remove(0);
-			if (count == 61) {
-				System.out.println(count);
-			}
+
 			if (current.mech.isWin()) {
 				end = current;
 				terminate = true;

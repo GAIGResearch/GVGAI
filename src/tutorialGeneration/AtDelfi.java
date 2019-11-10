@@ -2,6 +2,7 @@ package tutorialGeneration;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,6 +12,8 @@ import javax.swing.BorderFactory;
 import javax.swing.border.Border;
 
 import org.graphstream.graph.Graph;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import core.game.Game;
@@ -230,6 +233,32 @@ public class AtDelfi {
         return toPlay;
 	}
 	
+	public void saveGameMechanics(String filename, List<Mechanic> mechsToSave) {
+		// gather all mechanics in format
+		JSONArray jsonMechArray = new JSONArray(); 
+		for(Mechanic mech : mechsToSave) {
+			JSONObject jsonMech = new JSONObject();
+			jsonMech.put("condition", mech.getConditions().get(0).getName());
+			jsonMech.put("action", mech.getReadibleAction());
+			
+			
+			for(int i = 0; i < mech.getSprites().size(); i++) {
+				jsonMech.put("sprite" + (i+1), mech.getSprites().get(i).getName());
+			}
+			
+			jsonMechArray.add(jsonMech);
+		}
+		
+		try (FileWriter file = new FileWriter(filename)) {
+			 
+            file.write(jsonMechArray.toJSONString());
+            file.flush();
+ 
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+		// save to file
+	}
 	public String[] getLevelLines() {
 		String[] lines = new IO().readFile(this.levelFile);
 		return lines;

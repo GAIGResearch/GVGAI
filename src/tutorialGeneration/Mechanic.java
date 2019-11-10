@@ -13,6 +13,7 @@ public class Mechanic {
 	private List<Node> conditions;
 	private List<Node> actions;
 	private String readibleAction;
+	private AtDelfiGraph graph;
 	
 	private HashMap<String, int[]> frames;
 	
@@ -21,7 +22,7 @@ public class Mechanic {
 	
 	private boolean visted;
 	
-	public Mechanic(boolean isTerminal) {
+	public Mechanic(boolean isTerminal, AtDelfiGraph graph) {
 		this.setId(Mechanic.idCounter++);
 
 		setVisted(false);
@@ -29,6 +30,7 @@ public class Mechanic {
 		conditions = new ArrayList<Node>();
 		actions = new ArrayList<Node>();
 		
+		this.graph = graph;
 		this.setTerminal(isTerminal);
 		
 		setFrames(new HashMap<String, int[]>());
@@ -107,6 +109,19 @@ public class Mechanic {
 				}
 			}
 		}
+//		if (!this.isTerminal) {
+//			for(Node sprite : this.getSprites()) {
+//				if(graph.getAvatarEntities().contains(sprite)) {
+//					// check for timeout mechanics, if they exist, and add as outputs to this mechanic
+//					for(Mechanic mech : graph.getMechanics()) {
+//						if(mech.conditions.get(0).getName().equals("Timeout")) {
+//							outputMechanics.add(mech);
+//						}
+//					}
+//				}
+//			}
+//		}
+		
 		return outputMechanics;
 	}
 
