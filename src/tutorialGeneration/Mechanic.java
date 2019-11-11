@@ -98,6 +98,25 @@ public class Mechanic {
 	public String getReadibleAction() {
 		return readibleAction;
 	}
+	/***
+	 * INCOMPLETE! TODO finish
+	 * @return
+	 */
+	public List<Mechanic> getSiblings() {
+		List<Mechanic> siblings = new ArrayList<Mechanic>();
+		for (Mechanic mech : graph.getMechanics()) {
+			// we know that sprites will happen in the same order
+			// make sure they are similarly shaped
+			if (mech.getSiblings().size() == this.getSprites().size()) {
+				// make sure they have the same action
+				if(mech.getReadibleAction().equals(this.getReadibleAction())) {
+					// check if sprite1's have the same parent
+					
+				}
+			}
+		}
+		return siblings;
+	}
 	public List<Mechanic> getOutputs() {
 		List<Mechanic> outputMechanics = new ArrayList<Mechanic>();
 		for(Node action : actions) {

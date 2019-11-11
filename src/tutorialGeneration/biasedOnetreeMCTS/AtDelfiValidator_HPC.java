@@ -14,6 +14,7 @@ import core.vgdl.VGDLRegistry;
 import ontology.Types;
 import tools.Utils;
 import tracks.ArcadeMachine;
+import tutorialGeneration.MechanicParser;
 import video.basics.GameEvent;
 import video.basics.Interaction;
 import video.basics.PlayerAction;
@@ -131,7 +132,7 @@ public class AtDelfiValidator_HPC {
 		return games[id];
 	}
 	
-	public void runXperiments(int x, boolean improved, int seed, boolean seeded, int id) {
+	public void runXperiments(int x, String criticalFile, boolean improved, int seed, boolean seeded, int id) {
 		
 		String gameFile = generateTutorialPath + getGame(gameIdx)[1] + ".txt";
 		String levelFile = gamesPath + getGame(gameIdx)[1] + "_lvl" + levelIdx + ".txt";
@@ -176,9 +177,10 @@ public class AtDelfiValidator_HPC {
 				if(!seeded)
 					seed = new Random().nextInt();
 		        SingleMCTSPlayer player = new SingleMCTSPlayer(new Random(seed), num_actions, actions, improved, expFile, mainFile);
-		        player.critPath = new ArrayList<GameEvent>();
+		        player.critPath = MechanicParser.readMechFile(criticalFile);
+		        
 //		        AtDelfiValidator_HPC.gameID = gameIdx;
-		        setupCritPath(player.critPath);
+//		        setupCritPath(player.critPath);
 		        
 		        player.init(root);
 		        winning += player.run(id);	

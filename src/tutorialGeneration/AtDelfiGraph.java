@@ -473,7 +473,7 @@ public class AtDelfiGraph {
 			
 			Node spawnee = findSpriteNode(sprite.getAttributes().get("stype"));
 			
-			Node condition = new Node(name, "n/a", "Condition");
+			Node condition = new Node(name, "Tick Condition", "Condition");
 			Node action = new Node("Spawn", "n/a", "Action");
 			
 			conditions.add(condition);
@@ -492,6 +492,7 @@ public class AtDelfiGraph {
 			spriteMechanic.setActions(Arrays.asList(action));
 			spriteMechanic.addSprite(sprite);
 			spriteMechanic.addSprite(spawnee);
+			spriteMechanic.setReadibleAction(action.getName());
 			mechanics.add(spriteMechanic);
 		}
 	}

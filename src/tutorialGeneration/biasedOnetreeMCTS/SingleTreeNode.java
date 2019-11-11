@@ -1,6 +1,7 @@
 package tutorialGeneration.biasedOnetreeMCTS;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.TreeSet;
 
@@ -58,12 +59,13 @@ public class SingleTreeNode
     
     public ArrayList<GameEvent> interactions;
     
-    public ArrayList<GameEvent> critPath;
+    public List<GameEvent> critPath;
 
     public SingleTreeNode(Random rnd, int num_actions, int numIterations, Types.ACTIONS[] actions) {
         this(null,null, -1, rnd, num_actions, actions, new ArrayList<GameEvent>());
         this.numIterations = numIterations;
         rootNode = this;
+        // read in critical_mechanics file
     }
 
     public SingleTreeNode(SingleTreeNode root, SingleTreeNode parent, int childIdx, Random rnd, int num_actions, Types.ACTIONS[] actions, ArrayList<GameEvent> interactions) {
@@ -93,7 +95,7 @@ public class SingleTreeNode
      * @param elapsedTimer
      * @param improved
      */
-    public void mctsSearch(boolean improved, ArrayList<GameEvent> critPath) {
+    public void mctsSearch(boolean improved, List<GameEvent> critPath2) {
         int numIters = 0;
         bestNode = null;
         SingleTreeNode.deepest = 0;
@@ -107,7 +109,7 @@ public class SingleTreeNode
             StateObservation state = rootState.copy();
 
             SingleTreeNode selected = treePolicy(state);
-            selected.critPath = critPath;
+            selected.critPath = critPath2;
             double delta = selected.rollOut(state, improved);
             backUp(selected, delta);
 

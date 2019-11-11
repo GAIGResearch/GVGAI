@@ -42,11 +42,11 @@ public class MechanicParser {
             	// make an interaction and put in a list
             	JSONObject mech = (JSONObject) mechanicsFile.get(i);
             	
-            	if (mech.get("condition").equals("Player Input") && !flag) {
+            	if (mech.get("condition").equals("Press Space") && !flag) {
             		flag = true;
             		criticalMechanics.add(new PlayerAction("ACTION_USE"));
             	}
-            	else if(mech.get("condition").equals("n/a")) {
+            	else {
             		criticalMechanics.add(new Interaction(mech.get("action") + "", mech.get("sprite1") + "", mech.get("sprite2") + ""));
             	}
             }
@@ -64,7 +64,7 @@ public class MechanicParser {
 	}
 	
 	public static void main(String[] args) {
-		MechanicParser.readMechFile("mechanics.json");
+		MechanicParser.readMechFile("mechanics_plants.json");
 	}
 
 }

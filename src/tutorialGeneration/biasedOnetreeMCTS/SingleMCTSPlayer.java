@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import core.game.StateObservation;
@@ -48,7 +49,7 @@ public class SingleMCTSPlayer
     public boolean done = false;
     public boolean visualize = false;
     
-    public ArrayList<GameEvent> critPath;
+    public List<GameEvent> critPath;
     File expFile;
     File mainExperimentsFile;
     
