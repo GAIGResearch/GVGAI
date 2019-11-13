@@ -101,11 +101,11 @@ public class SingleTreeNode
         SingleTreeNode.deepest = 0;
         while(numIters < numIterations){
 
-        	if(numIters % 1000 == 0 && verbose) {
-        		System.out.println("*********************\n");
-        		System.out.println("Iteration: " + numIters);
-        		System.out.println("Deepest Node: " + SingleTreeNode.deepest);
-        	}
+//        	if(numIters % 1000 == 0 && verbose) {
+//        		System.out.println("*********************\n");
+//        		System.out.println("Iteration: " + numIters);
+//        		System.out.println("Deepest Node: " + SingleTreeNode.deepest);
+//        	}
             StateObservation state = rootState.copy();
 
             SingleTreeNode selected = treePolicy(state);

@@ -43,7 +43,7 @@ public class SingleMCTSPlayer
 
     public boolean improved;
     public static SingleTreeNode currentNode;
-    public int numIterations = 2000;
+    public int numIterations = 5000;
 
 
     public boolean done = false;
@@ -98,7 +98,7 @@ public class SingleMCTSPlayer
         		SingleTreeNode.deepest = 0;
         		SingleTreeNode.deepestNode = null;
 	    	    init(a_gameState);
-	    		m_root.numIterations = 500;
+	    		m_root.numIterations = this.numIterations;
 	    	    m_root.mctsSearch(improved, critPath);
 	    	    int action = m_root.mostVisitedAction();
 //	    	    if(visualize) {

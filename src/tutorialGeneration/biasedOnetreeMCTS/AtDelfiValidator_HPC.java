@@ -61,28 +61,33 @@ public class AtDelfiValidator_HPC {
 	}
 	public static void main(String[] args) {
 		
+		
 		int seed = 100;
 		AtDelfiValidator_HPC validator = new AtDelfiValidator_HPC();
 		int id = Integer.parseInt(args[0]);
 		
 		int u=id%10;
 	    int t=(id/10)%10;
+		String criticalFile = "mechanics.json";
 	    
-//	    if(id > 500)
-//			validator.gameIdx = 4;
-//	    else if(id > 400)
-//			validator.gameIdx = 30;
-	    if(id > 299)
+	    if(id > 299) {
 			validator.gameIdx = 34;
-	    else if(id > 199) 
+			criticalFile = "critical_mechanics_realPortals.json";
+	    }
+	    else if(id > 199) { 
 			validator.gameIdx = 39;
-		else if(id > 99)
+			criticalFile = "critical_mechanics_solarfox.json";
+	    }
+		else if(id > 99) {
 			validator.gameIdx = 30;
-		else
+			criticalFile = "critical_mechanics_plants.json";
+		}
+		else {
 			validator.gameIdx = 47;
+			criticalFile = "critical_mechanics_zelda.json";
+		}
 		
-		// fixed game
-//		validator.gameIdx = 34;
+
 		
 		
 		int withoutH = u + t*10;
@@ -96,43 +101,21 @@ public class AtDelfiValidator_HPC {
 			validator.levelIdx = 1;
 		else
 			validator.levelIdx = 0;
-		validator.runXperiments(1, false, seed, false, id);
+//		validator.gameIdx = Integer.parseInt(args[1]);
 		
-//		
-//		try {
-//			StateObservation root = validator.startup(seed, gameFile, levelFile);
-//			
-//			// more setup stuff
-//	        ArrayList<Types.ACTIONS> act = root.getAvailableActions();
-//	        Types.ACTIONS[] actions = new Types.ACTIONS[act.size()];
-//	        
-//	        for(int i = 0; i < actions.length; ++i)
-//	        {
-//	            actions[i] = act.get(i);
-//	        }
-//	        
-//	        int num_actions = actions.length;
-//	        
-//	        boolean improved = true;
-//	        
-//	        SingleMCTSPlayer player = new SingleMCTSPlayer(new Random(seed), num_actions, actions, improved);
-//	        
-//	        player.init(root);
-//	        player.run();
-//	        
-//	        System.out.println("Complete");
-//	        
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+
+		boolean improved = Boolean.parseBoolean(args[1]);
+		
+		System.out.println("******************");
+		System.out.println("Improved: " + improved + "\nCritical file: " + criticalFile + "\nGame: " + validator.gameIdx + "\nLevel: " + validator.levelIdx);
+		validator.runXperiments(criticalFile, improved, seed, false, id);
 	}
 	
 	public String[] getGame(int id) {
 		return games[id];
 	}
 	
-	public void runXperiments(int x, String criticalFile, boolean improved, int seed, boolean seeded, int id) {
+	public void runXperiments(String criticalFile, boolean improved, int seed, boolean seeded, int id) {
 		
 		String gameFile = generateTutorialPath + getGame(gameIdx)[1] + ".txt";
 		String levelFile = gamesPath + getGame(gameIdx)[1] + "_lvl" + levelIdx + ".txt";
@@ -151,7 +134,6 @@ public class AtDelfiValidator_HPC {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		// run x amount of experiments //
 		File mainFile = new File("experiments/main_file_" + gameIdx + "_" + id +".txt");
 		int winning = 0;
 			try{
@@ -178,9 +160,7 @@ public class AtDelfiValidator_HPC {
 					seed = new Random().nextInt();
 		        SingleMCTSPlayer player = new SingleMCTSPlayer(new Random(seed), num_actions, actions, improved, expFile, mainFile);
 		        player.critPath = MechanicParser.readMechFile(criticalFile);
-		        
-//		        AtDelfiValidator_HPC.gameID = gameIdx;
-//		        setupCritPath(player.critPath);
+		     
 		        
 		        player.init(root);
 		        winning += player.run(id);	
@@ -191,6 +171,7 @@ public class AtDelfiValidator_HPC {
 			}
 	}
 	
+	// TODO remove this if not needed or pull into utils file
 	public void setupCritPath(ArrayList<GameEvent> critPath) {
 		if(gameIdx == 47) {
 			// zelda
