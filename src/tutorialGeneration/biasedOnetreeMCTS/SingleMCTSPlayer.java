@@ -43,7 +43,7 @@ public class SingleMCTSPlayer
 
     public boolean improved;
     public static SingleTreeNode currentNode;
-    public int numIterations = 5000;
+    public int numIterations = 15000;
 
 
     public boolean done = false;

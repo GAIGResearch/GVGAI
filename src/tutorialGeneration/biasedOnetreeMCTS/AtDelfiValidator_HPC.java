@@ -88,20 +88,36 @@ public class AtDelfiValidator_HPC {
 		}
 		
 
-		
+		// TODO remove for normal experiments
+		validator.gameIdx = 34;
 		
 		int withoutH = u + t*10;
-		if (withoutH > 79) 
+		
+		// TODO reinsert for normal experiments
+//		if (withoutH > 79) 
+//			validator.levelIdx = 4;
+//		else if(withoutH > 59)
+//			validator.levelIdx = 3;
+//		else if(withoutH > 39)
+//			validator.levelIdx = 2;
+//		else if(withoutH > 19)
+//			validator.levelIdx = 1;
+//		else
+//			validator.levelIdx = 0;
+		
+		// TODO remove for normal experiments
+		if (withoutH > 799) 
 			validator.levelIdx = 4;
-		else if(withoutH > 59)
+		else if(withoutH > 599)
 			validator.levelIdx = 3;
-		else if(withoutH > 39)
+		else if(withoutH > 399)
 			validator.levelIdx = 2;
-		else if(withoutH > 19)
+		else if(withoutH > 199)
 			validator.levelIdx = 1;
 		else
 			validator.levelIdx = 0;
-//		validator.gameIdx = Integer.parseInt(args[1]);
+		
+
 		
 
 		boolean improved = Boolean.parseBoolean(args[1]);
