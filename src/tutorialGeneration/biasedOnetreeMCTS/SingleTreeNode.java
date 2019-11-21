@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.TreeSet;
-
+import eveqt.EquationParser;
+import eveqt.EquationNode;
 import core.game.StateObservation;
 import ontology.Types;
 import tools.ElapsedCpuTimer;
@@ -46,6 +47,9 @@ public class SingleTreeNode
     protected double[] bounds = new double[]{Double.MAX_VALUE, -Double.MAX_VALUE};
     public int childIdx;
 
+    
+    // the reward equation for this tree
+    public EquationNode rewardEquation;
     public int num_actions;
     Types.ACTIONS[] actions;
     public int ROLLOUT_DEPTH = 50;
@@ -61,9 +65,31 @@ public class SingleTreeNode
     
     public List<GameEvent> critPath;
 
+    /**
+     * A root node with a self-determined reward function
+     * @param rnd
+     * @param num_actions
+     * @param numIterations
+     * @param actions
+     */
     public SingleTreeNode(Random rnd, int num_actions, int numIterations, Types.ACTIONS[] actions) {
         this(null,null, -1, rnd, num_actions, actions, new ArrayList<GameEvent>());
         this.numIterations = numIterations;
+        rootNode = this;
+        // read in critical_mechanics file
+    }
+    
+    /**
+     * A root node with an equation tree
+     * @param rnd
+     * @param num_actions
+     * @param numIterations
+     * @param actions
+     */
+    public SingleTreeNode(Random rnd, int num_actions, int numIterations, Types.ACTIONS[] actions, EquationNode rewardEquation) {
+        this(null,null, -1, rnd, num_actions, actions, new ArrayList<GameEvent>());
+        this.numIterations = numIterations;
+        this.rewardEquation = rewardEquation;
         rootNode = this;
         // read in critical_mechanics file
     }
@@ -100,12 +126,6 @@ public class SingleTreeNode
         bestNode = null;
         SingleTreeNode.deepest = 0;
         while(numIters < numIterations){
-
-//        	if(numIters % 1000 == 0 && verbose) {
-//        		System.out.println("*********************\n");
-//        		System.out.println("Iteration: " + numIters);
-//        		System.out.println("Deepest Node: " + SingleTreeNode.deepest);
-//        	}
             StateObservation state = rootState.copy();
 
             SingleTreeNode selected = treePolicy(state);
@@ -119,11 +139,6 @@ public class SingleTreeNode
             numIters++;
         }
         System.out.println("Deepest Node: " + SingleTreeNode.deepest);
-//        int won = 0;
-//        if(bestNode != null) {
-//        	won = 1;
-//        }
-//        System.out.println("Game Over\nResult: " + won);
     }
     public SingleTreeNode getBestNode() {
     	return bestNode;
@@ -229,9 +244,11 @@ public class SingleTreeNode
         double delta = value(state);
         
         if(improved) {
-        	delta += getCritPathBonus(ogGameTick, state.getFirstTimeEventsHistory());
-        	// WARNING: For testing with just the bonus as the reward!!!
-//        	delta = getCritPathBonus(ogGameTick, state.getFirstTimeEventsHistory());
+        	// for a fixed bonus 
+        	if (this.rootNode.rewardEquation != null)
+        		delta += getCritPathBonus(ogGameTick, state.getFirstTimeEventsHistory());
+        	else 
+        		delta = evaluateRewardEquation(state.getFirstTimeEventsHistory());
         }
         if(delta < bounds[0])
             bounds[0] = delta;
@@ -261,6 +278,24 @@ public class SingleTreeNode
         return rawScore;
     }
     
+    public double evaluateRewardEquation(ArrayList<GameEvent> interactions) {
+    	double value = 0.0;
+    	Object[] interactionArray = interactions.toArray();
+    	int[] mechCounter = new int[critPath.size()];
+
+    	for(int i = 0; i < critPath.size(); i++) {
+    		for(int j = 0; j < interactionArray.length; j++) {
+    			GameEvent interaction = (GameEvent) interactionArray[j];
+    			
+    			if(critPath.get(i).equals(interaction)) {
+    				mechCounter[i]++;    				
+    			}
+    		}
+    	}
+    	
+		return value;
+    	
+    }
     public double getCritPathBonus(int ogGameTick, ArrayList<GameEvent> interactions) {
     	
 //    	ArrayList<GameEvent> critPath = new ArrayList<GameEvent>();
@@ -330,8 +365,11 @@ public class SingleTreeNode
 //    					if(Integer.parseInt(interaction.gameTick) == rootNode.rootState.getGameTick() + 1) {
 //    						bonus+= 10000;
 //    					}
-    					if(mechCounter[i] < 100)	
-    						bonus += BONUS  * ((1 - BONUS_DECAY) / mechCounter[i]) * (1.0 / (float)(Math.pow(1.1, Integer.parseInt(interaction.gameTick) - (ogGameTick))));
+    					if(mechCounter[i] < 100) {	
+    						// regular bonus if there is no reward equation
+    						if (this.rootNode.rewardEquation != null)
+    							bonus += BONUS  * ((1 - BONUS_DECAY) / mechCounter[i]) * (1.0 / (float)(Math.pow(1.1, Integer.parseInt(interaction.gameTick) - (ogGameTick))));
+    					}
 //    					System.out.println(interaction.toString() + " : " + interaction.gameTick);
     					this.bonus_count += 1;
     				}
