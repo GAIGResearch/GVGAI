@@ -1344,25 +1344,22 @@ public abstract class Game {
 			}
 		}
 
-		/* UNCOMMENT LATER
+
 		if(avatars[0] != null)
 		{
 			storeGameSimulationResult.
-			storeGameSimulationResult(String.valueOf((avatars[0].getWinState().key()))
+			storeGameSimulationResult(String.valueOf(avatars[0].getWinState().key()), String.valueOf(avatars[0].getScore())
 					,String.valueOf(gameTick));
-<<<<<<< HEAD
 			
 			storeGameSimulationResult.addMechanics(storeInteraction.interactionArray, storePlayerAction.playerActionArray);
 			File f = new File(InteractionStaticData.gameName, InteractionStaticData.agentName + "_" + InteractionStaticData.levelCount + "_" + InteractionStaticData.playthroughCount +
 					"_result.json");
-=======
 
->>>>>>> ddd1506b6ac9f1a53697737532dcbb79a6fc785a
 			storeGameSimulationResult.
 			writeAllInfo(f.toString());
 			InteractionStaticData.resultsCounter += 1;
 		}
-		 */
+		 
 
 		System.out.println("Result (1->win; 0->lose): " + sb1 + sb2 + "timesteps:" + this.getGameTick());
 

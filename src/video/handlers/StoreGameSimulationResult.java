@@ -16,9 +16,10 @@ public class StoreGameSimulationResult
 		gameResult = new JSONObject();
 	}
 
-	public void storeGameSimulationResult(String result, String tick)
+	public void storeGameSimulationResult(String result, String score, String tick)
 	{
 		this.gameResult.put("result", result);
+		this.gameResult.put("score", score);
 		this.gameResult.put("tick", tick);
 	}
 	
