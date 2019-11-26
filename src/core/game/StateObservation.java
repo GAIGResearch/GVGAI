@@ -307,6 +307,10 @@ public class StateObservation {
     public ArrayList<GameEvent> getFirstTimeEventsHistory() {
     	return model.getFirstTimeEventsHistory();
     }  
+    
+    public ArrayList<GameEvent> getCurrentGameTickEvents() {
+    	return model.getCurrentGameTickEvents();
+    }
 
     /**
      * Returns a list of observations of NPC in the game. As there can be

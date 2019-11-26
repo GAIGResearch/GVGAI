@@ -147,6 +147,10 @@ public abstract class Game {
 	 * All events in the game
 	 */
 	protected ArrayList<GameEvent> firstTimeEvents;
+	
+	
+	protected ArrayList<GameEvent> currentEvents;
+	
 
 	/**
 	 * For each entry, int identifier of sprite type, a list with all the itypes
@@ -328,6 +332,7 @@ public abstract class Game {
 		terminations = new ArrayList<Termination>();
 		historicEvents = new TreeSet<Event>();
 		firstTimeEvents = new ArrayList<GameEvent>();
+		currentEvents = new ArrayList<GameEvent>();
 		timeEffects = new TreeSet<TimeEffect>();
 		spriteCopies = new ArrayList<VGDLSprite>();
 		storeInteraction = new StoreInteraction();
@@ -1080,7 +1085,9 @@ public abstract class Game {
 
 			// Draw all sprites in the panel.
 			view.paint(this.spriteGroups);
-
+			
+			currentEvents = new ArrayList<GameEvent>();
+			
 			storeFramesAndActions(players, frameStorer);
 
 			// Update the frame title to reflect current score and tick.
@@ -1607,9 +1614,10 @@ public abstract class Game {
 	@SuppressWarnings("unchecked")
 	protected void eventHandling() {
 		// log player actions
-		if(this.avatarLastAction[0].toString().equals(Types.ACTIONS.ACTION_USE.toString())) {
-			this.firstTimeEvents.add(new PlayerAction(String.valueOf(this.gameTick), this.avatarLastAction[0].toString()));
-		}
+//		if(this.avatarLastAction[0].toString().equals(Types.ACTIONS.ACTION_USE.toString())) {
+//			this.firstTimeEvents.add(new PlayerAction(String.valueOf(this.gameTick), this.avatarLastAction[0].toString()));
+//			this.currentEvents.add(new PlayerAction(String.valueOf(this.gameTick), this.avatarLastAction[0].toString()));
+//		}
 		// Array to indicate that the sprite type has no representative in
 		// collisions.
 		boolean noSprites[] = new boolean[spriteGroups.length];
@@ -1863,6 +1871,7 @@ public abstract class Game {
 		// add this event to the all events list
 		Interaction newInt = new Interaction(String.valueOf(this.gameTick), ef.getClass().getName(), VGDLRegistry.GetInstance().getRegisteredSpriteKey(s1.getType()), VGDLRegistry.GetInstance().getRegisteredSpriteKey(s2.getType()));
 		firstTimeEvents.add(newInt);
+		currentEvents.add(newInt);
 
 	}
 

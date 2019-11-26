@@ -1032,6 +1032,11 @@ public class ForwardModel extends Game
     {
         return firstTimeEvents;
     }
+    
+    public ArrayList<GameEvent> getCurrentGameTickEvents()
+    {
+    	return currentEvents;
+    }
 
     /**
      * Returns a list of observations of NPC in the game. As there can be

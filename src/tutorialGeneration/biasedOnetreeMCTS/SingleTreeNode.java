@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.TreeSet;
+import java.util.HashMap;
 import eveqt.EquationParser;
 import eveqt.EquationNode;
 import core.game.StateObservation;
@@ -180,8 +181,7 @@ public class SingleTreeNode
         state.advance(actions[bestAction]);
         ArrayList<GameEvent> interactions = state.getFirstTimeEventsHistory();
 
-        // add any interactions that occured during this event
-        
+        // add any interactions that occurred during this event
         SingleTreeNode tn = new SingleTreeNode(this.rootNode, this, bestAction, this.m_rnd, num_actions, actions, interactions);
         tn.bonus = this.bonus;
         children[bestAction] = tn;
@@ -248,7 +248,7 @@ public class SingleTreeNode
         	if (this.rootNode.rewardEquation != null)
         		delta += getCritPathBonus(ogGameTick, state.getFirstTimeEventsHistory());
         	else 
-        		delta = evaluateRewardEquation(state.getFirstTimeEventsHistory());
+        		delta = evaluateRewardEquation(state.getCurrentGameTickEvents());
         }
         if(delta < bounds[0])
             bounds[0] = delta;
@@ -281,17 +281,17 @@ public class SingleTreeNode
     public double evaluateRewardEquation(ArrayList<GameEvent> interactions) {
     	double value = 0.0;
     	Object[] interactionArray = interactions.toArray();
-    	int[] mechCounter = new int[critPath.size()];
-
-    	for(int i = 0; i < critPath.size(); i++) {
-    		for(int j = 0; j < interactionArray.length; j++) {
-    			GameEvent interaction = (GameEvent) interactionArray[j];
-    			
-    			if(critPath.get(i).equals(interaction)) {
-    				mechCounter[i]++;    				
-    			}
-    		}
+    	
+    	HashMap mechanicMap = new HashMap<String, Integer>();
+    	for(GameEvent event : this.critPath) {
+    		mechanicMap.put(event.toString(), 0);
     	}
+		for(int i = 0; i < interactionArray.length; i++) {
+			GameEvent interaction = (GameEvent) interactionArray[i];
+			mechanicMap.put(interaction.toString(), 1);
+		}
+    	
+		value = rewardEquation.evaluate(mechanicMap);
     	
 		return value;
     	
