@@ -12,6 +12,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
@@ -21,6 +23,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import tutorialGeneration.MechanicParser;
+import video.basics.GameEvent;
+
 public class CMEMapElites {
 	private String _gameName;
 	private double _coinFlip;
@@ -28,16 +33,17 @@ public class CMEMapElites {
 	private HashMap<String, Chromosome> _map = new HashMap<String, Chromosome>();		//as a test use just the chromosome as the value
 	//private HashMap<String, CMECell> _map = new HashMap<String, CMECell>();
 	
-	private ArrayList<String[]> tutInteractionDict = new ArrayList<String[]>();
+	private HashSet<String> varNames;
+	private List<GameEvent> rules;
 	
 	
-	
-	public CMEMapElites(String gn, String gl, Random seed, double coinFlip, String genFolder, String tutFolder) {
+	public CMEMapElites(String gn, String gl, Random seed, double coinFlip, String genFolder, String mechanicsFile) {
 		this._gameName = gn;
 		this._coinFlip = coinFlip;
 		
-		ParseTutorialRules(tutFolder);
-		Chromosome.SetStaticVar(seed, gn, gl, genFolder, tutInteractionDict);
+		rules = parseTutorialRules(mechanicsFile);
+		varNames = this.convertToRuleNames(rules);
+		Chromosome.SetStaticVar(seed, gn, gl, genFolder, rules, varNames);
 	}
 	
 	//returns a batch of randomly created chromosomes
@@ -45,7 +51,6 @@ public class CMEMapElites {
 		Chromosome[] randos = new Chromosome[batchSize];
 		for(int i=0;i<batchSize;i++) {
 			randos[i] = new Chromosome();
-			randos[i].randomInit(placeholder);
 		}
 		return randos;
 	}
@@ -109,61 +114,27 @@ public class CMEMapElites {
 	}
 	
 	//sets the game interaction set (rules) for the dimensionality
-	private void ParseTutorialRules(String tutFolder) {
-		//assume that the rules will come from the game's specific json file
-		//as a test we will use one custom made for zelda
-		//however, for the real simulation - assume we can call a function from AtDelphi (original) 
-		//	that will provide these rules
-		//the format of the JSON file is:
-		//		{inputs (sprite2) : [], outputs (sprite1) : [], action : ""}
-		
-		String gameRuleJSON = tutFolder + _gameName + "_tut.json";		//in this scenario it is in the same folder
-		try {
-	        //read the file
-			BufferedReader jsonRead = new BufferedReader(new FileReader(gameRuleJSON));
-			System.out.println("game rules file: " + gameRuleJSON);
+	private List<GameEvent> parseTutorialRules(String mechanicFile) {
+		List<GameEvent> mechanics = MechanicParser.readMechFile(mechanicFile);
 
-			//parse each line (assuming 1 object per line)
-			String line = jsonRead.readLine();
-	        while(line != null) {
-	        	//get the input sprite list, output sprite list, and action value
-	            JSONObject obj = (JSONObject) new JSONParser().parse(line);
-	            JSONArray inputs = (JSONArray)obj.get("input");
-	            JSONArray outputs = (JSONArray)obj.get("output");
-	            String action = obj.get("action").toString();
-	            
-	            //add the set to the dictionary
-	            for(int a=0;a<inputs.size();a++) {
-	            	for(int b=0;b<outputs.size();b++) {
-	            		String[] key = {action, inputs.get(a).toString(), outputs.get(b).toString()};
-	            		tutInteractionDict.add(key);
-	            	}
-	            }
-	            
-	            line = jsonRead.readLine();
-	        }
-	        //close the file
-	        jsonRead.close();         
-	    }
-	    catch(FileNotFoundException e) {
-	        System.out.println("ERROR: Unable to open file '" + gameRuleJSON + "'");    
-	        System.exit(0);
-	    }
-	    catch(IOException e) {
-	    	System.out.println("IO EXCEPTION");
-	        e.printStackTrace();
-	    }catch (ParseException e) {
-	    	System.out.println("PARSE EXCEPTION");
-			e.printStackTrace();
-		}
-		
-		
+		return mechanics;
 	}
+	
+	// Converts the raw mechanic info into strings for variables in the equation trees
+	private HashSet<String> convertToRuleNames(List<GameEvent> mechanics) {
+		List<String> mechNames = new ArrayList<String>();
+		for (GameEvent event : mechanics) {
+			mechNames.add(event.toString());
+		}
+		HashSet<String> varSet = new HashSet<String>(mechNames);
+		return varSet;
+	}
+	
 	
 	//debug to print the imported rules
 	public void printRules() {
-		for(String[] s : tutInteractionDict) 
-			System.out.println("[" + s[0] + ", " + s[1] + ", " + s[2] + "]");
+		for(String s : this.varNames) 
+			System.out.println(s);
 	}
 	
 	//writes the map to a string (overrides toString() function)
