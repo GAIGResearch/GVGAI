@@ -66,7 +66,7 @@ public class ADPChildRunner {
 		//read the simulation parameters
 		HashMap<String, String> parameters = null;
 		try {
-		    parameters = readParameters("AtDelphiPlusParameters.txt");
+		    parameters = readParameters("MCTSRewardEvolutionParameters.txt");
 		} catch (IOException e1) {
 		    e1.printStackTrace();
 		}

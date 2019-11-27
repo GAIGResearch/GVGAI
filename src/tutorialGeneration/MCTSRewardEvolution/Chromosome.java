@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -94,12 +95,13 @@ public class Chromosome implements Comparable<Chromosome>{
 	}
 
 
-	//TODO random equation initialization function using LevelGenMachine.java and ChromosomeLevelGenerator (AtDelphi+ exclusive class)
+	/**
+	 * Randomly initialize a new equation tree
+	 */
 	public void randomInit() {
 		try {
 			this.rewardEquation = EvEqT.generateRandomTreeEquation(Chromosome._eParser, 10);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		};
 		
@@ -173,11 +175,13 @@ public class Chromosome implements Comparable<Chromosome>{
 
 
 	//TODO run a chromosome with an MCTS agent
-	public void calculateResults(String aiAgent, String outFile, int id) throws IOException {
+	public void calculateResults(String aiAgent, int id) throws IOException {
 
-		
-		double[] results = ArcadeMachine.runOneGame(Chromosome._gamePath, outFile, false, aiAgent, null, Chromosome._rnd.nextInt(), 0);
-
+		// run on all levels multiple times
+		for (int i = 0; i < 5; i++) {
+			String levelName = Chromosome._gamePath + "_lvl" + i + ".txt";
+			double[] results = ArcadeMachine.runOneGame(Chromosome._gamePath, levelName, false, aiAgent, null, Chromosome._rnd.nextInt(), 0);
+		}
 
 		this._age++;					//increment the age (the chromosome is older now that it has been run)
 		setConstraints(results); 	//set the constraints (win or lose)
@@ -255,20 +259,39 @@ public class Chromosome implements Comparable<Chromosome>{
 	}
 	
 	
-	//TODO mutates the reward equation randomly
+	/**
+	 * Mutating
+	 * @param coinFlip
+	 */
 	public void mutate(double coinFlip) {
 		double f = 0.0;
 		//int ct = 0;
 
 		//if it meets the coin flip, then pick a tile and mutate
 		do {
-			
+			try {
+				f = Math.random();
+				if (f < 0.33) {
+					// Delete a random node from a clone copy of the input equation
+					this.rewardEquation = EvEqT.deleteNode(Chromosome._eParser, this.rewardEquation);
+				}
+				else if (f < 0.66) {
+					// Change a random node from a clone copy of the input equation
+					this.rewardEquation = EvEqT.changeNode(Chromosome._eParser, this.rewardEquation);
+				}
+				else {
+					// Insert a new node to a clone copy of the input equation
+					this.rewardEquation = EvEqT.insertNode(Chromosome._eParser, this.rewardEquation, 5);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			f = Math.random();
 		}while(f < coinFlip);
 
 
 		
 	}
-
 	
 	//clone chromosome function
 	public Chromosome clone() {
@@ -348,5 +371,11 @@ public class Chromosome implements Comparable<Chromosome>{
 	public double log2(double x)
 	{
 		return (Math.log(x) / Math.log(2.0));
+	}
+
+
+	public void fileInit(String string) {
+		// TODO Auto-generated method stub
+		
 	}
 }

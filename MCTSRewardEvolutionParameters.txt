@@ -1,0 +1,11 @@
+seed = 1000
+gameListCSV = examples/all_games_sp.csv
+gameIndex = 108
+runner = tracks.singlePlayer.advanced.boostedMCTS.Agent
+inputFolder = input/
+tutorialFolder = rules/
+outputFolder = output/
+resultFolder = result/
+populationSize = 10
+coinFlip = 0.5
+exportFreq = 100
