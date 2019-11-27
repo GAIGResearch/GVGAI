@@ -93,13 +93,13 @@ public class Chromosome implements Comparable<Chromosome>{
 		this.rewardEquation = rewardEquation;
 	}
 
-
-	//TODO random equation initialization function using LevelGenMachine.java and ChromosomeLevelGenerator (AtDelphi+ exclusive class)
+	/***
+	 * Randomly initializes a new equation tree
+	 */
 	public void randomInit() {
 		try {
 			this.rewardEquation = EvEqT.generateRandomTreeEquation(Chromosome._eParser, 10);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		};
 		
@@ -277,7 +277,7 @@ public class Chromosome implements Comparable<Chromosome>{
 
 	//override class toString() function
 	public String toString() {
-		return rewardEquation.toString();
+		return this.rewardEquation.toString();
 	}
 
 	//creates an input file format for the level (for use with parallelization)
@@ -348,5 +348,10 @@ public class Chromosome implements Comparable<Chromosome>{
 	public double log2(double x)
 	{
 		return (Math.log(x) / Math.log(2.0));
+	}
+
+	// TODO implement reading in reward 
+	public void fileInit(String string) {
+		
 	}
 }
