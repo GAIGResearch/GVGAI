@@ -94,9 +94,9 @@ public class Chromosome implements Comparable<Chromosome>{
 		this.rewardEquation = rewardEquation;
 	}
 
-
 	/**
 	 * Randomly initialize a new equation tree
+
 	 */
 	public void randomInit() {
 		try {
@@ -300,7 +300,7 @@ public class Chromosome implements Comparable<Chromosome>{
 
 	//override class toString() function
 	public String toString() {
-		return rewardEquation.toString();
+		return this.rewardEquation.toString();
 	}
 
 	//creates an input file format for the level (for use with parallelization)
@@ -374,8 +374,8 @@ public class Chromosome implements Comparable<Chromosome>{
 	}
 
 
+	// TODO implement reading in reward 
 	public void fileInit(String string) {
-		// TODO Auto-generated method stub
 		
 	}
 }
