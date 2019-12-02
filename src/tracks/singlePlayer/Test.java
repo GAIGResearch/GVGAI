@@ -52,7 +52,7 @@ public class Test {
 
 		// 2. This plays a game in a level by the controller.
 		double[] results = ArcadeMachine.runOneGame(game, level1, visuals, sampleMCTSController, recordActionsFile, seed, 0);
-
+		System.out.println("");
 
 		// 3. This replays a game from an action file previously recorded
 	//	 String readActionsFile = recordActionsFile;

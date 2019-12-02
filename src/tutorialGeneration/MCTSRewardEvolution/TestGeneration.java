@@ -52,7 +52,7 @@ public class TestGeneration{
 	//String recordLevelFile = generateLevelPath + games[gameIdx] + "_glvl.txt";
 	static String gameLoc = gamesPath + games[gameIdx] + ".txt";
 	
-	static String aiRunner = "agents.adrienctx.Agent";
+	static String aiRunner = "tracks.singlePlayer.advanced.boostedMCTS.Agent";
 	
 	//static int eliteNum = 2;			//for mapelites can only have 1 (which is the best out of the group)
 	static int popNum = 10;
@@ -62,7 +62,7 @@ public class TestGeneration{
 	public static void main(String[] args) throws IOException{
 		long startTime = System.nanoTime();
 		
-		CMEMapElites map = new CMEMapElites(gameName, gameLoc, seed, 0.5, null, "src/atdelphi_plus/");
+		CMEMapElites map = new CMEMapElites(gameName, gameLoc, seed, 0.5, null, "mechanics_zelda.json", "8");
 		
 		
 		//initialize the 10 random chromosomes
@@ -80,7 +80,7 @@ public class TestGeneration{
 				System.out.println("");
 				System.out.println(c.rewardEquation);
 				//System.out.println(String.join(" ", c._allChar));
-				c.calculateResults(aiRunner, null, 0);
+				c.calculateResults(aiRunner, 0);
 				System.out.println("Constraints score: " + c._constraints);
 				System.out.println("Fitness score: " + c._fitness);
 				System.out.println("Dimension vector: " + Arrays.toString(c._dimensions));
@@ -94,11 +94,11 @@ public class TestGeneration{
 			myChromos = map.makeNextGeneration(popNum);
 		}
 
-		//export the MAPElites set
-		System.out.println("Exporting map!");
-		BufferedWriter bw = new BufferedWriter(new FileWriter("src/atdelphi_plus/generatedLevels/mapelites.txt"));
-		bw.write(map.toString());
-		bw.close();
+//		//export the MAPElites set
+//		System.out.println("Exporting map!");
+//		BufferedWriter bw = new BufferedWriter(new FileWriter("mapelites.txt"));
+//		bw.write(map.toString());
+//		bw.close();
 		
 		
 		//time debug ending

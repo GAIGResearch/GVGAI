@@ -14,6 +14,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -44,9 +45,9 @@ public class Chromosome implements Comparable<Chromosome>{
 		static protected String _gameName;
 		static protected String _gamePath;
 		static protected String[] _allChar;
-		static protected List<GameEvent> _rules;
 		static protected EquationParser _eParser;
-
+		
+		static protected double _maxDepth; 
 	
 	/********************
 	 * OBJECT VARIABLES *
@@ -64,13 +65,12 @@ public class Chromosome implements Comparable<Chromosome>{
 
 	
 	//sets the static variables for the Chromsome class - shared between all chromosomes
-	public static void SetStaticVar(Random seed, String gn, String gp, String genFolder, List<GameEvent> rules, HashSet<String> varNames) {
+	public static void SetStaticVar(Random seed, String gn, String gp, String genFolder, List<GameEvent> rules, HashSet<String> varNames, double maxDepth) {
 		Chromosome._rnd = seed;
 		Chromosome._gameName = gn;
 		Chromosome._gamePath = gp;
-		Chromosome._rules = rules;
-		Chromosome._allChar = getMapChar();	
 		Chromosome._eParser = new EquationParser(new Random(), varNames, EvEqT.generateConstants(20, 1000));
+		Chromosome._maxDepth = maxDepth;
 	}
 	
 	
@@ -122,95 +122,46 @@ public class Chromosome implements Comparable<Chromosome>{
 			}
 	}
 	
-	
-
-	//returns the full level
-	private String fullLevel(String ph) {
-		String[] lines = new IO().readFile(ph);
-		return String.join("\n", lines);
-	}
-
-	//stripped from LevelGenMachine's loadGeneratedFile() method
-	private String parseLevel(String fullLevel) {
-		String level = "";
-
-		String[] lines = fullLevel.split("\n");
-		int mode = 0;
-		for(String line: lines) {
-			if(line.equals("LevelDescription")) {
-				mode = 1;
-			}else if(mode == 1){
-				level += (line + "\n");
-			}
-		}
-
-		return level;
-	}
-
-	//returns a list of characters used for the map (map character key)
-	private static String[] getMapChar() {
-		String[] lines = new IO().readFile(Chromosome._gamePath);
-
-		String charList = "";
-		int mode = 0;
-		for(String line: lines) {
-			line = line.trim();
-			if(line.equals("LevelMapping")) {
-				mode = 1;
-				continue;
-			}else if(line.contentEquals("InteractionSet")) {
-				mode = 0;
-				continue;
-			}
-			else if(mode == 1 && line.length() > 0) {
-				String l = line.trim();
-				charList += l.charAt(0);
-			}
-		}
-		charList += " ";
-		return charList.split("");
-	}
-
-
-
 
 	//TODO run a chromosome with an MCTS agent
 	public void calculateResults(String aiAgent, int id) throws IOException {
 
 		// run on all levels multiple times
-		for (int i = 0; i < 5; i++) {
-			String levelName = Chromosome._gamePath + "_lvl" + i + ".txt";
-			double[] results = ArcadeMachine.runOneGame(Chromosome._gamePath, levelName, false, aiAgent, null, Chromosome._rnd.nextInt(), 0);
+		double average = 0.0;
+		int levelCount = 5;
+		int playthroughCount = 5;
+		for (int i = 0; i < levelCount; i++) {
+			for(int j = 0; i < playthroughCount; j++) {
+				String levelName = Chromosome._gamePath.replace(".txt", "") + "_lvl" + i + ".txt";
+				double[] results = ArcadeMachine.runOneGame(Chromosome._gamePath, levelName, false, aiAgent, null, Chromosome._rnd.nextInt(), 0);
+				double win = results[0];
+				double score = results[1];
+				
+				double runFitness = win * 0.7 + score * 0.3;
+				
+				average += runFitness;
+			}
 		}
+		average = average / (levelCount * playthroughCount);
 
 		this._age++;					//increment the age (the chromosome is older now that it has been run)
-		setConstraints(results); 	//set the constraints (win or lose)
+		setConstraints(0); 	//set the constraints (win or lose)
 		//calculateRawFitness(results[2], this._textLevel);
-		this._fitness = calculateFitness();		//set the fitness
+		this._fitness = average;		//set the fitness
 		calculateDimensions(id);							//set the dimensions
-
 	}
 
 
 	/*
 	 * sets the constraints of the chromosome from the results of a run
-	 * sh-boom
 	 */
-	private void setConstraints(double[] results) {
+	private void setConstraints(double value) {
 		//just uses the win condition
-		//this._constraints = results[0];		
-
-		//constraints = (win / timeToWin) + ((1-win) * 0.25 / timeToSurvive)
-		//this._constraints = (results[0] / results[2]) + (((1-results[0]) * 0.25) / results[2]);
-		
-		//constraints = (win / (timeToWin dist from ideal time)) + ((1-win) * 0.25 / (timeToSurvive dist from ideal time))
-		int idealTime = 50;
-		this._constraints = (results[0] / (Math.abs(idealTime - results[2])+1)) + (((1-results[0]) * 0.25) / (Math.abs(idealTime - results[2])+1));
+		this._constraints = value;
 	}
 
 	//TODO runs a game of this and figures out how successful the agent was
-	private double calculateFitness() {
-
+	private double calculateFitness(double fitness) {
 
 		return 0.0;
 	}
@@ -221,10 +172,11 @@ public class Chromosome implements Comparable<Chromosome>{
 		//System.out.println("calculating dimensions...");
 		
 		//create a new dimension set based on the size of _rules and set all values to 0
-		this._dimensions = new int[_rules.size()];
+		this._dimensions = new int[1];
 		for(int d=0;d<this._dimensions.length;d++) {
 			this._dimensions[d] = 0;
 		}
+		
 		
 		
 //		try {

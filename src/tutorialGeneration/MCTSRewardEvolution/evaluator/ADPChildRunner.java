@@ -101,8 +101,7 @@ public class ADPChildRunner {
 		String gameLoc = gameList.get(gameIndex)[1];
 		
 		
-		CMEMapElites map = new CMEMapElites(gameName, gameLoc, seed, coinFlip, parameters.get("generatorFolder"), parameters.get("tutorialFolder"));
-		
+		CMEMapElites map = new CMEMapElites(gameName, gameLoc, seed, coinFlip, parameters.get("generatorFolder"), parameters.get("tutorialFolder"), parameters.get("maxTreeDepth"));
 		
 		/////////////		START OF TUTORIAL LEVEL GENERATION   	/////////////////
 		Chromosome[] chromosomes = null;
@@ -136,7 +135,7 @@ public class ADPChildRunner {
 				//System.out.println(placeholderFile);
 				for(Chromosome c:chromosomes) {
 				    System.out.println("\t C" + id + ": Running Chromosome number: \t" + ++index + "/" + size + " (#" + (index+(id*size)) + ")");
-				    c.calculateResults(runner, placeholderFile, id);
+				    c.calculateResults(runner, id);
 				}
 				
 				// 4.5c) delete old input files
