@@ -9,3 +9,4 @@ resultFolder = result/
 populationSize = 10
 coinFlip = 0.5
 exportFreq = 100
+maxTreeDepth = 10

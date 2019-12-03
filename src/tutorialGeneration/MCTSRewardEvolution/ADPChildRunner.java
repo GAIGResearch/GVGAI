@@ -1,4 +1,4 @@
-package tutorialGeneration.MCTSRewardEvolution.evaluator;
+package tutorialGeneration.MCTSRewardEvolution;
 
 //for use on the NYU HPC server
 
@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Random;
 
 import atdelphi_plus.evaluator.ChildEvaluator;
-import tutorialGeneration.MCTSRewardEvolution.CMEMapElites;
-import tutorialGeneration.MCTSRewardEvolution.Chromosome;
 
 public class ADPChildRunner {
 

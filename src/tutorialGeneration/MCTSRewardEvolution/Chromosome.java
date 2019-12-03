@@ -26,6 +26,8 @@ import org.json.simple.parser.ParseException;
 import tools.IO;
 import tracks.ArcadeMachine;
 import tracks.levelGeneration.LevelGenMachine;
+
+import tracks.singlePlayer.advanced.boostedMCTS.Agent;
 import video.basics.GameEvent;
 import eveqt.EquationNode;
 import eveqt.EquationParser;
@@ -46,7 +48,7 @@ public class Chromosome implements Comparable<Chromosome>{
 		static protected String _gamePath;
 		static protected String[] _allChar;
 		static protected EquationParser _eParser;
-		
+		static protected List<GameEvent> _rules;
 		static protected double _maxDepth; 
 	
 	/********************
@@ -71,6 +73,7 @@ public class Chromosome implements Comparable<Chromosome>{
 		Chromosome._gamePath = gp;
 		Chromosome._eParser = new EquationParser(new Random(), varNames, EvEqT.generateConstants(20, 1000));
 		Chromosome._maxDepth = maxDepth;
+		Chromosome._rules = rules;
 	}
 	
 	
@@ -123,7 +126,7 @@ public class Chromosome implements Comparable<Chromosome>{
 	}
 	
 
-	//TODO run a chromosome with an MCTS agent
+	// run a chromosome with an MCTS agent
 	public void calculateResults(String aiAgent, int id) throws IOException {
 
 		// run on all levels multiple times
@@ -133,10 +136,13 @@ public class Chromosome implements Comparable<Chromosome>{
 		for (int i = 0; i < levelCount; i++) {
 			for(int j = 0; i < playthroughCount; j++) {
 				String levelName = Chromosome._gamePath.replace(".txt", "") + "_lvl" + i + ".txt";
-				double[] results = ArcadeMachine.runOneGame(Chromosome._gamePath, levelName, false, aiAgent, null, Chromosome._rnd.nextInt(), 0);
+				Agent._rewardEquation = rewardEquation;
+				Agent._critPath = Chromosome._rules;
+				System.out.println("Playing! \n * Level: " + i + "\n * Playthrough: " + j);
+
+				double[] results = ArcadeMachine.runOneGame(Chromosome._gamePath, levelName, true, aiAgent, null, Chromosome._rnd.nextInt(), 0);
 				double win = results[0];
 				double score = results[1];
-				
 				double runFitness = win * 0.7 + score * 0.3;
 				
 				average += runFitness;
@@ -160,54 +166,17 @@ public class Chromosome implements Comparable<Chromosome>{
 		this._constraints = value;
 	}
 
-	//TODO runs a game of this and figures out how successful the agent was
-	private double calculateFitness(double fitness) {
-
-		return 0.0;
-	}
-
-
-	//TODO calculates chromosomes dimensions based on the depth of the equation tree
+	// calculates chromosomes dimensions based on the depth of the equation tree
 	private void calculateDimensions(int id) {
 		//System.out.println("calculating dimensions...");
 		
 		//create a new dimension set based on the size of _rules and set all values to 0
-		this._dimensions = new int[1];
+		this._dimensions = new int[(int) Chromosome._maxDepth];
 		for(int d=0;d<this._dimensions.length;d++) {
 			this._dimensions[d] = 0;
 		}
-		
-		
-		
-//		try {
-//
-//	        while(line != null) {
-//	        	//System.out.println(line);
-//	        	JSONObject obj = (JSONObject)new JSONParser().parse(line);
-//	        	String action = obj.get("interaction").toString();
-//	        	String sprite2 = obj.get("sprite2").toString();
-//	        	String sprite1 = obj.get("sprite1").toString();
-//	        	
-//	        	String[] tryKey = {action, sprite2, sprite1};
-//	        	
-//	        	//System.out.println(Arrays.deepToString(tryKey));
-//	        	
-//	        	//confirm the interaction in the dimension space
-//	        	int ruleIndex = hasRule(tryKey);
-//	        	if(ruleIndex >= 0) {
-//	        		_dimensions[ruleIndex] = 1;
-//	        	}
-//	        	line = interRead.readLine();
-//	        }
-//	        interRead.close();
-//		}catch(FileNotFoundException e) {
-//	        System.out.println("Unable to open file '" + Chromosome.outputInteractionJSON.replaceFirst("%", (""+id)) + "'");                
-//	    }
-//	    catch(IOException e) {
-//	        e.printStackTrace();
-//	    } catch (ParseException e) {
-//			e.printStackTrace();
-//		}
+		// dimension = tree depth
+		this._dimensions[this.rewardEquation.getTreeDepth() - 1] = 1;
 	}
 	
 	

@@ -1,4 +1,4 @@
-package tutorialGeneration.MCTSRewardEvolution.evaluator;
+package tutorialGeneration.MCTSRewardEvolution;
 
 import java.io.BufferedWriter;
 
@@ -15,8 +15,6 @@ import java.util.List;
 import java.util.Random;
 
 import atdelphi_plus.evaluator.ParentEvaluator;
-import tutorialGeneration.MCTSRewardEvolution.CMEMapElites;
-import tutorialGeneration.MCTSRewardEvolution.Chromosome;
 
 public class ADPParentRunner {
 
