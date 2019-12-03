@@ -85,7 +85,8 @@ public class SingleMCTSPlayer
     public int run(int number)
     {	        
     	if	(oneTree) {
-    		m_root.mctsSearch(improved, critPath);
+    		m_root.critPath = critPath;
+    		m_root.mctsSearch(improved);
     	} else {
 			long startTime = System.currentTimeMillis();
 
@@ -99,7 +100,8 @@ public class SingleMCTSPlayer
         		SingleTreeNode.deepestNode = null;
 	    	    init(a_gameState);
 	    		m_root.numIterations = this.numIterations;
-	    	    m_root.mctsSearch(improved, critPath);
+	    		m_root.critPath = critPath;
+	    	    m_root.mctsSearch(improved);
 	    	    int action = m_root.mostVisitedAction();
 //	    	    if(visualize) {
 //	    	    	return action;

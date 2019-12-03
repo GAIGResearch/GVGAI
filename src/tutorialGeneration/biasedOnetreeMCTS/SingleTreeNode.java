@@ -122,7 +122,7 @@ public class SingleTreeNode
      * @param elapsedTimer
      * @param improved
      */
-    public void mctsSearch(boolean improved, List<GameEvent> critPath2) {
+    public void mctsSearch(boolean improved) {
         int numIters = 0;
         bestNode = null;
         SingleTreeNode.deepest = 0;
@@ -130,7 +130,8 @@ public class SingleTreeNode
             StateObservation state = rootState.copy();
 
             SingleTreeNode selected = treePolicy(state);
-            selected.critPath = critPath2;
+            selected.critPath = this.critPath;
+            selected.rewardEquation = this.rewardEquation;
             double delta = selected.rollOut(state, improved);
             backUp(selected, delta);
 
@@ -139,7 +140,7 @@ public class SingleTreeNode
             }
             numIters++;
         }
-        System.out.println("Deepest Node: " + SingleTreeNode.deepest);
+//        System.out.println("Deepest Node: " + SingleTreeNode.deepest);
     }
     public SingleTreeNode getBestNode() {
     	return bestNode;
@@ -245,7 +246,7 @@ public class SingleTreeNode
         
         if(improved) {
         	// for a fixed bonus 
-        	if (this.rootNode.rewardEquation != null)
+        	if (this.rootNode.rewardEquation == null)
         		delta += getCritPathBonus(ogGameTick, state.getFirstTimeEventsHistory());
         	else 
         		delta = evaluateRewardEquation(state.getCurrentGameTickEvents());
@@ -284,11 +285,11 @@ public class SingleTreeNode
     	
     	HashMap mechanicMap = new HashMap<String, Integer>();
     	for(GameEvent event : this.critPath) {
-    		mechanicMap.put(event.toString(), 0);
+    		mechanicMap.put(event.toString(), 0.0);
     	}
 		for(int i = 0; i < interactionArray.length; i++) {
 			GameEvent interaction = (GameEvent) interactionArray[i];
-			mechanicMap.put(interaction.toString(), 1);
+			mechanicMap.put(interaction.toString(), 1.0);
 		}
     	
 		value = rewardEquation.evaluate(mechanicMap);
@@ -468,7 +469,7 @@ public class SingleTreeNode
                     selected = i;
                 }
                 
-                System.out.println(actions[i] + " - value: " + childValue);
+//                System.out.println(actions[i] + " - value: " + childValue);
 //                		+ " - critPath hits: " + children[i].bonus_count);
             }
         }

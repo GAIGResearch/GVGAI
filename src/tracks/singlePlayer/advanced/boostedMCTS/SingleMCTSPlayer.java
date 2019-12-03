@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import core.game.StateObservation;
+import eveqt.EquationNode;
 import ontology.Types;
 import tools.ElapsedCpuTimer;
 
@@ -31,8 +32,9 @@ public class SingleMCTSPlayer
     public Random m_rnd;
 
     public int num_actions;
-    public int numIterations = 2000;
+    public int numIterations = 250;
     public Types.ACTIONS[] actions;
+    public EquationNode rewardEquation;
     
     public ArrayList<GameEvent> critPath;
 
@@ -53,6 +55,7 @@ public class SingleMCTSPlayer
         //Set the game observation to a newly root node.
         //System.out.println("learning_style = " + learning_style);
         m_root = new SingleTreeNode(m_rnd, num_actions, numIterations, actions);
+
         m_root.rootState = a_gameState;
     }
 
@@ -63,8 +66,16 @@ public class SingleMCTSPlayer
      */
     public int run(ElapsedCpuTimer elapsedTimer)
     {
+        if(rewardEquation != null) {
+        	m_root.rewardEquation = rewardEquation;
+        	m_root.critPath = critPath;
+        }
         //Do the search within the available time.
-        m_root.mctsSearch(true, critPath);
+        m_root.mctsSearch(true);
+        
+        if (this.critPath != null) {
+        	m_root.critPath = this.critPath;
+        }
 
         //Determine the best action to take and return it.
         int action = m_root.mostVisitedAction();
