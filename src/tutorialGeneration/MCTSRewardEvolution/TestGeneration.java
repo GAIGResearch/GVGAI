@@ -62,7 +62,7 @@ public class TestGeneration{
 	public static void main(String[] args) throws IOException{
 		long startTime = System.nanoTime();
 		
-		CMEMapElites map = new CMEMapElites(gameName, gameLoc, seed, 0.5, null, "mechanics_zelda.json", "8");
+		CMEMapElites map = new CMEMapElites(gameName, gameLoc, seed, 0.5, "rules/mechanics_zelda.json", "8");
 		
 		
 		//initialize the 10 random chromosomes

@@ -11,7 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-import atdelphi_plus.evaluator.ChildEvaluator;
+import tutorialGeneration.MCTSRewardEvolution.evaluator.ChildEvaluator;
+
 
 public class ADPChildRunner {
 
@@ -99,7 +100,7 @@ public class ADPChildRunner {
 		String gameLoc = gameList.get(gameIndex)[1];
 		
 		
-		CMEMapElites map = new CMEMapElites(gameName, gameLoc, seed, coinFlip, parameters.get("generatorFolder"), parameters.get("tutorialFolder"), parameters.get("maxTreeDepth"));
+		CMEMapElites map = new CMEMapElites(gameName, gameLoc, seed, coinFlip, parameters.get("tutorialFile"), parameters.get("maxTreeDepth"));
 		
 		/////////////		START OF TUTORIAL LEVEL GENERATION   	/////////////////
 		Chromosome[] chromosomes = null;
@@ -129,8 +130,6 @@ public class ADPChildRunner {
 				
 				// 4c) Run simulation and calculate results
 				int index = 0;
-				String placeholderFile = parameters.get("generatorLevelFile").replaceFirst("%", (""+id));
-				//System.out.println(placeholderFile);
 				for(Chromosome c:chromosomes) {
 				    System.out.println("\t C" + id + ": Running Chromosome number: \t" + ++index + "/" + size + " (#" + (index+(id*size)) + ")");
 				    c.calculateResults(runner, id);

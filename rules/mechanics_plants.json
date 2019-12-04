@@ -1,0 +1,89 @@
+[
+    {
+        "condition": "Every 2 Ticks",
+        "action": "Spawn",
+        "sprite2": "pea",
+        "sprite1": "plant"
+    },
+    {
+        "condition": "Every Tick",
+        "action": "Spawn",
+        "sprite2": "axe",
+        "sprite1": "zombie"
+    },
+    {
+        "condition": "Every Tick",
+        "action": "Spawn",
+        "sprite2": "zombie",
+        "sprite1": "fastHell"
+    },
+    {
+        "condition": "Every Tick",
+        "action": "Spawn",
+        "sprite2": "zombie",
+        "sprite1": "slowHell"
+    },
+    {
+        "condition": "Press Space",
+        "action": "Spawn",
+        "sprite1": "avatar"
+    },
+    {
+        "condition": "Collides",
+        "action": "StepBack",
+        "sprite2": "wall",
+        "sprite1": "avatar"
+    },
+    {
+        "condition": "Collides",
+        "action": "TransformTo",
+        "sprite2": "axe",
+        "sprite1": "plant"
+    },
+    {
+        "condition": "Collides",
+        "action": "StepBack",
+        "sprite2": "wall",
+        "sprite1": "zombie"
+    },
+    {
+        "condition": "Collides",
+        "action": "TransformTo",
+        "sprite2": "goal",
+        "sprite1": "zombie"
+    },
+    {
+        "condition": "Collides",
+        "action": "KillBoth",
+        "sprite2": "pea",
+        "sprite1": "zombie"
+    },
+    {
+        "condition": "Collides",
+        "action": "KillSprite",
+        "sprite2": "tomb",
+        "sprite1": "pea"
+    },
+    {
+        "condition": "Collides",
+        "action": "TransformTo",
+        "sprite2": "marsh",
+        "sprite1": "shovel"
+    },
+    {
+        "condition": "Timeout",
+        "action": "Win",
+        "sprite2": "avatar",
+        "sprite1": "Time"
+    },
+    {
+        "condition": "MultiSpriteCounter",
+        "action": "Lose",
+        "sprite1": "eatenBrains"
+    },
+    {
+        "condition": "SpriteCounter",
+        "action": "Lose",
+        "sprite1": "avatar"
+    }
+]

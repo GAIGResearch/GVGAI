@@ -1,0 +1,20 @@
+[
+    {
+        "condition": "MultiSpriteCounter",
+        "action": "Win",
+        "sprite2": "powerblib",
+        "sprite1": "blib"
+    },
+    {
+        "condition": "Collides",
+        "action": "Spawn",
+        "sprite2": "avatar",
+        "sprite1": "powerblib"
+    },
+    {
+        "condition": "Collides",
+        "action": "Spawn",
+        "sprite2": "avatar",
+        "sprite1": "blib"
+    }
+]

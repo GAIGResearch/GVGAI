@@ -1,0 +1,8 @@
+[
+    {
+        "condition": "Timeout",
+        "action": "Win",
+        "sprite2": "avatar",
+        "sprite1": "Time"
+    }
+]

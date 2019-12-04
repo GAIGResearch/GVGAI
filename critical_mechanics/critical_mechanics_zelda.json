@@ -1,0 +1,19 @@
+[
+    {
+        "condition": "SpriteCounter",
+        "action": "Win",
+        "sprite1": "goal"
+    },
+    {
+        "condition": "Collides",
+        "action": "KillSprite",
+        "sprite2": "withkey",
+        "sprite1": "goal"
+    },
+    {
+        "condition": "Collides",
+        "action": "TransformTo",
+        "sprite2": "key",
+        "sprite1": "nokey"
+    }
+]

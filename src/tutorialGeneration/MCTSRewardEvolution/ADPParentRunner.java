@@ -14,7 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-import atdelphi_plus.evaluator.ParentEvaluator;
+import tutorialGeneration.MCTSRewardEvolution.evaluator.ParentEvaluator;
+
 
 public class ADPParentRunner {
 
@@ -84,7 +85,7 @@ public class ADPParentRunner {
 		//import the parameter values
 		HashMap<String, String> parameters = null;
 		try {
-			parameters = readParameters("AtDelphiPlusParameters.txt");
+			parameters = readParameters("MCTSRewardEvolutionParameters.txt");
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
@@ -110,7 +111,7 @@ public class ADPParentRunner {
 		String gameLoc = gameList.get(gameIndex)[1];
 		
 		//setup map elites and the first chromosomes
-		CMEMapElites map = new CMEMapElites(gameName, gameLoc, seed, coinFlip, parameters.get("generatorFolder"), parameters.get("tutorialFolder"), parameters.get("maxTreeDepth"));
+		CMEMapElites map = new CMEMapElites(gameName, gameLoc, seed, coinFlip, parameters.get("tutorialFile"), parameters.get("maxTreeDepth"));
 		ParentEvaluator parent = new ParentEvaluator(parameters.get("inputFolder"), parameters.get("outputFolder"));
 		System.out.println("First Batch of Chromosomes");
 		Chromosome[] chromosomes = map.randomChromosomes(popSize, parameters.get("generatorFolder") + "init_ph.txt");

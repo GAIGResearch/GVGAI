@@ -67,7 +67,7 @@ public class Chromosome implements Comparable<Chromosome>{
 
 	
 	//sets the static variables for the Chromsome class - shared between all chromosomes
-	public static void SetStaticVar(Random seed, String gn, String gp, String genFolder, List<GameEvent> rules, HashSet<String> varNames, double maxDepth) {
+	public static void SetStaticVar(Random seed, String gn, String gp, List<GameEvent> rules, HashSet<String> varNames, double maxDepth) {
 		Chromosome._rnd = seed;
 		Chromosome._gameName = gn;
 		Chromosome._gamePath = gp;
@@ -131,10 +131,10 @@ public class Chromosome implements Comparable<Chromosome>{
 
 		// run on all levels multiple times
 		double average = 0.0;
-		int levelCount = 5;
-		int playthroughCount = 5;
+		int levelCount = 1;
+		int playthroughCount = 1;
 		for (int i = 0; i < levelCount; i++) {
-			for(int j = 0; i < playthroughCount; j++) {
+			for(int j = 0; j < playthroughCount; j++) {
 				String levelName = Chromosome._gamePath.replace(".txt", "") + "_lvl" + i + ".txt";
 				Agent._rewardEquation = rewardEquation;
 				Agent._critPath = Chromosome._rules;
@@ -297,6 +297,11 @@ public class Chromosome implements Comparable<Chromosome>{
 
 	// TODO implement reading in reward 
 	public void fileInit(String string) {
-		
+		// read in reward equation into this chromosome's reward equation
+		try {
+			this.rewardEquation = Chromosome._eParser.parse(string.split("\n")[1]);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

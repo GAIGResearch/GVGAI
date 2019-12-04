@@ -1102,7 +1102,7 @@ public abstract class Game {
 			}
 		}
 
-		storeActionsAndInteractions();
+//		storeActionsAndInteractions();
 
 		if (isHuman && !wi.windowClosed && CompetitionParameters.killWindowOnEnd) {
 			if (CompetitionParameters.dialogBoxOnStartAndEnd) {
@@ -1362,8 +1362,7 @@ public abstract class Game {
 			File f = new File(InteractionStaticData.gameName, InteractionStaticData.agentName + "_" + InteractionStaticData.levelCount + "_" + InteractionStaticData.playthroughCount +
 					"_result.json");
 
-			storeGameSimulationResult.
-			writeAllInfo(f.toString());
+//			storeGameSimulationResult.writeAllInfo(f.toString());
 			InteractionStaticData.resultsCounter += 1;
 		}
 		 

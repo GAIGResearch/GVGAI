@@ -37,13 +37,13 @@ public class CMEMapElites {
 	private List<GameEvent> rules;
 	
 	
-	public CMEMapElites(String gn, String gl, Random seed, double coinFlip, String genFolder, String mechanicsFile, String maxTreeDepth) {
+	public CMEMapElites(String gn, String gl, Random seed, double coinFlip, String mechanicsFile, String maxTreeDepth) {
 		this._gameName = gn;
 		this._coinFlip = coinFlip;
 		
 		rules = parseTutorialRules(mechanicsFile);
 		varNames = this.convertToRuleNames(rules);
-		Chromosome.SetStaticVar(seed, gn, gl, genFolder, rules, varNames, Double.parseDouble(maxTreeDepth));
+		Chromosome.SetStaticVar(seed, gn, gl, rules, varNames, Double.parseDouble(maxTreeDepth));
 	}
 	
 	//returns a batch of randomly created chromosomes
