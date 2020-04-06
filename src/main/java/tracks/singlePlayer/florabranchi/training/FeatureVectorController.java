@@ -1,7 +1,11 @@
 package tracks.singlePlayer.florabranchi.training;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -11,6 +15,8 @@ import core.game.StateObservation;
 import tools.Vector2d;
 
 public class FeatureVectorController {
+
+  private List<PossibleHarmfulSprite> possibleHarmfulSprites = new ArrayList<>();
 
   class ObservableData {
 
@@ -57,11 +63,16 @@ public class FeatureVectorController {
 
   private static final String TOTAL_OBSERVABLE = "TOTAL_%s";
   private static final String TOTAL_OBSERVABLE_DISTANCE = "TOTAL_%s_DST";
-  private static final String CLOSEST_OBSERVABLE_TYPE = "CLOSEST_%s_TYPE";
   private static final String CLOSEST_OBSERVABLE_X = "CLOSEST_%s_X";
   private static final String CLOSEST_OBSERVABLE_Y = "CLOSEST_%s_Y";
   private static final String AVERAGE_DISTANCE_TO_OBSERVABLE = "AVG_DST_TO_%s";
 
+  private static final String DST_TO_CLOSEST_HARM = "DST_TO_CLOSEST_HARM";
+  private static final String POSSIBLE_HARM_X_AXIS = "POSSIBLE_HARM_X_AXIS";
+  private static final String POSSIBLE_HARM_Y_AXIS_TO_LEFT = "POSSIBLE_HARM_Y_AXIS_TO_LEFT";
+  private static final String POSSIBLE_HARM_Y_AXIS_TO_RIGHT = "POSSIBLE_HARM_Y_AXIS_TO_RIGHT";
+
+  private static final String CLOSEST_OBSERVABLE_TYPE = "CLOSEST_%s_TYPE";
 
   public static TreeSet<String> availableProperties = new TreeSet<>();
 
@@ -78,6 +89,10 @@ public class FeatureVectorController {
     return String.format(propertyType, objectType);
   }
 
+  public void injectHarmfulList(final List<PossibleHarmfulSprite> list) {
+    this.possibleHarmfulSprites = list;
+  }
+
   private TreeMap<String, Double> propertyValueMap = new TreeMap<>();
 
   static {
@@ -89,6 +104,11 @@ public class FeatureVectorController {
     availableProperties.add(PLAYER_RESOURCES);
     availableProperties.add(PLAYER_X);
     availableProperties.add(PLAYER_Y);
+
+    availableProperties.add(DST_TO_CLOSEST_HARM);
+    availableProperties.add(POSSIBLE_HARM_X_AXIS);
+    availableProperties.add(POSSIBLE_HARM_Y_AXIS_TO_RIGHT);
+    availableProperties.add(POSSIBLE_HARM_Y_AXIS_TO_LEFT);
 
     addGeneratedProperties();
   }
@@ -159,7 +179,6 @@ public class FeatureVectorController {
     double avatarRemainingLife = avatarHealth == 0 ? 100 : (double) totalAvatarHealth / avatarHealth;
     addToPropertyMap(propertyMap, AVATAR_HEALTH, avatarRemainingLife, totalAvatarHealth);
 
-    // Get Avatar created sprites
 
     // NPCS
     final ArrayList<Observation>[] npcPositions = stateObservation.getNPCPositions();
@@ -174,10 +193,35 @@ public class FeatureVectorController {
     }
 
     // MOVABLES
-    final ArrayList<Observation>[] movablePositions = stateObservation.getMovablePositions();
+    final ArrayList<Observation>[] movablePositions = stateObservation.getMovablePositions(avatarPosition);
     if (movablePositions != null) {
       addObservableObjectProperties(MOVABLES, movablePositions, avatarPosition, propertyMap, maxDistance, maxTotalDistance);
+
+      // Check for harm movables
+      final List<List<Observation>> observations = filterHarmObservablesByAvatarPosition(movablePositions, avatarPosition);
+
+      if (!observations.isEmpty() && !observations.get(0).isEmpty()) {
+        System.out.println("HARMMMMM");
+        addToPropertyMap(propertyMap, POSSIBLE_HARM_X_AXIS, 1, 1);
+      }
+
+/*      if (!observations.isEmpty() && !observations.get(1).isEmpty()) {
+        final Observation closestMovableHarmwWithSameY = observations.get(1).get(0);
+        addToPropertyMap(propertyMap, DST_TO_CLOSEST_HARM, closestMovableHarmwWithSameY.position.dist(avatarPosition), maxDistance);
+
+        if (avatarPosition.x > closestMovableHarmwWithSameY.position.x) {
+
+          addToPropertyMap(propertyMap, POSSIBLE_HARM_Y_AXIS_TO_LEFT, 1, 1);
+        } else {
+          System.out.println("HARM IN right");
+          addToPropertyMap(propertyMap, POSSIBLE_HARM_Y_AXIS_TO_RIGHT, 1, 1);
+        }*/
+      // }
+
     }
+
+    // Get possible harm sprites
+
 
     // RESOURCES
     final ArrayList<Observation>[] resourcesPositions = stateObservation.getResourcesPositions();
@@ -207,6 +251,54 @@ public class FeatureVectorController {
 
 
     return propertyMap;
+  }
+
+  public List<List<Observation>> filterHarmObservablesByAvatarPosition(final ArrayList<Observation>[] observables,
+                                                                       final Vector2d avatarPosition) {
+    List<Observation> possibleHarmInX = new ArrayList<>();
+    List<Observation> possibleHarmInY = new ArrayList<>();
+
+    Arrays.stream(observables).forEach(
+        list -> {
+          list.forEach(
+              element -> {
+                if (possibleHarmfulSprites.contains(new PossibleHarmfulSprite(element.category, element.itype))) {
+
+                  if (isPossibleThreatInX(avatarPosition, element.position, 10)) {
+                    possibleHarmInX.add(element);
+                  }
+
+/*                  if (isPossibleThreatInY(avatarPosition, element.position, 10)) {
+                    possibleHarmInY.add(element);
+                  }*/
+                }
+              }
+          );
+        }
+    );
+
+    List<List<Observation>> results = new LinkedList<>();
+    results.add(possibleHarmInX);
+    //results.add(possibleHarmInY);
+
+    return results;
+  }
+
+  private boolean isPossibleThreatInX(final Vector2d avatar,
+                                      final Vector2d object,
+                                      final int range) {
+
+    double minValue = avatar.x - range;
+    double maxValue = avatar.x + range;
+    return object.x > minValue && object.x < maxValue;
+  }
+
+  private boolean isPossibleThreatInY(final Vector2d avatar,
+                                      final Vector2d object,
+                                      final int range) {
+    double minValue = avatar.y - range;
+    double maxValue = avatar.y + range;
+    return object.y > minValue && object.y < maxValue;
   }
 
 
@@ -260,6 +352,51 @@ public class FeatureVectorController {
 
   public int getSize() {
     return availableProperties.size();
+  }
+
+  public Map<Integer, List<Observation>> castAllObservationToMapOfTypes(final StateObservation stateObservation) {
+
+    Map<Integer, List<Observation>> castedMap = new HashMap<>();
+    final ArrayList<Observation>[][] observationGrid = stateObservation.getObservationGrid();
+    for (int i = 0; i < observationGrid.length - 1; i++) {
+      for (int j = 0; j < observationGrid[0].length - 1; j++) {
+        final ArrayList<Observation> observations = observationGrid[i][j];
+        observations.forEach(entry -> {
+          addElementToMap(entry.category, entry, castedMap);
+          if (possibleHarmfulSprites.contains(entry.itype)) {
+            System.out.println("got it");
+          }
+        });
+      }
+    }
+
+    return castedMap;
+  }
+
+  public Map<Integer, Observation> castAllObservationToMapOfIds(final StateObservation stateObservation) {
+
+    Map<Integer, Observation> castedMap = new HashMap<>();
+    final ArrayList<Observation>[][] observationGrid = stateObservation.getObservationGrid();
+    for (int i = 0; i < observationGrid.length - 1; i++) {
+      for (int j = 0; j < observationGrid[0].length - 1; j++) {
+        final ArrayList<Observation> observations = observationGrid[i][j];
+        observations.forEach(entry -> castedMap.put(entry.obsID, entry));
+      }
+    }
+
+    return castedMap;
+  }
+
+  public void addElementToMap(final int category,
+                              final Observation object,
+                              final Map<Integer, List<Observation>> map) {
+    if (map.containsKey(category)) {
+      map.get(category).add(object);
+    } else {
+      List<Observation> newList = new ArrayList<>();
+      newList.add(object);
+      map.put(category, newList);
+    }
   }
 
 

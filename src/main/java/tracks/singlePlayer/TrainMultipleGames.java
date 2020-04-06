@@ -25,14 +25,14 @@ public class TrainMultipleGames {
     boolean visuals = false;
     int seed = new Random().nextInt();
 
-    String floraController = "tracks.singlePlayer.florabranchi.agents.OfflineTrainerAgent";
+    String floraController = "tracks.singlePlayer.florabranchi.agents.SarsaAgent";
 
     // Load available games
     String spGamesCollection = "examples/all_games_sp.csv";
     String[][] games = Utils.readGames(spGamesCollection);
 
     // TOTAL GAMES
-    final int totalGames = 600;
+    final int totalGames = 200;
 
 
     // Game and level to play

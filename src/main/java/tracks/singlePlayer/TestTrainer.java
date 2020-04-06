@@ -25,7 +25,7 @@ public class TestTrainer {
     //boolean visuals = false;
     int seed = new Random().nextInt();
 
-    String floraController = "tracks.singlePlayer.florabranchi.agents.OfflineTrainerAgent";
+    String floraController = "tracks.singlePlayer.florabranchi.agents.SarsaAgent";
 
     // Load available games
     String spGamesCollection = "examples/all_games_sp.csv";

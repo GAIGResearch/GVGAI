@@ -19,6 +19,8 @@ import javax.swing.*;
 
 import core.game.StateObservation;
 import ontology.Types;
+import tracks.singlePlayer.florabranchi.persistence.weights.OfflineTrainerResults;
+import tracks.singlePlayer.florabranchi.persistence.weights.TrainingWeights;
 
 public class LearningAgentDebug {
 
@@ -300,7 +302,7 @@ public class LearningAgentDebug {
     final XYSeries series = new XYSeries("Score over Episodes");
 
     // Show only last n elements
-    int elementsToShow = 50;
+    int elementsToShow = 300;
     final int size = rewardPerEpisodeMap.size();
 
     int firstElement = 0;
