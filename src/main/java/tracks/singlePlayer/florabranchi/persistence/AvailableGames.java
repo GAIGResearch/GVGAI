@@ -1,8 +1,16 @@
 package tracks.singlePlayer.florabranchi.persistence;
 
 public enum AvailableGames {
-  ALIENS(1, "aliens"),
-  DRAGONS(2, "dragons");
+  ALIENS(0, "aliens"),
+  DRAGONS(1, "dragons"),
+  KATANA(2, "katana"),
+  KNIGHT_MAZE(3, "knight_maze"),
+  WEIRD_MAZE(4, "weird_maze"),
+  DWARF_MAZE(5, "dward_maze"),
+  ZELDA(12, "zelda"),
+  BUTTERFLIES(13, "butterflies"),
+  RACE(15, "race"),
+  SPACESHIP(21, "spaceship");
 
 
   private Integer id;

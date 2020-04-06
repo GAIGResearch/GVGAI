@@ -27,6 +27,7 @@ production/
 *.html
 *.gif
 *.pyc
+*.png
 
 clients/GVGAI-JavaClient/src/sampleRandom.zip
 
@@ -59,3 +60,4 @@ clients/GVGAI-PythonClient/src/logs/clientLog.txt
 examples/super_secret
 src/META-INF/MANIFEST.MF
 src/rs/META-INF/MANIFEST.MF
+*.png

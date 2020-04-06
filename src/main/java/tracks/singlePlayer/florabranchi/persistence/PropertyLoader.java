@@ -18,6 +18,10 @@ public class PropertyLoader {
   public boolean VISUALS;
   public boolean SAVE_RESULTS;
 
+  public float SARSA_ALFA;
+  public float SARSA_GAMMA;
+  public float SARSA_EPISLON;
+
   public PropertyLoader(final String configFile) throws IOException {
 
     InputStream inputStream;
@@ -38,6 +42,17 @@ public class PropertyLoader {
     EPISODES = Integer.parseInt(prop.getProperty("LEVEL"));
     LEVEL = Integer.parseInt(prop.getProperty("EPISODES"));
 
+    // Agent
+    AGENT = castAgentPath(prop.getProperty("AGENT"));
+    VISUALS = Boolean.parseBoolean(prop.getProperty("VISUALS"));
+
+    // Monte Carlo properties, if required
+
+    // Sarsa properties, if required
+    SARSA_ALFA = Float.parseFloat(prop.getProperty("EPISODES"));
+    SARSA_GAMMA = Float.parseFloat(prop.getProperty("EPISODES"));
+    SARSA_EPISLON = Float.parseFloat(prop.getProperty("EPISODES"));
+
 
   }
 
@@ -48,6 +63,16 @@ public class PropertyLoader {
       return 1;
     }
     return Objects.requireNonNull(castedGame).getId();
+  }
+
+  public String castAgentPath(final String agentName) {
+    switch (agentName) {
+      case "sarsa":
+        return "tracks.singlePlayer.florabranchi.agents.SarsaAgent";
+      case "monte_carlo":
+      default:
+        return "tracks.singlePlayer.florabranchi.agents.MonteCarloTreeAgent";
+    }
   }
 
 }
