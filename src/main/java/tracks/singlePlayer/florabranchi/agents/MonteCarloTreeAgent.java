@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import core.game.StateObservation;
-import core.player.AbstractPlayer;
 import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
 import tracks.singlePlayer.florabranchi.tree.TreeController;
@@ -13,9 +12,9 @@ import tracks.singlePlayer.florabranchi.tree.TreeNode;
 /**
  * Flora Branchi (florabranchi@gmail.com) September 2019
  */
-public class MonteCarloTreeAgent extends AbstractPlayer {
+public class MonteCarloTreeAgent extends AbstractAgent {
 
-  private final TreeController treeController;
+  private TreeController treeController;
   /**
    * Random generator for the agent.
    */
@@ -26,6 +25,8 @@ public class MonteCarloTreeAgent extends AbstractPlayer {
    */
   protected ArrayList<ACTIONS> actions;
 
+  protected boolean showTree;
+
   /**
    * ' initialize all variables for the agent
    *
@@ -34,9 +35,21 @@ public class MonteCarloTreeAgent extends AbstractPlayer {
    */
   public MonteCarloTreeAgent(final StateObservation stateObs,
                              final ElapsedCpuTimer elapsedTimer) {
+    super(stateObs, elapsedTimer);
+    showTree = propertyLoader.SHOW_TREE;
+
     randomGenerator = new Random();
     actions = stateObs.getAvailableActions();
-    treeController = new TreeController(stateObs);
+    treeController = new TreeController(stateObs, displayDebug());
+  }
+
+  protected boolean displayDebug() {
+    return false;
+  }
+
+  @Override
+  protected String getPropertyPath() {
+    return "mcts.properties";
   }
 
 

@@ -1,20 +1,16 @@
 package tracks.singlePlayer.florabranchi.agents;
 
-import static tracks.singlePlayer.florabranchi.agents.config.SarsaConfig.ALFA;
-import static tracks.singlePlayer.florabranchi.agents.config.SarsaConfig.EXPLORATION_EPSILON;
-import static tracks.singlePlayer.florabranchi.agents.config.SarsaConfig.GAMMA;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import core.game.Event;
 import core.game.Observation;
 import core.game.StateObservation;
-import core.player.AbstractPlayer;
 import ontology.Types;
 import tools.ElapsedCpuTimer;
 import tracks.singlePlayer.florabranchi.GameResults;
@@ -25,9 +21,15 @@ import tracks.singlePlayer.florabranchi.training.FeatureVectorController;
 import tracks.singlePlayer.florabranchi.training.LearningAgentDebug;
 import tracks.singlePlayer.florabranchi.training.PossibleHarmfulSprite;
 
-public class SarsaAgent extends AbstractPlayer {
+public class SarsaAgent extends AbstractAgent {
 
-  private final LearningAgentDebug learningAgentDebug;
+  public double ALFA = 0.3;
+  public double GAMMA = 0.9;
+  public double EXPLORATION_EPSILON = 10;
+
+  protected final static Logger LOGGER = Logger.getLogger("GVGAI_BOT");
+
+  private LearningAgentDebug learningAgentDebug;
 
   private FeatureVectorController featureVectorController;
 
@@ -46,11 +48,12 @@ public class SarsaAgent extends AbstractPlayer {
   private double previousScore;
   private int previousEnemyCount;
 
-
   public SarsaAgent(final StateObservation stateObs,
                     final ElapsedCpuTimer elapsedTimer) {
-    super();
-
+    super(stateObs, elapsedTimer);
+    ALFA = propertyLoader.SARSA_ALFA;
+    GAMMA = propertyLoader.SARSA_GAMMA;
+    EXPLORATION_EPSILON = propertyLoader.SARSA_EPSILON;
     featureVectorController = new FeatureVectorController();
     initializeTrainingWeightVector(featureVectorController.getSize());
 
@@ -58,8 +61,17 @@ public class SarsaAgent extends AbstractPlayer {
       featureVectorController.injectHarmfulList(previousResults.getWeightVector().getPossibleHarmfulElements());
     }
 
-    learningAgentDebug = new LearningAgentDebug(stateObs, previousResults);
+    if (displayDebug()) {
+      learningAgentDebug = new LearningAgentDebug(stateObs, previousResults);
+    }
+  }
 
+  protected boolean displayDebug() {
+    return true;
+  }
+
+  protected String getPropertyPath() {
+    return "sarsa.properties";
   }
 
   @Override
@@ -91,13 +103,16 @@ public class SarsaAgent extends AbstractPlayer {
       harmfulSpriteId = last.passiveSpriteId;
 
       if (integerListMap.containsKey(harmfulSpriteId)) {
+        LOGGER.info("Game finished due to possible harmful sprite");
         final Observation observations = integerListMap.get(harmfulSpriteId);
         possibleHarmfulSprite = new PossibleHarmfulSprite(observations.category, observations.itype);
       }
 
+      LOGGER.info(String.format("Agent LOST - score: [%s]", stateObs.getGameScore()));
       persistenceController.addLog("Player lost");
     } else {
       won = true;
+      LOGGER.info(String.format("Agent WON - score: [%s]", stateObs.getGameScore()));
       persistenceController.addLog("Player won");
     }
 
@@ -109,7 +124,9 @@ public class SarsaAgent extends AbstractPlayer {
     logCurrentWeights();
     persistStatisticsAndWeights(won, finalScore, possibleHarmfulSprite);
 
-    learningAgentDebug.closeJframe();
+    if (learningAgentDebug != null) {
+      learningAgentDebug.closeJframe();
+    }
     super.result(stateObs, elapsedCpuTimer);
   }
 
@@ -225,7 +242,7 @@ public class SarsaAgent extends AbstractPlayer {
 
     final TreeMap<String, Double> featuresForCurrState = featureVectorController.extractFeatureVector(stateObs);
 
-    if (learningAgentDebug.showJframe) {
+    if (learningAgentDebug != null && learningAgentDebug.showJframe) {
       learningAgentDebug.writeResultsToUi(featuresForCurrState, selectedAction, trainingWeights, previousResults.getEpisodeTotalScoreMap());
     }
 
@@ -315,7 +332,7 @@ public class SarsaAgent extends AbstractPlayer {
         bestAction = action;
 
         // Update Q Values in UI
-        if (learningAgentDebug.showJframe) {
+        if (learningAgentDebug != null && learningAgentDebug.showJframe) {
           learningAgentDebug.updateQLabel(action, maxValue);
         }
       }

@@ -9,12 +9,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import core.game.Observation;
 import core.game.StateObservation;
 import tools.Vector2d;
 
 public class FeatureVectorController {
+
+  private final static Logger LOGGER = Logger.getLogger("GVGAI_BOT");
 
   private List<PossibleHarmfulSprite> possibleHarmfulSprites = new ArrayList<>();
 
@@ -75,9 +78,22 @@ public class FeatureVectorController {
   private static final String CLOSEST_OBSERVABLE_TYPE = "CLOSEST_%s_TYPE";
 
   public static TreeSet<String> availableProperties = new TreeSet<>();
+  public static TreeSet<String> shownProperties = new TreeSet<>();
 
   public static Set<String> getAvailableProperties() {
     return availableProperties;
+  }
+
+  public static TreeSet<String> getShownProperties() {
+    return shownProperties;
+  }
+
+  static {
+    shownProperties.add(GAME_TICK);
+    shownProperties.add(GAME_SCORE);
+    shownProperties.add(PLAYER_X);
+    shownProperties.add(PLAYER_Y);
+    shownProperties.add(GAME_TICK);
   }
 
   public TreeMap<String, Double> getPropertyValueMap() {
@@ -91,6 +107,8 @@ public class FeatureVectorController {
 
   public void injectHarmfulList(final List<PossibleHarmfulSprite> list) {
     this.possibleHarmfulSprites = list;
+    LOGGER.info("Injected harmful sprites");
+    LOGGER.info(possibleHarmfulSprites.toString());
   }
 
   private TreeMap<String, Double> propertyValueMap = new TreeMap<>();
@@ -201,22 +219,26 @@ public class FeatureVectorController {
       final List<List<Observation>> observations = filterHarmObservablesByAvatarPosition(movablePositions, avatarPosition);
 
       if (!observations.isEmpty() && !observations.get(0).isEmpty()) {
-        System.out.println("HARMMMMM");
+        //LOGGER.log(Level.INFO, "POSSIBLE HARM IN X");
+        final Observation closestMovableHarmwWithSameX = observations.get(0).get(0);
+        addToPropertyMap(propertyMap, DST_TO_CLOSEST_HARM, closestMovableHarmwWithSameX.position.dist(avatarPosition), maxDistance);
         addToPropertyMap(propertyMap, POSSIBLE_HARM_X_AXIS, 1, 1);
       }
 
-/*      if (!observations.isEmpty() && !observations.get(1).isEmpty()) {
+      // Logic for enemies in Y axis
+      if (!observations.isEmpty() && observations.size() > 1 && !observations.get(1).isEmpty()) {
+        //LOGGER.log(Level.INFO, "POSSIBLE HARM IN Y");
         final Observation closestMovableHarmwWithSameY = observations.get(1).get(0);
         addToPropertyMap(propertyMap, DST_TO_CLOSEST_HARM, closestMovableHarmwWithSameY.position.dist(avatarPosition), maxDistance);
 
+        // Find out harm direction
         if (avatarPosition.x > closestMovableHarmwWithSameY.position.x) {
-
           addToPropertyMap(propertyMap, POSSIBLE_HARM_Y_AXIS_TO_LEFT, 1, 1);
         } else {
           System.out.println("HARM IN right");
           addToPropertyMap(propertyMap, POSSIBLE_HARM_Y_AXIS_TO_RIGHT, 1, 1);
-        }*/
-      // }
+        }
+      }
 
     }
 
@@ -268,9 +290,9 @@ public class FeatureVectorController {
                     possibleHarmInX.add(element);
                   }
 
-/*                  if (isPossibleThreatInY(avatarPosition, element.position, 10)) {
+                  if (isPossibleThreatInY(avatarPosition, element.position, 20)) {
                     possibleHarmInY.add(element);
-                  }*/
+                  }
                 }
               }
           );
@@ -288,7 +310,7 @@ public class FeatureVectorController {
                                       final Vector2d object,
                                       final int range) {
 
-    double minValue = avatar.x - range;
+    double minValue = Math.min(0, avatar.x - range);
     double maxValue = avatar.x + range;
     return object.x > minValue && object.x < maxValue;
   }
@@ -296,7 +318,7 @@ public class FeatureVectorController {
   private boolean isPossibleThreatInY(final Vector2d avatar,
                                       final Vector2d object,
                                       final int range) {
-    double minValue = avatar.y - range;
+    double minValue = Math.min(0, avatar.y - range);
     double maxValue = avatar.y + range;
     return object.y > minValue && object.y < maxValue;
   }
@@ -336,13 +358,15 @@ public class FeatureVectorController {
                                final String property,
                                final double value,
                                final double maxValue) {
-    if (value / maxValue > 1) {
+    final double featureNormalizedValue = getFeatureNormalizedValue(property, value, maxValue);
+    if (featureNormalizedValue > 1) {
+      System.out.println(String.format("Value %s, Max %s", value, maxValue));
       System.out.println("------- ERROR FEATURE VALUE > 1 ");
       System.out.println(property);
       System.out.println(value);
       System.out.println(maxValue);
     }
-    propertyMap.put(property, value / maxValue);
+    propertyMap.put(property, featureNormalizedValue);
   }
 
   public Double getFeatureValue(final String property) {
@@ -397,6 +421,14 @@ public class FeatureVectorController {
       newList.add(object);
       map.put(category, newList);
     }
+  }
+
+  public double getFeatureNormalizedValue(final String property, double value,
+                                          double max) {
+    double min = 0;
+    //System.out.println(property);
+    //System.out.println(String.format("Value %s, Max %s", value, max));
+    return (value - min) / (max - min);
   }
 
 

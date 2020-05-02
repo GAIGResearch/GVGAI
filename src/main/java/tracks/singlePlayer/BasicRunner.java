@@ -1,10 +1,10 @@
 package tracks.singlePlayer;
 
-import static com.sun.xml.internal.ws.spi.db.BindingContextFactory.LOGGER;
+import static java.util.logging.Level.INFO;
 
 import java.io.IOException;
 import java.util.Random;
-import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import tools.Utils;
 import tracks.ArcadeMachine;
@@ -15,13 +15,18 @@ import tracks.singlePlayer.florabranchi.persistence.PropertyLoader;
  */
 public class BasicRunner {
 
+
+  private final static Logger LOGGER = Logger.getLogger("GVGAI_BOT");
+
+
   public static void main(String[] args) throws IOException {
 
     PropertyLoader propertyLoader = new PropertyLoader(args[0]);
-    LOGGER.setLevel(Level.INFO);
+
 
     //Game settings
-
+    LOGGER.setLevel(propertyLoader.LOGGER_LEVEL);
+    LOGGER.log(INFO, "Starting game....");
     final boolean saveActions = false;
 
     //boolean visuals = false;
@@ -43,6 +48,7 @@ public class BasicRunner {
     String game = games[gameIdx][0];
     String level1 = game.replace(gameName, gameName + "_lvl" + levelIdx);
 
+
     // where to record the actions
     // executed. null if not to save.
     String recordActionsFile = null;
@@ -50,6 +56,15 @@ public class BasicRunner {
       recordActionsFile = "botLogs/actions_" + gameName + "_lvl" + levelIdx + "_" + seed + ".txt";
     }
 
-    ArcadeMachine.runOneGame(game, level1, visuals, selectedAgent, recordActionsFile, seed, 0);
+    if (visuals) {
+      ArcadeMachine.runOneGame(game, level1, visuals, selectedAgent, recordActionsFile, seed, 0);
+
+    } else {
+      String[] levelFiles;
+      levelFiles = new String[1];
+      levelFiles[0] = level1;
+      ArcadeMachine.runGames(game, levelFiles, episodes, selectedAgent, null);
+    }
+
   }
 }

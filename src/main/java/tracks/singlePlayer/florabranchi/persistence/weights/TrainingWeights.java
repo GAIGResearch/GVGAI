@@ -5,12 +5,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import ontology.Types;
 import tracks.singlePlayer.florabranchi.training.FeatureVectorController;
 import tracks.singlePlayer.florabranchi.training.PossibleHarmfulSprite;
 
 public class TrainingWeights implements Serializable {
+
+  private final static Logger LOGGER = Logger.getLogger("GVGAI_BOT");
 
   private TreeMap<Types.ACTIONS, TreeMap<String, Double>> weightVectorMap;
 
@@ -36,6 +39,9 @@ public class TrainingWeights implements Serializable {
     if (!possibleHarmfulElements.contains(harmfulSprite)) {
       possibleHarmfulElements.add(harmfulSprite);
     }
+    LOGGER.info("Known possible harmful elements:");
+    LOGGER.info(possibleHarmfulElements.toString());
+
   }
 
   public TreeMap<Types.ACTIONS, TreeMap<String, Double>> getWeightVectorMap() {

@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.logging.Level;
 
 public class PropertyLoader {
 
@@ -14,13 +15,16 @@ public class PropertyLoader {
   public int LEVEL;
 
   public String AGENT;
+  public Level LOGGER_LEVEL;
 
-  public boolean VISUALS;
+  public boolean DEBUG_VIEWER;
   public boolean SAVE_RESULTS;
+  public boolean VISUALS;
+  public boolean SHOW_TREE;
 
   public float SARSA_ALFA;
   public float SARSA_GAMMA;
-  public float SARSA_EPISLON;
+  public float SARSA_EPSILON;
 
   public PropertyLoader(final String configFile) throws IOException {
 
@@ -35,23 +39,28 @@ public class PropertyLoader {
       throw new FileNotFoundException("property file '" + configFile + "' not found in the classpath");
     }
 
+
+    final String loggerLevel = prop.getProperty("LOGGER_LEVEL");
+    LOGGER_LEVEL = Level.parse(loggerLevel);
     Date time = new Date(System.currentTimeMillis());
 
     // get the property value and print it out
     GAME = castGame(prop.getProperty("GAME"));
-    EPISODES = Integer.parseInt(prop.getProperty("LEVEL"));
-    LEVEL = Integer.parseInt(prop.getProperty("EPISODES"));
+    LEVEL = Integer.parseInt(prop.getProperty("LEVEL"));
+    EPISODES = Integer.parseInt(prop.getProperty("EPISODES"));
 
     // Agent
     AGENT = castAgentPath(prop.getProperty("AGENT"));
+    DEBUG_VIEWER = Boolean.parseBoolean(prop.getProperty("DEBUG_VIEWER"));
     VISUALS = Boolean.parseBoolean(prop.getProperty("VISUALS"));
+    SHOW_TREE = Boolean.parseBoolean(prop.getProperty("SHOW_TREE"));
 
     // Monte Carlo properties, if required
 
     // Sarsa properties, if required
-    SARSA_ALFA = Float.parseFloat(prop.getProperty("EPISODES"));
-    SARSA_GAMMA = Float.parseFloat(prop.getProperty("EPISODES"));
-    SARSA_EPISLON = Float.parseFloat(prop.getProperty("EPISODES"));
+    SARSA_ALFA = Float.parseFloat(prop.getProperty("SARSA_ALFA"));
+    SARSA_GAMMA = Float.parseFloat(prop.getProperty("SARSA_GAMMA"));
+    SARSA_EPSILON = Float.parseFloat(prop.getProperty("SARSA_EPSILON"));
 
 
   }
@@ -69,6 +78,10 @@ public class PropertyLoader {
     switch (agentName) {
       case "sarsa":
         return "tracks.singlePlayer.florabranchi.agents.SarsaAgent";
+      case "sarsa_trainer":
+        return "tracks.singlePlayer.florabranchi.agents.SarsaTrainerAgent";
+      case "monte_carlo_visuals":
+        return "tracks.singlePlayer.florabranchi.agents.MCTSVisualsAgent";
       case "monte_carlo":
       default:
         return "tracks.singlePlayer.florabranchi.agents.MonteCarloTreeAgent";

@@ -24,16 +24,24 @@ public class TreeController {
 
   private TreeViewer treeViewer;
 
-  public TreeController(StateObservation initialState) {
+  private boolean showTree;
 
-    treeViewer = new TreeViewer(initialState);
+  public TreeController(StateObservation initialState,
+                        boolean showTree) {
+
+    if (showTree) {
+      treeViewer = new TreeViewer(initialState);
+    }
     helper = new TreeHelper(initialState.getAvailableActions());
+    this.showTree = showTree;
   }
 
   public void updateTreeVisualization(final StateObservation stateObs,
                                       final int iteration,
                                       final Types.ACTIONS selectedAction) {
-    treeViewer.updateTreeObjects(1, stateObs.getGameTick(), iteration, rootNode, stateObs, selectedAction);
+    if (showTree) {
+      treeViewer.updateTreeObjects(1, stateObs.getGameTick(), iteration, rootNode, stateObs, selectedAction);
+    }
   }
 
   private void logMessage(final String message) {
@@ -161,7 +169,7 @@ public class TreeController {
     return node.value / node.visits + C * Math.sqrt((2 * (Math.log(parentVisits)) / node.visits));
   }
 
-  public Types.ACTIONS getBestFoundAction() {
+  public Types.ACTIONS weqas() {
     final TreeNode bestNode = getBestChild(rootNode);
     return bestNode.previousAction;
   }

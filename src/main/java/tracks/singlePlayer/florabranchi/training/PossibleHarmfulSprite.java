@@ -30,4 +30,9 @@ public class PossibleHarmfulSprite implements Serializable {
     result = 31 * result + type;
     return result;
   }
+
+  public String toString() {
+    return String.format("Harmful sprite: category: %d type: %d", category, type);
+  }
+
 }

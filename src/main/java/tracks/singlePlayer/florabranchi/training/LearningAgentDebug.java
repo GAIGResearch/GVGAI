@@ -222,12 +222,15 @@ public class LearningAgentDebug {
         // Update position
         elementY = initialPropertiedDisplacementY + currElement;
 
+        // Property name
         JLabel propertyLabel = new JLabel(entry, JLabel.CENTER);
         propertyLabel.setBounds(elementX, elementY + (currElement * lineHeight), lineWidth, lineHeight);
 
+        // Property value
         JLabel valueLabel = new JLabel(String.valueOf(0), JLabel.CENTER);
         valueLabel.setBounds(elementX + lineWidth, elementY + (currElement * lineHeight), lineWidth, lineHeight);
 
+        // Build weight vector values
         multiplier = 2;
         for (Types.ACTIONS action : avallableGameActions) {
           JLabel weightVectorValue = new JLabel(String.valueOf(0), JLabel.CENTER);
