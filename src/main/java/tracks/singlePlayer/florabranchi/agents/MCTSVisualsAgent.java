@@ -11,7 +11,7 @@ public class MCTSVisualsAgent extends MonteCarloTreeAgent {
 
   @Override
   protected boolean displayDebug() {
-    return false;
+    return true;
   }
 
   @Override

@@ -29,11 +29,11 @@ public class TreeController {
   public TreeController(StateObservation initialState,
                         boolean showTree) {
 
+    this.showTree = showTree;
     if (showTree) {
       treeViewer = new TreeViewer(initialState);
     }
     helper = new TreeHelper(initialState.getAvailableActions());
-    this.showTree = showTree;
   }
 
   public void updateTreeVisualization(final StateObservation stateObs,
@@ -86,7 +86,9 @@ public class TreeController {
       updateTree(selectedNode, simulationReward);
     }
 
-    updateTreeVisualization(initialState, 0, null);
+    if (showTree) {
+      updateTreeVisualization(initialState, 0, null);
+    }
   }
 
   public Pair<TreeNode, StateObservation> getMostPromisingLeafNode(final StateObservation initialState) {
@@ -111,13 +113,28 @@ public class TreeController {
   public double rollout(final StateObservation initialState) {
     double initialScore = initialState.getGameScore();
     StateObservation copyState = initialState.copy();
-    while (!copyState.isGameOver()) {
+
+    // contar jogadas e cortar antes do fim
+    int advancementsInRollout = 20;
+
+    while (!copyState.isGameOver() && advancementsInRollout > 0) {
       final ArrayList<Types.ACTIONS> availableActions = copyState.getAvailableActions();
-      copyState.advance(availableActions.get(rand.nextInt(availableActions.size() - 1)));
+      if (availableActions.size() < 1) {
+        advancementsInRollout = 0;
+      } else {
+        final double currentScore = copyState.getGameScore();
+        final Types.ACTIONS takeAction = availableActions.get(rand.nextInt(availableActions.size() - 1));
+        copyState.advance(availableActions.get(rand.nextInt(availableActions.size() - 1)));
+        advancementsInRollout--;
+      }
+
     }
 
     double finalScore = copyState.getGameScore();
-    double scoreDelta = 0;
+    double scoreDelta = finalScore - initialScore;
+
+    int maxScore = 5;
+    scoreDelta = scoreDelta / maxScore;
 
     final Types.WINNER gameWinner = copyState.getGameWinner();
 

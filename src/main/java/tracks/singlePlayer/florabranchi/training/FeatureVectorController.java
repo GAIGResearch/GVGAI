@@ -45,8 +45,8 @@ public class FeatureVectorController {
     }
   }
 
-  private static final String WORLD_HEIGHT = "WORLD_HEIGHT";
-  private static final String WORLD_WIDTH = "WORLD_WIDTH";
+  //private static final String WORLD_HEIGHT = "WORLD_HEIGHT";
+  //private static final String WORLD_WIDTH = "WORLD_WIDTH";
 
   private static final String GAME_TICK = "GAME_TICK";
   private static final String GAME_SCORE = "GAME_SCORE";
@@ -114,11 +114,11 @@ public class FeatureVectorController {
   private TreeMap<String, Double> propertyValueMap = new TreeMap<>();
 
   static {
-    availableProperties.add(GAME_SCORE);
+    //availableProperties.add(GAME_SCORE);
     availableProperties.add(AVATAR_HEALTH);
-    availableProperties.add(GAME_TICK);
-    availableProperties.add(WORLD_HEIGHT);
-    availableProperties.add(WORLD_WIDTH);
+    //availableProperties.add(GAME_TICK);
+    //availableProperties.add(WORLD_HEIGHT);
+    //availableProperties.add(WORLD_WIDTH);
     availableProperties.add(PLAYER_RESOURCES);
     availableProperties.add(PLAYER_X);
     availableProperties.add(PLAYER_Y);
@@ -175,8 +175,8 @@ public class FeatureVectorController {
     double worldWidth = stateObservation.getWorldDimension().getWidth();
 
     // World properties
-    addToPropertyMap(propertyMap, WORLD_HEIGHT, worldHeight, 1000);
-    addToPropertyMap(propertyMap, WORLD_WIDTH, worldWidth, 1000);
+    //addToPropertyMap(propertyMap, WORLD_HEIGHT, worldHeight, 1000);
+    //addToPropertyMap(propertyMap, WORLD_WIDTH, worldWidth, 1000);
 
     double maxDistance = Math.sqrt(Math.pow(worldHeight, 2) * Math.pow(worldWidth, 2));
     double maxTotalDistance = worldHeight * worldWidth;

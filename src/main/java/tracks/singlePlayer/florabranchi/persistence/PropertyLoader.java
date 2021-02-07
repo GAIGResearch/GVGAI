@@ -66,8 +66,7 @@ public class PropertyLoader {
   }
 
   public int castGame(final String game) {
-    final AvailableGames castedGame = AvailableGames.fromName(game);
-    if (game == null) {
+    final AvailableGames castedGame = AvailableGames.fromName(game);if (game == null) {
       System.out.println("Failed to solve game. Starting Aliens.");
       return 1;
     }

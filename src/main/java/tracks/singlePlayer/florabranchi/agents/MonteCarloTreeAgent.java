@@ -71,13 +71,15 @@ public class MonteCarloTreeAgent extends AbstractAgent {
 
     // Perform tree Search
     // todo add time limit here
-    treeController.treeSearch(20, stateObs);
+    treeController.treeSearch(30, stateObs);
 
     final TreeNode bestChild = treeController.getMostVisitedChild(treeController.rootNode);
     final ACTIONS bestFoundAction = bestChild.previousAction;
 
     // Update Visualization
-    treeController.updateTreeVisualization(stateObs, 0, bestFoundAction);
+    if (displayDebug()) {
+      treeController.updateTreeVisualization(stateObs, 0, bestFoundAction);
+    }
 
     System.out.println(elapsedTimer.elapsedMillis());
 

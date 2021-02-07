@@ -19,7 +19,7 @@ public class PersistenceController {
 
   private final static String weightProgressionCsvPath = "./tests/weight_progression_csv";
 
-  private static final String persistedWeightsPath = "./offlineTrainingRecords.txt";
+  private static final String persistedWeightsPath = "./tests/offlineTrainingRecords.txt";
 
   final boolean saveToLog = true;
 

@@ -34,23 +34,23 @@ public class TreeViewer implements ViewerListener {
   private SpriteManager sman;
   private Graph graph;
 
-  private HashMap<Integer, List<Integer>> nodeChildrenMapByIndex = new HashMap<>();
-  private HashMap<Integer, List<Edge>> edgesMap = new HashMap<>();
-  private HashMap<Integer, Edge> childrenEdgeMap = new HashMap<>();
-  private HashMap<Integer, Node> nodeMap = new HashMap<>();
+  private final HashMap<Integer, List<Integer>> nodeChildrenMapByIndex = new HashMap<>();
+  private final HashMap<Integer, List<Edge>> edgesMap = new HashMap<>();
+  private final HashMap<Integer, Edge> childrenEdgeMap = new HashMap<>();
+  private final HashMap<Integer, Node> nodeMap = new HashMap<>();
   private HashMap<Integer, Node> extraNodes = new HashMap<>();
   private HashMap<Integer, Sprite> extraSprites = new HashMap<>();
-  private HashMap<String, Sprite> gameStateSpriteMap = new HashMap<>();
+  private final HashMap<String, Sprite> gameStateSpriteMap = new HashMap<>();
 
 
   private int totalFixedNodes;
-  private TreeHelper treeHelper;
+  private final TreeHelper treeHelper;
 
   // Viewer properties
-  final static int TREE_DEPTH = 4;
+  final static int TREE_DEPTH = 3;
 
-  private final static int LAYER_HEIGHT = 300;
-  private final static int LAYER_WIDTH = 50;
+  private final static int LAYER_HEIGHT = 2000;
+  private final static int LAYER_WIDTH = 200;
 
   private final static int SPRITE_DISPLACEMENT_X = 0;
   private final static double SPRITE_DISPLACEMENT_Y = -2;
@@ -225,7 +225,6 @@ public class TreeViewer implements ViewerListener {
 
             final String edgeId = childrenNode + String.valueOf(lastLayerNode);
             final Edge edge = graph.addEdge(edgeId, parentNodeIndex, childNodeIndex);
-
 
             childrenEdgeMap.put(childrenNode, edge);
             addEdgeToMap(lastLayerNode, edge);
@@ -453,7 +452,9 @@ public class TreeViewer implements ViewerListener {
     }
 
     // Get undendered nodes
-    List<ViewerNode> newNodeList = viewerNodes.stream().filter(node -> node.id > totalFixedNodes).collect(Collectors.toList());
+    List<ViewerNode> newNodeList = viewerNodes.stream()
+        .filter(node -> node.id > totalFixedNodes)
+        .collect(Collectors.toList());
 
     // Add new nodes
     updateExtraNodes(newNodeList);
