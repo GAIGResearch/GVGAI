@@ -26,6 +26,10 @@ public class PropertyLoader {
   public float SARSA_GAMMA;
   public float SARSA_EPSILON;
 
+  // MCTS
+  public int TREE_SEARCH_SIZE;
+  public int SIMULATION_DEPTH;
+
   public PropertyLoader(final String configFile) throws IOException {
 
     InputStream inputStream;
@@ -56,17 +60,20 @@ public class PropertyLoader {
     SHOW_TREE = Boolean.parseBoolean(prop.getProperty("SHOW_TREE"));
 
     // Monte Carlo properties, if required
+    TREE_SEARCH_SIZE = Integer.parseInt(prop.getProperty("TREE_SEARCH_SIZE", "0"));
+    SIMULATION_DEPTH = Integer.parseInt(prop.getProperty("SIMULATION_DEPTH", "0"));
 
     // Sarsa properties, if required
-    SARSA_ALFA = Float.parseFloat(prop.getProperty("SARSA_ALFA"));
-    SARSA_GAMMA = Float.parseFloat(prop.getProperty("SARSA_GAMMA"));
-    SARSA_EPSILON = Float.parseFloat(prop.getProperty("SARSA_EPSILON"));
+    SARSA_ALFA = Float.parseFloat(prop.getProperty("SARSA_ALFA", "0"));
+    SARSA_GAMMA = Float.parseFloat(prop.getProperty("SARSA_GAMMA", "0"));
+    SARSA_EPSILON = Float.parseFloat(prop.getProperty("SARSA_EPSILON", "0"));
 
 
   }
 
   public int castGame(final String game) {
-    final AvailableGames castedGame = AvailableGames.fromName(game);if (game == null) {
+    final AvailableGames castedGame = AvailableGames.fromName(game);
+    if (game == null) {
       System.out.println("Failed to solve game. Starting Aliens.");
       return 1;
     }

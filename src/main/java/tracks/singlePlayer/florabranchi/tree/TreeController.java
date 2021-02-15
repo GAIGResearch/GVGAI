@@ -26,14 +26,19 @@ public class TreeController {
 
   private boolean showTree;
 
+  public int ROLLOUT_LOOK_AHEADS;
+
   public TreeController(StateObservation initialState,
-                        boolean showTree) {
+                        boolean showTree,
+                        int rolloutLookAheads) {
 
     this.showTree = showTree;
     if (showTree) {
       treeViewer = new TreeViewer(initialState);
     }
+    ROLLOUT_LOOK_AHEADS = rolloutLookAheads;
     helper = new TreeHelper(initialState.getAvailableActions());
+
   }
 
   public void updateTreeVisualization(final StateObservation stateObs,
@@ -115,7 +120,7 @@ public class TreeController {
     StateObservation copyState = initialState.copy();
 
     // contar jogadas e cortar antes do fim
-    int advancementsInRollout = 20;
+    int advancementsInRollout = ROLLOUT_LOOK_AHEADS;
 
     while (!copyState.isGameOver() && advancementsInRollout > 0) {
       final ArrayList<Types.ACTIONS> availableActions = copyState.getAvailableActions();
@@ -124,7 +129,7 @@ public class TreeController {
       } else {
         final double currentScore = copyState.getGameScore();
         final Types.ACTIONS takeAction = availableActions.get(rand.nextInt(availableActions.size() - 1));
-        copyState.advance(availableActions.get(rand.nextInt(availableActions.size() - 1)));
+        copyState.advance(takeAction);
         advancementsInRollout--;
       }
 
@@ -133,15 +138,16 @@ public class TreeController {
     double finalScore = copyState.getGameScore();
     double scoreDelta = finalScore - initialScore;
 
-    int maxScore = 5;
+    int maxScore = 3;
     scoreDelta = scoreDelta / maxScore;
 
     final Types.WINNER gameWinner = copyState.getGameWinner();
 
     if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_WINS)) {
+      //scoreDelta = 1;
       scoreDelta = 1;
     } else if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
-      scoreDelta = 0;
+      scoreDelta = -1;
     }
 
     return scoreDelta;
@@ -173,6 +179,10 @@ public class TreeController {
     return Collections.max(node.children, Comparator.comparing(c -> c.visits));
   }
 
+  public TreeNode getChildWithHighestScore(final TreeNode node) {
+    return Collections.max(node.children, Comparator.comparing(c -> c.value));
+  }
+
   public TreeNode getBestChild(final TreeNode node) {
     return Collections.max(node.children, Comparator.comparing(c -> getNodeUpperConfidenceBound(c, node.visits)));
   }
@@ -186,8 +196,4 @@ public class TreeController {
     return node.value / node.visits + C * Math.sqrt((2 * (Math.log(parentVisits)) / node.visits));
   }
 
-  public Types.ACTIONS weqas() {
-    final TreeNode bestNode = getBestChild(rootNode);
-    return bestNode.previousAction;
-  }
 }

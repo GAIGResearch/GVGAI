@@ -299,7 +299,7 @@ public class TreeViewer implements ViewerListener {
     final Node parentNode = graph.getNode(parentNodeId.toString());
 
     if (parentNode == null) {
-      System.out.println("ERROR FAILED TO FIND PARENT");
+      //System.out.println("ERROR FAILED TO FIND PARENT");
       return;
     }
 

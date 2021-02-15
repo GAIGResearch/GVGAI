@@ -27,6 +27,9 @@ public class MonteCarloTreeAgent extends AbstractAgent {
 
   protected boolean showTree;
 
+  public int TREE_SEARCH_SIZE;
+  public int SIMULATION_DEPTH;
+
   /**
    * ' initialize all variables for the agent
    *
@@ -38,9 +41,12 @@ public class MonteCarloTreeAgent extends AbstractAgent {
     super(stateObs, elapsedTimer);
     showTree = propertyLoader.SHOW_TREE;
 
+    TREE_SEARCH_SIZE = propertyLoader.TREE_SEARCH_SIZE;
+    SIMULATION_DEPTH = propertyLoader.SIMULATION_DEPTH;
+
     randomGenerator = new Random();
     actions = stateObs.getAvailableActions();
-    treeController = new TreeController(stateObs, displayDebug());
+    treeController = new TreeController(stateObs, displayDebug(), SIMULATION_DEPTH);
   }
 
   protected boolean displayDebug() {
@@ -60,6 +66,8 @@ public class MonteCarloTreeAgent extends AbstractAgent {
   public ACTIONS act(final StateObservation stateObs,
                      final ElapsedCpuTimer elapsedTimer) {
 
+
+
     System.out.println("SCORE: " + stateObs.getGameScore());
     return monteCarloSearch(stateObs, elapsedTimer);
 
@@ -71,9 +79,10 @@ public class MonteCarloTreeAgent extends AbstractAgent {
 
     // Perform tree Search
     // todo add time limit here
-    treeController.treeSearch(30, stateObs);
+    treeController.treeSearch(TREE_SEARCH_SIZE, stateObs);
 
-    final TreeNode bestChild = treeController.getMostVisitedChild(treeController.rootNode);
+    //getMostVisitedChild getBestChild (best UCB) getChildWithHighestScore
+    final TreeNode bestChild = treeController.getChildWithHighestScore(treeController.rootNode);
     final ACTIONS bestFoundAction = bestChild.previousAction;
 
     // Update Visualization
