@@ -14,7 +14,9 @@ public class TreeController {
 
   private final static Logger logger = Logger.getLogger(TreeController.class.getName());
 
-  private final static double C = 1 / Math.sqrt(2);
+  //UCB1
+  //private final static double C = 1 / Math.sqrt(2);
+  private final static double C = 2;
 
   private final TreeHelper helper;
 
@@ -138,16 +140,12 @@ public class TreeController {
     double finalScore = copyState.getGameScore();
     double scoreDelta = finalScore - initialScore;
 
-    int maxScore = 3;
-    scoreDelta = scoreDelta / maxScore;
-
     final Types.WINNER gameWinner = copyState.getGameWinner();
 
     if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_WINS)) {
-      //scoreDelta = 1;
-      scoreDelta = 1;
+      scoreDelta = Math.pow(10, 5);
     } else if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
-      scoreDelta = -1;
+      scoreDelta = -Math.pow(10, 5);
     }
 
     return scoreDelta;
