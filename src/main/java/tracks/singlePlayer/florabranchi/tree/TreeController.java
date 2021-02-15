@@ -81,7 +81,7 @@ public class TreeController {
         expand(mostPromisingNode, mostPromisingNodeState);
 
         // Simulation with random children
-        selectedNode = mostPromisingNode.children.get(rand.nextInt(mostPromisingNode.children.size() - 1));
+        selectedNode = mostPromisingNode.children.get(rand.nextInt(mostPromisingNode.children.size()));
         mostPromisingNodeState.advance(selectedNode.previousAction);
         logMessage(String.format("Rollouting selected node %s", selectedNode.id));
         simulationReward = rollout(mostPromisingNodeState);
@@ -130,7 +130,7 @@ public class TreeController {
         advancementsInRollout = 0;
       } else {
         final double currentScore = copyState.getGameScore();
-        final Types.ACTIONS takeAction = availableActions.get(rand.nextInt(availableActions.size() - 1));
+        final Types.ACTIONS takeAction = availableActions.get(rand.nextInt(availableActions.size()));
         copyState.advance(takeAction);
         advancementsInRollout--;
       }
@@ -178,7 +178,23 @@ public class TreeController {
   }
 
   public TreeNode getChildWithHighestScore(final TreeNode node) {
+
+    if (allValuesEqual(node)) {
+      return node.children.get(rand.nextInt(node.children.size()));
+    }
+
     return Collections.max(node.children, Comparator.comparing(c -> c.value));
+  }
+
+  public boolean allValuesEqual(final TreeNode node) {
+
+    double value = 0d;
+    for (TreeNode child : node.children) {
+      if (child.value != value) {
+        return false;
+      }
+    }
+    return true;
   }
 
   public TreeNode getBestChild(final TreeNode node) {
