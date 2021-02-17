@@ -101,7 +101,7 @@ public class TreeHelper {
                                final List<Types.ACTIONS> availableActions) {
 
     int initialNodeId = firstNode;
-    for (Types.ACTIONS action : availableActions) {
+    for (final Types.ACTIONS action : availableActions) {
       addNewNodeToMap(parentNode, initialNodeId, action);
       initialNodeId++;
     }

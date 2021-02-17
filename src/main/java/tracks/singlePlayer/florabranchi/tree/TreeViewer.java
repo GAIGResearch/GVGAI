@@ -50,7 +50,9 @@ public class TreeViewer implements ViewerListener {
   final static int TREE_DEPTH = 3;
 
   private final static int LAYER_HEIGHT = 2000;
-  private final static int LAYER_WIDTH = 200;
+  private final static int LAYER_HEIGHT_LOWER = 10000;
+  private final static int LAYER_WIDTH = 150;
+  private final static int LAYER_WIDTH_LOWER = 150;
 
   private final static int SPRITE_DISPLACEMENT_X = 0;
   private final static double SPRITE_DISPLACEMENT_Y = -2;
@@ -104,7 +106,7 @@ public class TreeViewer implements ViewerListener {
             + "}"
 
             + "node.selected {"
-            + "size: 10px;"
+            + "size: 15px;"
             + "fill-color: red, green;"
             + "fill-mode: dyn-plain;"
             + "}"
@@ -370,7 +372,7 @@ public class TreeViewer implements ViewerListener {
     final Map<Integer, List<ViewerNode>> nodeDepthMap = getNodeDepthMap(newNodeList);
 
     int currParent = 1;
-    int yOffset = LAYER_HEIGHT / 5;
+    int yOffset = LAYER_HEIGHT_LOWER / 5;
 
     for (Map.Entry<Integer, List<ViewerNode>> nodeDepthEntries : nodeDepthMap.entrySet()) {
 
@@ -401,7 +403,7 @@ public class TreeViewer implements ViewerListener {
 
         Integer parentId = childrenNodes.getKey();
 
-        int nodeSpacing = LAYER_WIDTH * parentsInDepth / 2;
+        int nodeSpacing = LAYER_WIDTH_LOWER * parentsInDepth / 2;
         addNewNodesFromParent(parentId, childrenNodes.getValue(), nodeSpacing);
         currParent++;
       }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import core.game.StateObservation;
@@ -16,7 +17,7 @@ public class TreeController {
 
   //UCB1
   //private final static double C = 1 / Math.sqrt(2);
-  private final static double C = 2;
+  private final static double C = 10;
 
   private final TreeHelper helper;
 
@@ -29,6 +30,8 @@ public class TreeController {
   private boolean showTree;
 
   public int ROLLOUT_LOOK_AHEADS;
+  private double WINNER_SCORE = Math.pow(10, 6);
+  private double LOSS_SCORE = -Math.pow(10, 6);
 
   public TreeController(StateObservation initialState,
                         boolean showTree,
@@ -86,7 +89,7 @@ public class TreeController {
         logMessage(String.format("Rollouting selected node %s", selectedNode.id));
         simulationReward = rollout(mostPromisingNodeState);
       } else {
-        simulationReward = 0;
+        simulationReward = LOSS_SCORE;
       }
 
       // Backpropagation
@@ -101,7 +104,10 @@ public class TreeController {
   public Pair<TreeNode, StateObservation> getMostPromisingLeafNode(final StateObservation initialState) {
     TreeNode selectedNode = rootNode;
     StateObservation newState = initialState.copy();
+
+    // Go through tree until leaf node is found
     while (!selectedNode.children.isEmpty()) {
+      // Get node with higher UCB
       selectedNode = getBestChild(selectedNode);
       newState.advance(selectedNode.previousAction);
     }
@@ -143,9 +149,9 @@ public class TreeController {
     final Types.WINNER gameWinner = copyState.getGameWinner();
 
     if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_WINS)) {
-      scoreDelta = Math.pow(10, 5);
+      scoreDelta = WINNER_SCORE;
     } else if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
-      scoreDelta = -Math.pow(10, 5);
+      scoreDelta = LOSS_SCORE;
     }
 
     return scoreDelta;
@@ -174,6 +180,11 @@ public class TreeController {
   }
 
   public TreeNode getMostVisitedChild(final TreeNode node) {
+
+    if (allValuesEqual(node)) {
+      return node.children.get(rand.nextInt(node.children.size()));
+    }
+
     return Collections.max(node.children, Comparator.comparing(c -> c.visits));
   }
 
@@ -187,17 +198,24 @@ public class TreeController {
   }
 
   public boolean allValuesEqual(final TreeNode node) {
-
-    double value = 0d;
+    Double value = null;
     for (TreeNode child : node.children) {
-      if (child.value != value) {
+      if (value != null && child.value != value) {
         return false;
+      } else if (value == null) {
+        value = child.value;
       }
     }
+    //System.out.print("All values equal \n");
     return true;
   }
 
   public TreeNode getBestChild(final TreeNode node) {
+
+    if (allValuesEqual(node)) {
+      return node.children.get(rand.nextInt(node.children.size()));
+    }
+
     return Collections.max(node.children, Comparator.comparing(c -> getNodeUpperConfidenceBound(c, node.visits)));
   }
 
@@ -207,7 +225,7 @@ public class TreeController {
     if (node.visits == 0) {
       return Double.MAX_VALUE;
     }
-    return node.value / node.visits + C * Math.sqrt((2 * (Math.log(parentVisits)) / node.visits));
+    return (node.value / node.visits) + 2 * C * Math.sqrt((2 * (Math.log(parentVisits)) / node.visits));
   }
 
 }

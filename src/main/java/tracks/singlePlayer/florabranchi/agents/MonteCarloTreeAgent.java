@@ -81,7 +81,9 @@ public class MonteCarloTreeAgent extends AbstractAgent {
     // todo add time limit here
     treeController.treeSearch(TREE_SEARCH_SIZE, stateObs);
 
-    //getMostVisitedChild getBestChild (best UCB) getChildWithHighestScore
+    //final TreeNode bestChild = treeController.getChildWithHighestScore(treeController.rootNode);
+    //final TreeNode bestChild = treeController.getBestChild(treeController.rootNode);
+    //System.out.println("Best child: \n");
     final TreeNode bestChild = treeController.getChildWithHighestScore(treeController.rootNode);
     final ACTIONS bestFoundAction = bestChild.previousAction;
 
