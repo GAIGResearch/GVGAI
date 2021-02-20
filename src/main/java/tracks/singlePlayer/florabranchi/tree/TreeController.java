@@ -213,10 +213,10 @@ public class TreeController {
     final int resources = copyState.getAvatarResources().size();
 
     final double score = scoreDelta + resources
-        + (2 * Math.max(0, resourceScore))
-        + (5 * Math.max(0, exporationScore))
-        + (1 * Math.max(0, movableScore))
-        + (1 * Math.max(0, portalScore));
+        + (2 * resourceScore)
+        + (5 * exporationScore)
+        + (1 * movableScore)
+        + (1 * portalScore);
 
     return score;
   }
