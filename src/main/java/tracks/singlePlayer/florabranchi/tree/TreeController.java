@@ -1,5 +1,8 @@
 package tracks.singlePlayer.florabranchi.tree;
 
+import static tracks.singlePlayer.florabranchi.training.StateEvaluatorHelper.getAverageDistance;
+import static tracks.singlePlayer.florabranchi.training.StateEvaluatorHelper.getNpcData;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -7,9 +10,11 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import core.game.Observation;
 import core.game.StateObservation;
 import javafx.util.Pair;
 import ontology.Types;
+import tracks.singlePlayer.florabranchi.training.StateEvaluatorHelper;
 
 public class TreeController {
 
@@ -20,6 +25,9 @@ public class TreeController {
   private final static double C = 10;
 
   private final TreeHelper helper;
+  private final int height;
+  private final int width;
+  private final int maxDistance;
 
   public TreeNode rootNode;
 
@@ -33,6 +41,8 @@ public class TreeController {
   private double WINNER_SCORE = Math.pow(10, 6);
   private double LOSS_SCORE = -Math.pow(10, 6);
 
+  private final int[][] visitCount;
+
   public TreeController(StateObservation initialState,
                         boolean showTree,
                         int rolloutLookAheads) {
@@ -43,6 +53,18 @@ public class TreeController {
     }
     ROLLOUT_LOOK_AHEADS = rolloutLookAheads;
     helper = new TreeHelper(initialState.getAvailableActions());
+
+    height = StateEvaluatorHelper.getHeight(initialState);
+    width = StateEvaluatorHelper.getWidth(initialState);
+    visitCount = new int[width][height];
+
+    for (int i = 0; i < width - 1; i++) {
+      for (int j = 0; j < height - 1; j++) {
+        visitCount[i][j] = 0;
+      }
+    }
+
+    maxDistance = height * width;
 
   }
 
@@ -123,6 +145,69 @@ public class TreeController {
 
   }
 
+  public double getStateScore(final StateObservation copyState) {
+
+    final Types.WINNER gameWinner = copyState.getGameWinner();
+
+    if (gameWinner.equals(Types.WINNER.PLAYER_WINS)) {
+      return WINNER_SCORE;
+    } else if (gameWinner.equals(Types.WINNER.PLAYER_LOSES)) {
+      return LOSS_SCORE;
+    }
+
+    final int avatarX = (int) copyState.getAvatarPosition().x;
+    final int avatarY = (int) copyState.getAvatarPosition().y;
+
+    double totalScore = 0;
+
+    final StateEvaluatorHelper.ObservableData npcData = StateEvaluatorHelper.getNpcData(copyState);
+    final StateEvaluatorHelper.ObservableData portalsData = StateEvaluatorHelper.getPortalsData(copyState);
+    final StateEvaluatorHelper.ObservableData movablesData = StateEvaluatorHelper.getMovablesData(copyState);
+    final StateEvaluatorHelper.ObservableData resourcesData = StateEvaluatorHelper.getResourcesData(copyState);
+
+    // todo get distance to closest enemy
+    final Double avgNpcDist = getAverageDistance(npcData);
+
+    final double distClosestResource = distanceToClosestObservable(avatarX, avatarY, resourcesData);
+    final double distClosestPortal = distanceToClosestObservable(avatarX, avatarY, portalsData);
+    final double distClosestMovable = distanceToClosestObservable(avatarX, avatarY, movablesData);
+
+
+    visitCount[avatarX][avatarY] = visitCount[avatarX][avatarY] + 1;
+
+    double initialScore = copyState.getGameScore();
+    double finalScore = copyState.getGameScore();
+    double scoreDelta = finalScore - initialScore;
+
+    return scoreDelta
+        + (1 - distClosestResource / maxDistance)
+        + (distClosestMovable / maxDistance)
+        + (1 - distClosestPortal / maxDistance)
+        + (((double) 1 - visitCount[avatarX][avatarY]) / maxDistance);
+  }
+
+  public double distanceToClosestObservable(final int avatarX,
+                                            final int avatarY,
+                                            final StateEvaluatorHelper.ObservableData closestObservable) {
+
+    if (closestObservable.closerObject == null) {
+      return 0;
+
+    }
+    return calculateDistanceBetweenPoints(closestObservable.closerObject.position.x,
+        closestObservable.closerObject.position.y,
+        avatarX,
+        avatarY);
+  }
+
+  public double calculateDistanceBetweenPoints(
+      double x1,
+      double y1,
+      double x2,
+      double y2) {
+    return Math.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));
+  }
+
   public double rollout(final StateObservation initialState) {
     double initialScore = initialState.getGameScore();
     StateObservation copyState = initialState.copy();
@@ -142,7 +227,7 @@ public class TreeController {
       }
 
     }
-
+/*
     double finalScore = copyState.getGameScore();
     double scoreDelta = finalScore - initialScore;
 
@@ -152,9 +237,9 @@ public class TreeController {
       scoreDelta = WINNER_SCORE;
     } else if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
       scoreDelta = LOSS_SCORE;
-    }
+    }*/
 
-    return scoreDelta;
+    return getStateScore(copyState);
   }
 
   public void updateTree(final TreeNode selectedNode,

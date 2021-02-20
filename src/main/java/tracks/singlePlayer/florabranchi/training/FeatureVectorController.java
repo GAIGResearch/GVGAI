@@ -1,5 +1,7 @@
 package tracks.singlePlayer.florabranchi.training;
 
+import static tracks.singlePlayer.florabranchi.training.StateEvaluatorHelper.getObservableData;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,29 +23,6 @@ public class FeatureVectorController {
 
   private List<PossibleHarmfulSprite> possibleHarmfulSprites = new ArrayList<>();
 
-  class ObservableData {
-
-    double maxDistance = 0;
-    double minDistance = 0;
-    double totalDist = 0;
-    double totalEnemies;
-    Observation furtherObject;
-    Observation closerObject;
-
-    public ObservableData(final double maxDistance,
-                          final double minDistance,
-                          final double totalEnemies,
-                          final double totalDist,
-                          final Observation furtherObject,
-                          final Observation closerObject) {
-      this.maxDistance = maxDistance;
-      this.minDistance = minDistance;
-      this.totalDist = totalDist;
-      this.furtherObject = furtherObject;
-      this.closerObject = closerObject;
-      this.totalEnemies = totalEnemies;
-    }
-  }
 
   //private static final String WORLD_HEIGHT = "WORLD_HEIGHT";
   //private static final String WORLD_WIDTH = "WORLD_WIDTH";
@@ -155,7 +134,7 @@ public class FeatureVectorController {
                                             final TreeMap<String, Double> propertyMap,
                                             final double maxDistance,
                                             final double maxTotalDist) {
-    final ObservableData observableData = getObservableData(objects, avatarPosition);
+    final StateEvaluatorHelper.ObservableData observableData = getObservableData(objects, avatarPosition);
     addToPropertyMap(propertyMap, buildPropertyName(type, TOTAL_OBSERVABLE), observableData.totalEnemies, 500);
     addToPropertyMap(propertyMap, buildPropertyName(type, CLOSEST_OBSERVABLE_X), observableData.closerObject.position.x, maxDistance);
     addToPropertyMap(propertyMap, buildPropertyName(type, CLOSEST_OBSERVABLE_Y), observableData.closerObject.position.y, maxDistance);
@@ -163,6 +142,9 @@ public class FeatureVectorController {
     //addToPropertyMap(propertyMap, buildPropertyName(type, CLOSEST_OBSERVABLE_TYPE), observableData.closerObject.itype, 10);
     addToPropertyMap(propertyMap, buildPropertyName(type, AVERAGE_DISTANCE_TO_OBSERVABLE), observableData.totalDist / observableData.totalEnemies, maxDistance);
   }
+
+
+
 
   public TreeMap<String, Double> extractFeatureVector(StateObservation stateObservation) {
 
@@ -203,6 +185,7 @@ public class FeatureVectorController {
     if (npcPositions != null && npcPositions.length > 0) {
       addObservableObjectProperties(NPCS, npcPositions, avatarPosition, propertyMap, maxDistance, maxTotalDistance);
     }
+
 
     // IMMOVABLES
     final ArrayList<Observation>[] immovablePositions = stateObservation.getImmovablePositions();
@@ -321,37 +304,6 @@ public class FeatureVectorController {
     double minValue = Math.min(0, avatar.y - range);
     double maxValue = avatar.y + range;
     return object.y > minValue && object.y < maxValue;
-  }
-
-
-  public ObservableData getObservableData(final ArrayList<Observation>[] objectsList,
-                                          final Vector2d avatarPosition) {
-    double totalEnemies = 0;
-    double maxDistance = 0;
-    double minDistance = Integer.MAX_VALUE;
-    double totalDist = 0;
-    Observation furtherObject = objectsList[0].get(0);
-    Observation closestObject = objectsList[0].get(0);
-
-    for (final ArrayList<Observation> objects : objectsList) {
-      for (Observation object : objects) {
-        double distance = object.position.dist(avatarPosition);
-        if (distance > maxDistance) {
-          maxDistance = distance;
-          furtherObject = object;
-        }
-
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestObject = object;
-        }
-
-        totalDist += distance;
-        totalEnemies++;
-      }
-    }
-
-    return new ObservableData(maxDistance, minDistance, totalEnemies, totalDist, furtherObject, closestObject);
   }
 
   public void addToPropertyMap(final TreeMap<String, Double> propertyMap,

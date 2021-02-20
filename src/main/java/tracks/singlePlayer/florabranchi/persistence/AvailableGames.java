@@ -41,7 +41,8 @@ public enum AvailableGames {
   G_37(37, "escape"),
   G_38(38, "explore"),
   G_39(39, "factorymanager"),
-  G_40(40, "firecaster");
+  G_40(40, "firecaster"),
+  G_44(44, "frogs");
 
   private Integer id;
   private String name;
