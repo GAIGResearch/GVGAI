@@ -145,7 +145,8 @@ public class TreeController {
 
   }
 
-  public double getStateScore(final StateObservation copyState) {
+  public double getStateScore(final StateObservation copyState, final
+  double initialScore) {
 
     final Types.WINNER gameWinner = copyState.getGameWinner();
 
@@ -171,19 +172,26 @@ public class TreeController {
     final double distClosestResource = distanceToClosestObservable(avatarX, avatarY, resourcesData);
     final double distClosestPortal = distanceToClosestObservable(avatarX, avatarY, portalsData);
     final double distClosestMovable = distanceToClosestObservable(avatarX, avatarY, movablesData);
+    final double distClosestNpc = distanceToClosestObservable(avatarX, avatarY, npcData);
 
 
     visitCount[avatarX][avatarY] = visitCount[avatarX][avatarY] + 1;
 
-    double initialScore = copyState.getGameScore();
     double finalScore = copyState.getGameScore();
     double scoreDelta = finalScore - initialScore;
 
-    return scoreDelta
-        + (1 - distClosestResource / maxDistance)
-        + (distClosestMovable / maxDistance)
-        + (1 - distClosestPortal / maxDistance)
-        + (((double) 1 - visitCount[avatarX][avatarY]) / maxDistance);
+    double exporationScore = ((double) 1 - visitCount[avatarX][avatarY]) / maxDistance;
+    double resourceScore = (1 - distClosestResource / maxDistance);
+    double movableScore = distClosestMovable / maxDistance;
+    double portalScore = (1 - distClosestPortal / maxDistance);
+
+    final double score = scoreDelta
+        + (2 * resourceScore)
+        + (5 * exporationScore)
+        + (1 * movableScore)
+        + (1 * portalScore);
+
+    return score;
   }
 
   public double distanceToClosestObservable(final int avatarX,
@@ -239,7 +247,7 @@ public class TreeController {
       scoreDelta = LOSS_SCORE;
     }*/
 
-    return getStateScore(copyState);
+    return getStateScore(copyState, initialScore);
   }
 
   public void updateTree(final TreeNode selectedNode,
