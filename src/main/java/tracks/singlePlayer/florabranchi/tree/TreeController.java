@@ -22,7 +22,7 @@ public class TreeController {
 
   //UCB1
   //private final static double C = 1 / Math.sqrt(2);
-  private final static double C = 10;
+  private final static double C = 2;
 
   private final TreeHelper helper;
   private final int height;
@@ -38,8 +38,8 @@ public class TreeController {
   private boolean showTree;
 
   public int ROLLOUT_LOOK_AHEADS;
-  private double WINNER_SCORE = Math.pow(10, 6);
-  private double LOSS_SCORE = -Math.pow(10, 6);
+  private double WINNER_SCORE = Double.MAX_VALUE;
+  private double LOSS_SCORE = Double.MIN_VALUE;
 
   private final int[][] visitCount;
 
@@ -83,12 +83,35 @@ public class TreeController {
   public void treeSearch(final int iterations,
                          final StateObservation initialState) {
 
-/*    if (rootNode == null) {
-      rootNode = new TreeNode(0, null, null);
-    }*/
-
     rootNode = new TreeNode(0, null, null);
 
+    randomRollout(iterations, initialState);
+
+    if (showTree) {
+      updateTreeVisualization(initialState, 0, null);
+    }
+  }
+
+  public void jenJerry(final StateObservation initialState) {
+    rootNode = new TreeNode(0, null, null);
+
+    int children = initialState.getAvailableActions().size();
+
+    expand(rootNode, initialState);
+
+    for (int i = 0; i < children; i++) {
+      // Simulation with random children
+      TreeNode selectedNode = rootNode.children.get(i);
+      StateObservation mostPromisingNodeState = initialState.copy();
+      mostPromisingNodeState.advance(selectedNode.previousAction);
+      final double simulationReward = rollout(mostPromisingNodeState);
+      updateTree(selectedNode, simulationReward);
+    }
+
+  }
+
+  public void randomRollout(final int iterations,
+                            final StateObservation initialState) {
     for (int i = 0; i < iterations; i++) {
 
       //System.out.println("ITERATION " + i);
@@ -181,15 +204,19 @@ public class TreeController {
     double scoreDelta = finalScore - initialScore;
 
     double exporationScore = ((double) 1 - visitCount[avatarX][avatarY]) / maxDistance;
-    double resourceScore = (1 - distClosestResource / maxDistance);
+    double resourceScore = distClosestResource == 0 ? 0 : (1 - distClosestResource) / maxDistance;
+    //double resourceScore = (1 - distClosestResource) / maxDistance;
     double movableScore = distClosestMovable / maxDistance;
-    double portalScore = (1 - distClosestPortal / maxDistance);
+    double portalScore = distClosestPortal == 0 ? 0 : (1 - distClosestPortal) / maxDistance;
+    //double portalScore = (1 - distClosestPortal) / maxDistance;
 
-    final double score = scoreDelta
-        + (2 * resourceScore)
-        + (5 * exporationScore)
-        + (1 * movableScore)
-        + (1 * portalScore);
+    final int resources = copyState.getAvatarResources().size();
+
+    final double score = scoreDelta + resources
+        + (2 * Math.max(0, resourceScore))
+        + (5 * Math.max(0, exporationScore))
+        + (1 * Math.max(0, movableScore))
+        + (1 * Math.max(0, portalScore));
 
     return score;
   }
