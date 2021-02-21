@@ -22,7 +22,7 @@ public class TreeController {
 
   //UCB1
   //private final static double C = 1 / Math.sqrt(2);
-  private final static double C = 2;
+  private final static double C = Math.sqrt(2);
 
   private final TreeHelper helper;
   private final int height;
@@ -38,8 +38,8 @@ public class TreeController {
   private boolean showTree;
 
   public int ROLLOUT_LOOK_AHEADS;
-  private double WINNER_SCORE = Double.MAX_VALUE;
-  private double LOSS_SCORE = Double.MIN_VALUE;
+  private static final double WINNER_SCORE = Double.MAX_VALUE;
+  private static final double LOSS_SCORE = Double.MIN_VALUE;
 
   private final int[][] visitCount;
 
@@ -168,6 +168,21 @@ public class TreeController {
 
   }
 
+  public double getGameScore(final StateObservation copyState, final
+  double initialScore) {
+
+    final Types.WINNER gameWinner = copyState.getGameWinner();
+
+    if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_WINS)) {
+      return WINNER_SCORE;
+    } else if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
+      return LOSS_SCORE;
+    }
+
+    double finalScore = copyState.getGameScore();
+    return finalScore - initialScore;
+  }
+
   public double getStateScore(final StateObservation copyState, final
   double initialScore) {
 
@@ -216,7 +231,7 @@ public class TreeController {
         + (2 * resourceScore)
         + (5 * exporationScore)
         + (1 * movableScore)
-        + (1 * portalScore);
+        + (3 * portalScore);
 
     return score;
   }
@@ -262,18 +277,9 @@ public class TreeController {
       }
 
     }
-/*
-    double finalScore = copyState.getGameScore();
-    double scoreDelta = finalScore - initialScore;
 
-    final Types.WINNER gameWinner = copyState.getGameWinner();
 
-    if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_WINS)) {
-      scoreDelta = WINNER_SCORE;
-    } else if (copyState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
-      scoreDelta = LOSS_SCORE;
-    }*/
-
+    //return getGameScore(copyState, initialScore);
     return getStateScore(copyState, initialScore);
   }
 
