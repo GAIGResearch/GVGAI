@@ -47,11 +47,13 @@ public class TreeViewer implements ViewerListener {
   private final TreeHelper treeHelper;
 
   // Viewer properties
-  final static int TREE_DEPTH = 3;
+  final static int TREE_DEPTH = 5;
 
-  private final static int LAYER_HEIGHT = 2000;
-  private final static int LAYER_HEIGHT_LOWER = 10000;
+  private final static int LAYER_HEIGHT = 25000;
   private final static int LAYER_WIDTH = 150;
+
+  private final static int LAYER_HEIGHT_LOWER = 10000;
+
   private final static int LAYER_WIDTH_LOWER = 150;
 
   private final static int SPRITE_DISPLACEMENT_X = 0;

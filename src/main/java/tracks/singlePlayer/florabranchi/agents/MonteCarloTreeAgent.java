@@ -50,7 +50,7 @@ public class MonteCarloTreeAgent extends AbstractAgent {
   }
 
   protected boolean displayDebug() {
-    return false;
+    return propertyLoader.SHOW_TREE;
   }
 
   @Override

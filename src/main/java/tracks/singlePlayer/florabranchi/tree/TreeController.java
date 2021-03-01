@@ -219,19 +219,23 @@ public class TreeController {
     double scoreDelta = finalScore - initialScore;
 
     double exporationScore = ((double) 1 - visitCount[avatarX][avatarY]) / maxDistance;
-    double resourceScore = distClosestResource == 0 ? 0 : (1 - distClosestResource) / maxDistance;
-    //double resourceScore = (1 - distClosestResource) / maxDistance;
+    //double resourceScore = distClosestResource == 0 ? 0 : (1 - distClosestResource) / maxDistance;
+    double resourceScore = (1 - distClosestResource) / maxDistance;
     double movableScore = distClosestMovable / maxDistance;
-    double portalScore = distClosestPortal == 0 ? 0 : (1 - distClosestPortal) / maxDistance;
-    //double portalScore = (1 - distClosestPortal) / maxDistance;
+    double npcScore = distClosestNpc / maxDistance;
+    //double portalScore = distClosestPortal == 0 ? 0 : (1 - distClosestPortal) / maxDistance;
+    double portalScore = (1 - distClosestPortal) / maxDistance;
 
     final int resources = copyState.getAvatarResources().size();
 
-    final double score = scoreDelta + resources
+    final double score =
+        1 * scoreDelta
+        + 3 * resources
+        + 1 * npcScore
         + (2 * resourceScore)
         + (5 * exporationScore)
         + (1 * movableScore)
-        + (3 * portalScore);
+        + (2 * portalScore);
 
     return score;
   }

@@ -42,7 +42,23 @@ public enum AvailableGames {
   G_38(38, "explore"),
   G_39(39, "factorymanager"),
   G_40(40, "firecaster"),
-  G_44(44, "frogs");
+  G_44(44, "frogs"),
+  G_45(45, "garbagecollector"),
+  G_46(46, "ghostbuster"),
+  G_47(47, "glow"),
+  G_48(48, "grow"),
+  G_49(49, "gymkhana"),
+  G_50(50, "hungrybirds"),
+  G_51(51, "iceandfire"),
+  G_52(52, "ikaruga"),
+  G_53(53, "infection"),
+  G_54(54, "intersection"),
+  G_55(55, "islands"),
+  G_56(56, "jaws"),
+  G_57(57, "killBillVol1"),
+  G_58(58, "labyrinth"),
+  G_59(59, "labyrinthdual"),
+  G_60(60, "lasers"),;
 
   private Integer id;
   private String name;
