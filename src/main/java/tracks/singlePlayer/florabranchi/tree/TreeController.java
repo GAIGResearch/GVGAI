@@ -219,23 +219,25 @@ public class TreeController {
     double scoreDelta = finalScore - initialScore;
 
     double exporationScore = ((double) 1 - visitCount[avatarX][avatarY]) / maxDistance;
-    //double resourceScore = distClosestResource == 0 ? 0 : (1 - distClosestResource) / maxDistance;
-    double resourceScore = (1 - distClosestResource) / maxDistance;
+    double resourceScore = distClosestResource == 0 ? 0 : (1 - distClosestResource) / maxDistance;
+    //double resourceScore = (1 - distClosestResource) / maxDistance;
     double movableScore = distClosestMovable / maxDistance;
+
+    // should npc score be removed? quando é inimigo, atrapalha
+
     double npcScore = distClosestNpc / maxDistance;
-    //double portalScore = distClosestPortal == 0 ? 0 : (1 - distClosestPortal) / maxDistance;
-    double portalScore = (1 - distClosestPortal) / maxDistance;
+    double portalScore = distClosestPortal == 0 ? 0 : (1 - distClosestPortal) / maxDistance;
+    //double portalScore = (1 - distClosestPortal) / maxDistance;
 
     final int resources = copyState.getAvatarResources().size();
 
     final double score =
         1 * scoreDelta
-        + 3 * resources
-        + 1 * npcScore
-        + (2 * resourceScore)
-        + (5 * exporationScore)
-        + (1 * movableScore)
-        + (2 * portalScore);
+            + 1 * resources
+            + (2 * resourceScore)
+            + (5 * exporationScore)
+            + (1 * movableScore)
+            + (2 * portalScore);
 
     return score;
   }
@@ -328,6 +330,13 @@ public class TreeController {
   }
 
   public boolean allValuesEqual(final TreeNode node) {
+
+    // outros casos de empate
+    // retornar lista de nodos com valor parecido
+    // n1 .4 n2 .4 n3 .3
+    // lista com valores maximos iguais
+
+
     Double value = null;
     for (TreeNode child : node.children) {
       if (value != null && child.value != value) {
