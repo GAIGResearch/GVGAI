@@ -77,7 +77,7 @@ public class TreeController {
   }
 
   private void logMessage(final String message) {
-    //logger.log(Level.INFO, message);
+    logger.log(Level.INFO, message);
   }
 
   public void treeSearch(final int iterations,
@@ -97,7 +97,7 @@ public class TreeController {
 
     int children = initialState.getAvailableActions().size();
 
-    expand(rootNode, initialState);
+    expand(rootNode, initialState.getAvailableActions());
 
     for (int i = 0; i < children; i++) {
       // Simulation with random children
@@ -126,13 +126,14 @@ public class TreeController {
 
       // Expansion - Expand node if not terminal
       if (!mostPromisingNodeState.isGameOver()) {
-        expand(mostPromisingNode, mostPromisingNodeState);
+        expand(mostPromisingNode, mostPromisingNodeState.getAvailableActions());
 
         // Simulation with random children
         selectedNode = mostPromisingNode.children.get(rand.nextInt(mostPromisingNode.children.size()));
         mostPromisingNodeState.advance(selectedNode.previousAction);
         logMessage(String.format("Rollouting selected node %s", selectedNode.id));
         simulationReward = rollout(mostPromisingNodeState);
+        logMessage(String.format("Simulation Reward: %s", simulationReward));
       } else {
         simulationReward = LOSS_SCORE;
       }
@@ -302,10 +303,10 @@ public class TreeController {
   }
 
   public void expand(final TreeNode node,
-                     final StateObservation currentState) {
+                     final ArrayList<Types.ACTIONS> actions) {
     TreeNode tempNode = node;
-    for (Types.ACTIONS action : currentState.getAvailableActions()) {
-      logMessage(String.format("Selected action %s to expand node %s", action.toString(), node.id));
+    logMessage(String.format("Expanding children of node %s", node.id));
+    for (Types.ACTIONS action : actions) {
       tempNode = new TreeNode(helper.getNodeId(node.id, action), node, action);
       node.children.add(tempNode);
     }

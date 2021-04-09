@@ -58,7 +58,8 @@ public enum AvailableGames {
   G_57(57, "killBillVol1"),
   G_58(58, "labyrinth"),
   G_59(59, "labyrinthdual"),
-  G_60(60, "lasers"),;
+  G_60(60, "lasers"),
+  G_70(70, "painter");
 
   private Integer id;
   private String name;

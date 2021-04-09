@@ -11,7 +11,7 @@ public class TreeHelper {
 
 
   public TreeHelper(final List<Types.ACTIONS> availableActions) {
-    generateTreeNodeIds(10, availableActions);
+    generateTreeNodeIds(11, availableActions);
   }
 
   public static Map<Integer, Map<Types.ACTIONS, Integer>> nodeIdsMap = new HashMap<>();
