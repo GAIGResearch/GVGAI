@@ -1,16 +1,13 @@
 package tracks.singlePlayer.florabranchi.tree;
 
 import static tracks.singlePlayer.florabranchi.training.StateEvaluatorHelper.getAverageDistance;
-import static tracks.singlePlayer.florabranchi.training.StateEvaluatorHelper.getNpcData;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import core.game.Observation;
 import core.game.StateObservation;
 import javafx.util.Pair;
 import ontology.Types;
@@ -77,7 +74,7 @@ public class TreeController {
   }
 
   private void logMessage(final String message) {
-    logger.log(Level.INFO, message);
+    //logger.log(Level.INFO, message);
   }
 
   public void treeSearch(final int iterations,
@@ -85,7 +82,7 @@ public class TreeController {
 
     rootNode = new TreeNode(0, null, null);
 
-    randomRollout(iterations, initialState);
+    treePolicy(iterations, initialState);
 
     if (showTree) {
       updateTreeVisualization(initialState, 0, null);
@@ -105,23 +102,26 @@ public class TreeController {
       StateObservation mostPromisingNodeState = initialState.copy();
       mostPromisingNodeState.advance(selectedNode.previousAction);
       final double simulationReward = rollout(mostPromisingNodeState);
-      updateTree(selectedNode, simulationReward);
+      backup(selectedNode, simulationReward);
     }
 
   }
 
-  public void randomRollout(final int iterations,
-                            final StateObservation initialState) {
+  public void treePolicy(final int iterations,
+                         final StateObservation initialState) {
+
     for (int i = 0; i < iterations; i++) {
 
       //System.out.println("ITERATION " + i);
 
       // Selection - Get most promising node
-      final Pair<TreeNode, StateObservation> mostPromisingNodePair = getMostPromisingLeafNode(initialState);
+      final Pair<TreeNode, StateObservation> mostPromisingNodePair = selection(initialState);
+
       TreeNode mostPromisingNode = mostPromisingNodePair.getKey();
       StateObservation mostPromisingNodeState = mostPromisingNodePair.getValue();
 
       TreeNode selectedNode = mostPromisingNode;
+
       double simulationReward;
 
       // Expansion - Expand node if not terminal
@@ -134,12 +134,13 @@ public class TreeController {
         logMessage(String.format("Rollouting selected node %s", selectedNode.id));
         simulationReward = rollout(mostPromisingNodeState);
         logMessage(String.format("Simulation Reward: %s", simulationReward));
+
       } else {
         simulationReward = LOSS_SCORE;
       }
 
       // Backpropagation
-      updateTree(selectedNode, simulationReward);
+      backup(mostPromisingNode, simulationReward);
     }
 
     if (showTree) {
@@ -147,7 +148,8 @@ public class TreeController {
     }
   }
 
-  public Pair<TreeNode, StateObservation> getMostPromisingLeafNode(final StateObservation initialState) {
+
+  public Pair<TreeNode, StateObservation> selection(final StateObservation initialState) {
     TreeNode selectedNode = rootNode;
     StateObservation newState = initialState.copy();
 
@@ -290,15 +292,15 @@ public class TreeController {
     return getStateScore(copyState, initialScore);
   }
 
-  public void updateTree(final TreeNode selectedNode,
-                         final double updatedValue) {
+  public void backup(final TreeNode selectedNode,
+                     final double updatedValue) {
 
     selectedNode.visits++;
     selectedNode.value = selectedNode.value + updatedValue;
     logMessage(String.format("Node %s has been visited %d times", selectedNode.id, selectedNode.visits));
     logMessage(String.format("Node %s value %s", selectedNode.id, selectedNode.value / selectedNode.visits));
     if (selectedNode.parent != null) {
-      updateTree(selectedNode.parent, updatedValue);
+      backup(selectedNode.parent, updatedValue);
     }
   }
 
