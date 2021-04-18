@@ -30,6 +30,10 @@ public class PropertyLoader {
   public int TREE_SEARCH_SIZE;
   public int SIMULATION_DEPTH;
 
+  // Enhancements
+  public boolean TREE_REUSE;
+  public boolean LOSS_AVOIDANCE;
+
   public PropertyLoader(final String configFile) throws IOException {
 
     InputStream inputStream;
@@ -63,6 +67,9 @@ public class PropertyLoader {
     TREE_SEARCH_SIZE = Integer.parseInt(prop.getProperty("TREE_SEARCH_SIZE", "0"));
     SIMULATION_DEPTH = Integer.parseInt(prop.getProperty("SIMULATION_DEPTH", "0"));
 
+    TREE_REUSE = Boolean.parseBoolean(prop.getProperty("TREE_REUSE", "false"));
+    LOSS_AVOIDANCE = Boolean.parseBoolean(prop.getProperty("LOSS_AVOIDANCE", "false"));
+
     // Sarsa properties, if required
     SARSA_ALFA = Float.parseFloat(prop.getProperty("SARSA_ALFA", "0"));
     SARSA_GAMMA = Float.parseFloat(prop.getProperty("SARSA_GAMMA", "0"));
@@ -88,6 +95,8 @@ public class PropertyLoader {
         return "tracks.singlePlayer.florabranchi.agents.SarsaTrainerAgent";
       case "monte_carlo_visuals":
         return "tracks.singlePlayer.florabranchi.agents.MCTSVisualsAgent";
+      case "parametrized_monte_carlo_visuals":
+        return "tracks.singlePlayer.florabranchi.agents.ParametrizedMonteCarloTreeAgent";
       case "monte_carlo":
       default:
         return "tracks.singlePlayer.florabranchi.agents.MonteCarloTreeAgent";

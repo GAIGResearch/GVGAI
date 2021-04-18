@@ -6,13 +6,15 @@ import java.util.StringJoiner;
 
 import ontology.Types;
 
-public class TreeNode {
+public class Node {
+
+  static int nodeId = 0;
 
   public int id;
 
-  public TreeNode parent;
+  public Node parent;
 
-  public List<TreeNode> children = new ArrayList<>();
+  public List<Node> children = new ArrayList<>();
 
   public double value;
 
@@ -20,10 +22,9 @@ public class TreeNode {
 
   public Types.ACTIONS previousAction;
 
-  public TreeNode(final int nodeId,
-                  final TreeNode parent,
-                  final Types.ACTIONS previousAction) {
-    this.id = nodeId;
+  public Node(final Node parent,
+              final Types.ACTIONS previousAction) {
+    this.id = nodeId++;
     this.parent = parent;
     this.previousAction = previousAction;
   }
@@ -38,3 +39,4 @@ public class TreeNode {
         .toString();
   }
 }
+

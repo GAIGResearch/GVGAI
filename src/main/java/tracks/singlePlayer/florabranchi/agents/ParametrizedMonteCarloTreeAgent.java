@@ -5,6 +5,7 @@ import static tracks.singlePlayer.florabranchi.training.StateEvaluatorHelper.get
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.Random;
 
 import core.game.StateObservation;
@@ -13,8 +14,8 @@ import ontology.Types;
 import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
 import tracks.singlePlayer.florabranchi.training.StateEvaluatorHelper;
+import tracks.singlePlayer.florabranchi.tree.Node;
 import tracks.singlePlayer.florabranchi.tree.TreeHelper;
-import tracks.singlePlayer.florabranchi.tree.TreeNode;
 
 /**
  * Flora Branchi (florabranchi@gmail.com) September 2019
@@ -36,6 +37,10 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   public int TREE_SEARCH_SIZE;
   public int SIMULATION_DEPTH;
 
+  // Enhancements
+  public boolean TREE_REUSE;
+  public boolean LOSS_AVOIDANCE;
+
   //UCB1
   //private final static double C = 1 / Math.sqrt(2);
   private final static double C = Math.sqrt(2);
@@ -44,7 +49,9 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
   private final int maxDistance;
 
-  public TreeNode rootNode;
+  private ACTIONS lastAction = null;
+
+  public Node rootNode;
 
   private Random rand = new Random();
 
@@ -66,6 +73,8 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
     TREE_SEARCH_SIZE = propertyLoader.TREE_SEARCH_SIZE;
     SIMULATION_DEPTH = propertyLoader.SIMULATION_DEPTH;
+    TREE_REUSE = propertyLoader.TREE_REUSE;
+    LOSS_AVOIDANCE = propertyLoader.LOSS_AVOIDANCE;
 
     randomGenerator = new Random();
     actions = stateObs.getAvailableActions();
@@ -87,7 +96,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
   @Override
   protected String getPropertyPath() {
-    return "mcts.properties";
+    return "pmcts.visuals.properties";
   }
 
 
@@ -99,92 +108,77 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
                      final ElapsedCpuTimer elapsedTimer) {
 
     System.out.println("SCORE: " + stateObs.getGameScore());
-    return monteCarloSearch(stateObs, elapsedTimer);
+    final ACTIONS selectedAction = monteCarloSearchParametrized(stateObs, elapsedTimer, lastAction);
+    lastAction = selectedAction;
+    return selectedAction;
   }
 
+  public ACTIONS monteCarloSearchParametrized(final StateObservation stateObs,
+                                              final ElapsedCpuTimer elapsedTimer,
+                                              final ACTIONS previousAction) {
 
-  public ACTIONS monteCarloSearch(final StateObservation stateObs,
-                                  final ElapsedCpuTimer elapsedTimer) {
+    // todo time limit
 
-    // Perform tree Search
-    // todo add time limit here
-    treeSearch(TREE_SEARCH_SIZE, stateObs);
-
-    //final TreeNode bestChild = treeController.getChildWithHighestScore(treeController.rootNode);
-    //final TreeNode bestChild = treeController.getBestChild(treeController.rootNode);
-    //System.out.println("Best child: \n");
-    final TreeNode bestChild = getChildWithHighestScore(rootNode);
-    final ACTIONS bestFoundAction = bestChild.previousAction;
-
-    System.out.println(elapsedTimer.elapsedMillis());
-
-    // todo add prune support
-    //treeController.pruneTree(bestFoundAction);
-
-    return bestFoundAction;
-  }
-
-  public void treeSearch(final int iterations,
-                         final StateObservation initialState) {
-
-    rootNode = new TreeNode(0, null, null);
-
-    treePolicy(iterations, initialState);
-  }
-
-  public void jenJerry(final StateObservation initialState) {
-    rootNode = new TreeNode(0, null, null);
-
-    int children = initialState.getAvailableActions().size();
-
-    expand(rootNode, initialState.getAvailableActions());
-
-    for (int i = 0; i < children; i++) {
-      // Simulation with random children
-      TreeNode selectedNode = rootNode.children.get(i);
-      StateObservation mostPromisingNodeState = initialState.copy();
-      mostPromisingNodeState.advance(selectedNode.previousAction);
-      final double simulationReward = rollout(mostPromisingNodeState);
-      backup(selectedNode, simulationReward);
+    if (TREE_REUSE && previousAction != null) {
+      final Optional<Node> newRoot = rootNode.children.stream()
+          .filter(child -> child.previousAction.equals(previousAction)).findFirst();
+      rootNode = newRoot.orElseGet(() -> new Node(null, null));
+    } else {
+      rootNode = new Node(null, null);
     }
 
-  }
-
-  public void treePolicy(final int iterations,
-                         final StateObservation initialState) {
+    int iterations = TREE_SEARCH_SIZE;
 
     for (int i = 0; i < iterations; i++) {
 
-      //System.out.println("ITERATION " + i);
+      Pair<Node, StateObservation> selectedNodeInfo = parametrizedSelection(stateObs);
 
-      // Selection - Get most promising node
-      final Pair<TreeNode, StateObservation> mostPromisingNodePair = selection(initialState);
+      StateObservation mostPromisingNodeState = selectedNodeInfo.getValue();
+      Node selectedNode = selectedNodeInfo.getKey();
 
-      TreeNode mostPromisingNode = mostPromisingNodePair.getKey();
-      StateObservation mostPromisingNodeState = mostPromisingNodePair.getValue();
-
-      TreeNode selectedNode = mostPromisingNode;
 
       double simulationReward;
-
       // Expansion - Expand node if not terminal
       if (!mostPromisingNodeState.isGameOver()) {
-        expand(mostPromisingNode, mostPromisingNodeState.getAvailableActions());
-
+        expandAllChildren(selectedNode, mostPromisingNodeState.getAvailableActions());
         // Simulation with random children
-        selectedNode = mostPromisingNode.children.get(rand.nextInt(mostPromisingNode.children.size()));
-        mostPromisingNodeState.advance(selectedNode.previousAction);
-        logMessage(String.format("Rollouting selected node %s", selectedNode.id));
-        simulationReward = rollout(mostPromisingNodeState);
-        logMessage(String.format("Simulation Reward: %s", simulationReward));
+        selectedNode = selectedNode.children.get(rand.nextInt(selectedNode.children.size()));
 
+        simulationReward = rollout(mostPromisingNodeState);
       } else {
+
+        // Selected node is game over
+
         simulationReward = LOSS_SCORE;
       }
 
       // Backpropagation
-      backup(mostPromisingNode, simulationReward);
+      backup(selectedNode, simulationReward);
     }
+
+    final Node bestChild = getChildWithHighestScore(rootNode);
+    return bestChild.previousAction;
+  }
+
+  public Pair<Node, StateObservation> parametrizedSelection(final StateObservation initialState) {
+
+    Node selectedNode = rootNode;
+    StateObservation newState = initialState.copy();
+
+    // find left node
+    // currently we add multiple children so this while works
+    while (!selectedNode.children.isEmpty()) {
+
+      // Get node with higher UCB
+      selectedNode = getBestChild(selectedNode);
+      newState.advance(selectedNode.previousAction);
+    }
+    return new Pair<>(selectedNode, newState);
+  }
+
+  public void parametrizedExpansion() {
+
+
   }
 
   private void logMessage(final String message) {
@@ -192,8 +186,8 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   }
 
 
-  public Pair<TreeNode, StateObservation> selection(final StateObservation initialState) {
-    TreeNode selectedNode = rootNode;
+  public Pair<Node, StateObservation> selection(final StateObservation initialState) {
+    Node selectedNode = rootNode;
     StateObservation newState = initialState.copy();
 
     // Go through tree until leaf node is found
@@ -213,6 +207,29 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     rootNode.parent = null;
 
   }
+
+  public void backup(final Node selectedNode,
+                     final double updatedValue) {
+
+    selectedNode.visits++;
+    selectedNode.value = selectedNode.value + updatedValue;
+    logMessage(String.format("Node %s has been visited %d times", selectedNode.id, selectedNode.visits));
+    logMessage(String.format("Node %s value %s", selectedNode.id, selectedNode.value / selectedNode.visits));
+    if (selectedNode.parent != null) {
+      backup(selectedNode.parent, updatedValue);
+    }
+  }
+
+  public void expandAllChildren(final Node node,
+                                final ArrayList<Types.ACTIONS> actions) {
+    Node tempNode = node;
+    logMessage(String.format("Expanding children of node %s", node.id));
+    for (Types.ACTIONS action : actions) {
+      tempNode = new Node(node, action);
+      node.children.add(tempNode);
+    }
+  }
+
 
   public double getGameScore(final StateObservation copyState, final
   double initialScore) {
@@ -330,34 +347,11 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
     }
 
-
     //return getGameScore(copyState, initialScore);
     return getStateScore(copyState, initialScore);
   }
 
-  public void backup(final TreeNode selectedNode,
-                     final double updatedValue) {
-
-    selectedNode.visits++;
-    selectedNode.value = selectedNode.value + updatedValue;
-    logMessage(String.format("Node %s has been visited %d times", selectedNode.id, selectedNode.visits));
-    logMessage(String.format("Node %s value %s", selectedNode.id, selectedNode.value / selectedNode.visits));
-    if (selectedNode.parent != null) {
-      backup(selectedNode.parent, updatedValue);
-    }
-  }
-
-  public void expand(final TreeNode node,
-                     final ArrayList<Types.ACTIONS> actions) {
-    TreeNode tempNode = node;
-    logMessage(String.format("Expanding children of node %s", node.id));
-    for (Types.ACTIONS action : actions) {
-      tempNode = new TreeNode(helper.getNodeId(node.id, action), node, action);
-      node.children.add(tempNode);
-    }
-  }
-
-  public TreeNode getMostVisitedChild(final TreeNode node) {
+  public Node getMostVisitedChild(final Node node) {
 
     if (allValuesEqual(node)) {
       return node.children.get(rand.nextInt(node.children.size()));
@@ -366,7 +360,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     return Collections.max(node.children, Comparator.comparing(c -> c.visits));
   }
 
-  public TreeNode getChildWithHighestScore(final TreeNode node) {
+  public Node getChildWithHighestScore(final Node node) {
 
     if (allValuesEqual(node)) {
       return node.children.get(rand.nextInt(node.children.size()));
@@ -375,7 +369,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     return Collections.max(node.children, Comparator.comparing(c -> c.value));
   }
 
-  public boolean allValuesEqual(final TreeNode node) {
+  public boolean allValuesEqual(final Node node) {
 
     // outros casos de empate
     // retornar lista de nodos com valor parecido
@@ -384,7 +378,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
 
     Double value = null;
-    for (TreeNode child : node.children) {
+    for (Node child : node.children) {
       if (value != null && child.value != value) {
         return false;
       } else if (value == null) {
@@ -395,7 +389,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     return true;
   }
 
-  public TreeNode getBestChild(final TreeNode node) {
+  public Node getBestChild(final Node node) {
 
     if (allValuesEqual(node)) {
       return node.children.get(rand.nextInt(node.children.size()));
@@ -404,7 +398,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     return Collections.max(node.children, Comparator.comparing(c -> getNodeUpperConfidenceBound(c, node.visits)));
   }
 
-  public double getNodeUpperConfidenceBound(final TreeNode node,
+  public double getNodeUpperConfidenceBound(final Node node,
                                             final int parentVisits) {
 
     if (node.visits == 0) {
