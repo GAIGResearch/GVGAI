@@ -41,6 +41,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   public boolean TREE_REUSE;
   public boolean LOSS_AVOIDANCE;
   public boolean RAW_GAME_SCORE;
+  public boolean EXPAND_ALL_CHILD_NODES;
 
   //UCB1
   //private final static double C = 1 / Math.sqrt(2);
@@ -74,9 +75,11 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
     TREE_SEARCH_SIZE = propertyLoader.TREE_SEARCH_SIZE;
     SIMULATION_DEPTH = propertyLoader.SIMULATION_DEPTH;
+
     TREE_REUSE = propertyLoader.TREE_REUSE;
     LOSS_AVOIDANCE = propertyLoader.LOSS_AVOIDANCE;
     RAW_GAME_SCORE = propertyLoader.RAW_GAME_SCORE;
+    EXPAND_ALL_CHILD_NODES = propertyLoader.EXPAND_ALL_CHILD_NODES;
 
     randomGenerator = new Random();
     actions = stateObs.getAvailableActions();
@@ -145,11 +148,10 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
       StateObservation mostPromisingNodeState = selectedNodeInfo.getValue();
       Node selectedNode = selectedNodeInfo.getKey();
 
-
       double simulationReward = 0;
       // Expansion - Expand node if not terminal
       if (!mostPromisingNodeState.isGameOver()) {
-        expandAllChildren(selectedNode, mostPromisingNodeState.getAvailableActions());
+        expansion(selectedNode, mostPromisingNodeState.getAvailableActions());
         // Simulation with random children
         selectedNode = selectedNode.children.get(rand.nextInt(selectedNode.children.size()));
 
@@ -177,9 +179,11 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     Node selectedNode = rootNode;
     StateObservation newState = initialState.copy();
 
-    // find left node
-    // currently we add multiple children so this while works
-    while (!selectedNode.children.isEmpty()) {
+    while (!isExpandable(newState, selectedNode)) {
+
+      if (selectedNode.children.isEmpty()) {
+        return new Pair<>(selectedNode, newState);
+      }
 
       // Get node with higher UCB
       selectedNode = getBestChild(selectedNode);
@@ -190,6 +194,11 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
   private void logMessage(final String message) {
     //logger.log(Level.INFO, message);
+  }
+
+  private boolean isExpandable(final StateObservation initialState,
+                               final Node node) {
+    return node.children.size() < initialState.getAvailableActions().size();
   }
 
   public void backup(final Node selectedNode,
@@ -204,12 +213,17 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     }
   }
 
-  public void expandAllChildren(final Node node,
-                                final ArrayList<Types.ACTIONS> actions) {
-    Node tempNode = node;
+  public void expansion(final Node node,
+                        final ArrayList<Types.ACTIONS> actions) {
     logMessage(String.format("Expanding children of node %s", node.id));
-    for (Types.ACTIONS action : actions) {
-      tempNode = new Node(node, action);
+
+    if (EXPAND_ALL_CHILD_NODES) {
+      for (Types.ACTIONS action : actions) {
+        Node tempNode = new Node(node, action);
+        node.children.add(tempNode);
+      }
+    } else {
+      Node tempNode = new Node(node, actions.get(rand.nextInt(actions.size())));
       node.children.add(tempNode);
     }
   }

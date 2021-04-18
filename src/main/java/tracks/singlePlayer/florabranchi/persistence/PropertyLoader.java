@@ -34,6 +34,7 @@ public class PropertyLoader {
   public boolean TREE_REUSE;
   public boolean LOSS_AVOIDANCE;
   public boolean RAW_GAME_SCORE;
+  public boolean EXPAND_ALL_CHILD_NODES;
 
   public PropertyLoader(final String configFile) throws IOException {
 
@@ -71,6 +72,7 @@ public class PropertyLoader {
     TREE_REUSE = Boolean.parseBoolean(prop.getProperty("TREE_REUSE", "false"));
     LOSS_AVOIDANCE = Boolean.parseBoolean(prop.getProperty("LOSS_AVOIDANCE", "false"));
     RAW_GAME_SCORE = Boolean.parseBoolean(prop.getProperty("RAW_GAME_SCORE", "false"));
+    EXPAND_ALL_CHILD_NODES = Boolean.parseBoolean(prop.getProperty("EXPAND_ALL_CHILD_NODES", "false"));
 
     // Sarsa properties, if required
     SARSA_ALFA = Float.parseFloat(prop.getProperty("SARSA_ALFA", "0"));
