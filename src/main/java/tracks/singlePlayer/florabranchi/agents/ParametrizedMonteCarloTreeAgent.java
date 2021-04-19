@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import core.game.StateObservation;
 import javafx.util.Pair;
@@ -15,12 +17,16 @@ import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
 import tracks.singlePlayer.florabranchi.training.StateEvaluatorHelper;
 import tracks.singlePlayer.florabranchi.tree.Node;
+import tracks.singlePlayer.florabranchi.tree.TreeController;
 import tracks.singlePlayer.florabranchi.tree.TreeHelper;
 
 /**
  * Flora Branchi (florabranchi@gmail.com) September 2019
  */
 public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
+
+  private final static Logger logger = Logger.getLogger(TreeController.class.getName());
+
 
   /**
    * Random generator for the agent.
@@ -144,18 +150,25 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     for (int i = 0; i < iterations; i++) {
 
       Pair<Node, StateObservation> selectedNodeInfo = parametrizedSelection(stateObs);
-
       StateObservation mostPromisingNodeState = selectedNodeInfo.getValue();
       Node selectedNode = selectedNodeInfo.getKey();
 
       double simulationReward = 0;
       // Expansion - Expand node if not terminal
       if (!mostPromisingNodeState.isGameOver()) {
-        expansion(selectedNode, mostPromisingNodeState.getAvailableActions());
-        // Simulation with random children
-        selectedNode = selectedNode.children.get(rand.nextInt(selectedNode.children.size()));
 
+        expansion(selectedNode, mostPromisingNodeState.getAvailableActions());
+
+        // Rollout random children
+        if (!selectedNode.children.isEmpty()) {
+          selectedNode = selectedNode.children.get(rand.nextInt(selectedNode.children.size()));
+          mostPromisingNodeState.advance(selectedNode.previousAction);
+        }
+
+        logMessage(String.format("Rollouting selected node %s", selectedNode.id));
         simulationReward = rollout(mostPromisingNodeState);
+        logMessage(String.format("Simulation Reward: %s", simulationReward));
+
       } else {
 
         // Selected node is game over
@@ -179,21 +192,32 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     Node selectedNode = rootNode;
     StateObservation newState = initialState.copy();
 
-    while (!isExpandable(newState, selectedNode)) {
-
-      if (selectedNode.children.isEmpty()) {
-        return new Pair<>(selectedNode, newState);
+    if (EXPAND_ALL_CHILD_NODES) {
+      while (!selectedNode.children.isEmpty()) {
+        selectedNode = getBestChild(selectedNode);
+        newState.advance(selectedNode.previousAction);
       }
+    } else {
 
-      // Get node with higher UCB
-      selectedNode = getBestChild(selectedNode);
-      newState.advance(selectedNode.previousAction);
+      while (!isExpandable(newState, selectedNode)) {
+
+        if (selectedNode.children.isEmpty()) {
+          logMessage(String.format("Selected node %s with no children", selectedNode.id));
+          return new Pair<>(selectedNode, newState);
+        }
+
+        // Get node with higher UCB
+        selectedNode = getBestChild(selectedNode);
+        newState.advance(selectedNode.previousAction);
+      }
     }
+
+    logMessage(String.format("Selected node %s", selectedNode.id));
     return new Pair<>(selectedNode, newState);
   }
 
   private void logMessage(final String message) {
-    //logger.log(Level.INFO, message);
+    logger.log(Level.INFO, message);
   }
 
   private boolean isExpandable(final StateObservation initialState,
@@ -328,13 +352,12 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     StateObservation copyState = initialState.copy();
 
     int advancementsInRollout = SIMULATION_DEPTH;
-
     while (!copyState.isGameOver() && advancementsInRollout > 0) {
       final ArrayList<Types.ACTIONS> availableActions = copyState.getAvailableActions();
+      // If terminal state, break loop
       if (availableActions.size() < 1) {
         advancementsInRollout = 0;
       } else {
-        final double currentScore = copyState.getGameScore();
         final Types.ACTIONS takeAction = availableActions.get(rand.nextInt(availableActions.size()));
         copyState.advance(takeAction);
         advancementsInRollout--;
