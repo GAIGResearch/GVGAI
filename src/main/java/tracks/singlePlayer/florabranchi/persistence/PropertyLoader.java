@@ -35,6 +35,14 @@ public class PropertyLoader {
   public boolean LOSS_AVOIDANCE;
   public boolean RAW_GAME_SCORE;
   public boolean EXPAND_ALL_CHILD_NODES;
+  public boolean SAFETY_PREPRUNNING;
+
+  public int RAW_SCORE_WEIGHT;
+  public int TOTAL_RESOURCES_SCORE_WEIGHT;
+  public int RESOURCE_SCORE_WEIGHT;
+  public int EXPLORATION_SCORE_WEIGHT;
+  public int MOVABLES_SCORE_WEIGHT;
+  public int PORTALS_SCORE_WEIGHT;
 
   public PropertyLoader(final String configFile) throws IOException {
 
@@ -73,6 +81,15 @@ public class PropertyLoader {
     LOSS_AVOIDANCE = Boolean.parseBoolean(prop.getProperty("LOSS_AVOIDANCE", "false"));
     RAW_GAME_SCORE = Boolean.parseBoolean(prop.getProperty("RAW_GAME_SCORE", "false"));
     EXPAND_ALL_CHILD_NODES = Boolean.parseBoolean(prop.getProperty("EXPAND_ALL_CHILD_NODES", "false"));
+    SAFETY_PREPRUNNING = Boolean.parseBoolean(prop.getProperty("SAFETY_PREPRUNNING", "false"));
+
+    // Heuristic weights
+    RAW_SCORE_WEIGHT = Integer.parseInt(prop.getProperty("RAW_SCORE_WEIGHT", "1"));
+    TOTAL_RESOURCES_SCORE_WEIGHT = Integer.parseInt(prop.getProperty("TOTAL_RESOURCES_SCORE_WEIGHT", "1"));
+    RESOURCE_SCORE_WEIGHT = Integer.parseInt(prop.getProperty("RESOURCE_SCORE_WEIGHT", "1"));
+    EXPLORATION_SCORE_WEIGHT = Integer.parseInt(prop.getProperty("EXPLORATION_SCORE_WEIGHT", "1"));
+    MOVABLES_SCORE_WEIGHT = Integer.parseInt(prop.getProperty("MOVABLES_SCORE_WEIGHT", "1"));
+    PORTALS_SCORE_WEIGHT = Integer.parseInt(prop.getProperty("PORTALS_SCORE_WEIGHT", "1"));
 
     // Sarsa properties, if required
     SARSA_ALFA = Float.parseFloat(prop.getProperty("SARSA_ALFA", "0"));

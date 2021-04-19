@@ -48,6 +48,17 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   public boolean LOSS_AVOIDANCE;
   public boolean RAW_GAME_SCORE;
   public boolean EXPAND_ALL_CHILD_NODES;
+  public boolean SAFETY_PREPRUNNING;
+
+  // Heuristic Weights
+  public int RAW_SCORE_WEIGHT;
+  public int TOTAL_RESOURCES_SCORE_WEIGHT;
+  public int RESOURCE_SCORE_WEIGHT;
+
+  public int EXPLORATION_SCORE_WEIGHT;
+  public int MOVABLES_SCORE_WEIGHT;
+  public int PORTALS_SCORE_WEIGHT;
+
 
   //UCB1
   //private final static double C = 1 / Math.sqrt(2);
@@ -86,6 +97,15 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     LOSS_AVOIDANCE = propertyLoader.LOSS_AVOIDANCE;
     RAW_GAME_SCORE = propertyLoader.RAW_GAME_SCORE;
     EXPAND_ALL_CHILD_NODES = propertyLoader.EXPAND_ALL_CHILD_NODES;
+    SAFETY_PREPRUNNING = propertyLoader.SAFETY_PREPRUNNING;
+
+    // weights
+    RAW_SCORE_WEIGHT = propertyLoader.RAW_SCORE_WEIGHT;
+    TOTAL_RESOURCES_SCORE_WEIGHT = propertyLoader.TOTAL_RESOURCES_SCORE_WEIGHT;
+    RESOURCE_SCORE_WEIGHT = propertyLoader.RESOURCE_SCORE_WEIGHT;
+    EXPLORATION_SCORE_WEIGHT = propertyLoader.EXPLORATION_SCORE_WEIGHT;
+    MOVABLES_SCORE_WEIGHT = propertyLoader.MOVABLES_SCORE_WEIGHT;
+    PORTALS_SCORE_WEIGHT = propertyLoader.PORTALS_SCORE_WEIGHT;
 
     randomGenerator = new Random();
     actions = stateObs.getAvailableActions();
@@ -146,7 +166,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     }
 
     int iterations = TREE_SEARCH_SIZE;
-
+    boolean exitLoop = false;
     for (int i = 0; i < iterations; i++) {
 
       Pair<Node, StateObservation> selectedNodeInfo = parametrizedSelection(stateObs);
@@ -176,11 +196,15 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
           simulationReward = WINNER_SCORE;
         } else if (mostPromisingNodeState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
           simulationReward = LOSS_SCORE;
+          if (SAFETY_PREPRUNNING) {
+            exitLoop = true;
+          }
         }
       }
-
-      // Backpropagation
-      backup(selectedNode, simulationReward);
+      if (!exitLoop) {
+        // Backpropagation
+        backup(selectedNode, simulationReward);
+      }
     }
 
     final Node bestChild = getChildWithHighestScore(rootNode);
@@ -315,12 +339,12 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     final int resources = copyState.getAvatarResources().size();
 
     final double score =
-        1 * scoreDelta
-            + 1 * resources
-            + (2 * resourceScore)
-            + (5 * exporationScore)
-            + (1 * movableScore)
-            + (2 * portalScore);
+        RAW_SCORE_WEIGHT * scoreDelta
+            + TOTAL_RESOURCES_SCORE_WEIGHT * resources
+            + (RESOURCE_SCORE_WEIGHT * resourceScore)
+            + (EXPLORATION_SCORE_WEIGHT * exporationScore)
+            + (MOVABLES_SCORE_WEIGHT * movableScore)
+            + (PORTALS_SCORE_WEIGHT * portalScore);
 
     return score;
   }
