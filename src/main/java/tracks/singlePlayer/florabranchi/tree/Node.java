@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
+import core.game.StateObservation;
 import ontology.Types;
 
 public class Node {
@@ -22,11 +23,15 @@ public class Node {
 
   public Types.ACTIONS previousAction;
 
+  public StateObservation currentGameState;
+
   public Node(final Node parent,
-              final Types.ACTIONS previousAction) {
+              final Types.ACTIONS previousAction,
+              final StateObservation currentGameState) {
     this.id = nodeId++;
     this.parent = parent;
     this.previousAction = previousAction;
+    this.currentGameState = currentGameState;
   }
 
   @Override

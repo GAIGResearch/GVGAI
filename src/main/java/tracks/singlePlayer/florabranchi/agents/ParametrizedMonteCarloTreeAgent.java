@@ -51,7 +51,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   public boolean SAFETY_PREPRUNNING;
 
   public boolean RAW_GAME_SCORE;
-  
+
   // Heuristic Weights
   public int RAW_SCORE_WEIGHT;
   public int TOTAL_RESOURCES_SCORE_WEIGHT;
@@ -159,36 +159,35 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
         rootNode = newRoot.get();
         rootNode.parent = null;
       } else {
-        rootNode = newRoot.orElseGet(() -> new Node(null, null));
+        rootNode = newRoot.orElseGet(() -> new Node(null, null, stateObs));
       }
 
     } else {
-      rootNode = new Node(null, null);
+      rootNode = new Node(null, null, stateObs);
     }
 
     int iterations = TREE_SEARCH_SIZE;
     boolean skipTreeUpdate = false;
     for (int i = 0; i < iterations; i++) {
 
-      Pair<Node, StateObservation> selectedNodeInfo = parametrizedSelection(stateObs);
-      StateObservation mostPromisingNodeState = selectedNodeInfo.getValue();
-      Node selectedNode = selectedNodeInfo.getKey();
+      Node selectedNode = parametrizedSelection();
 
+      Pair<Double, Node> rolloutResults;
       double simulationReward = 0;
       // Expansion - Expand node if not terminal
-      if (!mostPromisingNodeState.isGameOver()) {
+      if (!selectedNode.currentGameState.isGameOver()) {
 
-        expansion(selectedNode, mostPromisingNodeState.getAvailableActions());
+        expansion(selectedNode, selectedNode.currentGameState.getAvailableActions());
 
         // Rollout random children
         if (!selectedNode.children.isEmpty()) {
           selectedNode = selectedNode.children.get(rand.nextInt(selectedNode.children.size()));
-          mostPromisingNodeState.advance(selectedNode.previousAction);
         }
 
         logMessage(String.format("Rollouting selected node %s", selectedNode.id));
-        simulationReward = rollout(mostPromisingNodeState);
-        if (simulationReward == LOSS_SCORE) {
+        rolloutResults = rollout(selectedNode);
+
+        if (rolloutResults.getKey() == LOSS_SCORE) {
           skipTreeUpdate = true;
         }
 
@@ -197,9 +196,9 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
       } else {
 
         // Selected node is game over
-        if (mostPromisingNodeState.getGameWinner().equals(Types.WINNER.PLAYER_WINS)) {
+        if (selectedNode.currentGameState.getGameWinner().equals(Types.WINNER.PLAYER_WINS)) {
           simulationReward = WINNER_SCORE;
-        } else if (mostPromisingNodeState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
+        } else if (selectedNode.currentGameState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
           simulationReward = LOSS_SCORE;
           if (SAFETY_PREPRUNNING) {
             skipTreeUpdate = true;
@@ -216,42 +215,38 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     return bestChild.previousAction;
   }
 
-  public Pair<Node, StateObservation> parametrizedSelection(final StateObservation initialState) {
+  public Node parametrizedSelection() {
 
     Node selectedNode = rootNode;
-    StateObservation newState = initialState.copy();
 
     if (EXPAND_ALL_CHILD_NODES) {
       while (!selectedNode.children.isEmpty()) {
         selectedNode = getBestChild(selectedNode);
-        newState.advance(selectedNode.previousAction);
       }
     } else {
 
-      while (!isExpandable(newState, selectedNode)) {
+      while (!isExpandable(selectedNode)) {
 
         if (selectedNode.children.isEmpty()) {
           logMessage(String.format("Selected node %s with no children", selectedNode.id));
-          return new Pair<>(selectedNode, newState);
+          return selectedNode;
         }
 
         // Get node with higher UCB
         selectedNode = getBestChild(selectedNode);
-        newState.advance(selectedNode.previousAction);
       }
     }
 
     logMessage(String.format("Selected node %s", selectedNode.id));
-    return new Pair<>(selectedNode, newState);
+    return selectedNode;
   }
 
   private void logMessage(final String message) {
     logger.log(Level.INFO, message);
   }
 
-  private boolean isExpandable(final StateObservation initialState,
-                               final Node node) {
-    return node.children.size() < initialState.getAvailableActions().size();
+  private boolean isExpandable(final Node node) {
+    return node.children.size() < node.currentGameState.getAvailableActions().size();
   }
 
   public void backup(final Node selectedNode,
@@ -266,19 +261,25 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     }
   }
 
-  public void expansion(final Node node,
+  public void expansion(final Node parentNode,
                         final ArrayList<Types.ACTIONS> actions) {
-    logMessage(String.format("Expanding children of node %s", node.id));
+    logMessage(String.format("Expanding children of node %s", parentNode.id));
 
     if (EXPAND_ALL_CHILD_NODES) {
       for (Types.ACTIONS action : actions) {
-        Node tempNode = new Node(node, action);
-        node.children.add(tempNode);
+        parentNode.children.add(buildChildNode(parentNode, action));
       }
     } else {
-      Node tempNode = new Node(node, actions.get(rand.nextInt(actions.size())));
-      node.children.add(tempNode);
+      final ACTIONS selectedAction = actions.get(rand.nextInt(actions.size()));
+      parentNode.children.add(buildChildNode(parentNode, selectedAction));
     }
+  }
+
+  public Node buildChildNode(final Node parent,
+                             final Types.ACTIONS action) {
+    final StateObservation newNodeState = parent.currentGameState.copy();
+    newNodeState.advance(action);
+    return new Node(parent, action, newNodeState);
   }
 
 
@@ -376,29 +377,43 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     return Math.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));
   }
 
-  public double rollout(final StateObservation initialState) {
+  public Pair<Double, Node> rollout(final Node node) {
+
+    final StateObservation initialState = node.currentGameState;
     double initialScore = initialState.getGameScore();
     StateObservation copyState = initialState.copy();
 
     int advancementsInRollout = SIMULATION_DEPTH;
+
+    Node currentNode = node;
     while (!copyState.isGameOver() && advancementsInRollout > 0) {
-      final ArrayList<Types.ACTIONS> availableActions = copyState.getAvailableActions();
+
+      final ArrayList<Types.ACTIONS> availableActions = currentNode.currentGameState.getAvailableActions();
       // If terminal state, break loop
       if (availableActions.size() < 1) {
         advancementsInRollout = 0;
       } else {
+
         final Types.ACTIONS takeAction = availableActions.get(rand.nextInt(availableActions.size()));
         copyState.advance(takeAction);
+
+/*        // add nodes to tree
+        final Node newNode = buildChildNode(node, takeAction);
+        node.children.add(newNode);
+        currentNode = newNode;*/
+
         advancementsInRollout--;
       }
-
     }
 
+    double reward = 0;
     if (RAW_GAME_SCORE) {
-      return getRawGameStateScore(copyState, initialScore);
+      reward = getRawGameStateScore(copyState, initialScore);
     } else {
-      return getStateScore(copyState, initialScore);
+      reward = getStateScore(copyState, initialScore);
     }
+
+    return new Pair<Double, Node>(reward, currentNode);
   }
 
   public Node getMostVisitedChild(final Node node) {
