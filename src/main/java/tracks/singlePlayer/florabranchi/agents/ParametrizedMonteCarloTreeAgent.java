@@ -46,15 +46,16 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   // Enhancements
   public boolean TREE_REUSE;
   public boolean LOSS_AVOIDANCE;
-  public boolean RAW_GAME_SCORE;
+
   public boolean EXPAND_ALL_CHILD_NODES;
   public boolean SAFETY_PREPRUNNING;
 
+  public boolean RAW_GAME_SCORE;
+  
   // Heuristic Weights
   public int RAW_SCORE_WEIGHT;
   public int TOTAL_RESOURCES_SCORE_WEIGHT;
   public int RESOURCE_SCORE_WEIGHT;
-
   public int EXPLORATION_SCORE_WEIGHT;
   public int MOVABLES_SCORE_WEIGHT;
   public int PORTALS_SCORE_WEIGHT;
@@ -166,7 +167,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     }
 
     int iterations = TREE_SEARCH_SIZE;
-    boolean exitLoop = false;
+    boolean skipTreeUpdate = false;
     for (int i = 0; i < iterations; i++) {
 
       Pair<Node, StateObservation> selectedNodeInfo = parametrizedSelection(stateObs);
@@ -187,6 +188,10 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
         logMessage(String.format("Rollouting selected node %s", selectedNode.id));
         simulationReward = rollout(mostPromisingNodeState);
+        if (simulationReward == LOSS_SCORE) {
+          skipTreeUpdate = true;
+        }
+
         logMessage(String.format("Simulation Reward: %s", simulationReward));
 
       } else {
@@ -197,11 +202,11 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
         } else if (mostPromisingNodeState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
           simulationReward = LOSS_SCORE;
           if (SAFETY_PREPRUNNING) {
-            exitLoop = true;
+            skipTreeUpdate = true;
           }
         }
       }
-      if (!exitLoop) {
+      if (!skipTreeUpdate) {
         // Backpropagation
         backup(selectedNode, simulationReward);
       }

@@ -12,7 +12,7 @@ public abstract class AbstractAgent extends AbstractPlayer {
 
   protected final static Logger LOGGER = Logger.getLogger("GVGAI_BOT");
 
-  PropertyLoader propertyLoader;
+  public PropertyLoader propertyLoader;
 
   protected AbstractAgent(final StateObservation stateObs,
                           final ElapsedCpuTimer elapsedTimer) {
