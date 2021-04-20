@@ -16,8 +16,11 @@ public class MetaWeights {
 
   private static List<Types.ACTIONS> avallableGameActions = new ArrayList<>();
 
+  private final String IS_DETERMINISTIC = "IS_det";
+
   static {
-    // what are metabot actions??
+    // what are metabot actions?? "naive"
+
 
     avallableGameActions.add(Types.ACTIONS.ACTION_NIL);
     avallableGameActions.add(Types.ACTIONS.ACTION_LEFT);
@@ -26,6 +29,25 @@ public class MetaWeights {
     avallableGameActions.add(Types.ACTIONS.ACTION_DOWN);
     avallableGameActions.add(Types.ACTIONS.ACTION_USE);
     avallableGameActions.add(Types.ACTIONS.ACTION_ESCAPE);
+
+
+    // opt a - mais simples
+    // bool isBrainman isAliens
+    // 0 0
+    // 0 1
+
+
+
+
+    // opt 2 -> game characteristic flags
+    // 0 0 0
+    // 1 0 0
+    // 1 1 0 ....etc
+
+
+
+
+
   }
 
   public TreeMap<Types.ACTIONS, TreeMap<String, Double>> getWeightVectorMap() {

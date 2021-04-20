@@ -27,7 +27,6 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
   private final static Logger logger = Logger.getLogger(TreeController.class.getName());
 
-
   /**
    * Random generator for the agent.
    */
@@ -40,6 +39,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
   protected boolean showTree;
 
+  // flora(todo) add time
   public int TREE_SEARCH_SIZE;
   public int SIMULATION_DEPTH;
 
@@ -59,6 +59,11 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   public int EXPLORATION_SCORE_WEIGHT;
   public int MOVABLES_SCORE_WEIGHT;
   public int PORTALS_SCORE_WEIGHT;
+
+  // todo
+  // breadth first initialization
+  // macroactions
+  // reversal penalty
 
 
   //UCB1
@@ -158,6 +163,13 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
       if (newRoot.isPresent()) {
         rootNode = newRoot.get();
         rootNode.parent = null;
+
+        // flora(todo) how to prune state if different from expected?
+        // Build new root is state is different
+        if (!stateObs.equals(rootNode.currentGameState)) {
+          newRoot.orElseGet(() -> new Node(null, null, stateObs));
+        }
+
       } else {
         rootNode = newRoot.orElseGet(() -> new Node(null, null, stateObs));
       }
@@ -180,7 +192,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
         expansion(selectedNode, selectedNode.currentGameState.getAvailableActions());
 
-        // Rollout random children
+        // Rollout random children or self if no children
         if (!selectedNode.children.isEmpty()) {
           selectedNode = selectedNode.children.get(rand.nextInt(selectedNode.children.size()));
         }
@@ -211,6 +223,8 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
       }
       if (!skipTreeUpdate) {
         // Backpropagation
+
+        // todo(flora) add discount factor
         backup(selectedNode, simulationReward);
       }
     }
@@ -236,6 +250,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
           return selectedNode;
         }
 
+        // fix - best child = unvisited action that is not here
         // Get node with higher UCB
         selectedNode = getBestChild(selectedNode);
       }
@@ -246,7 +261,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   }
 
   private void logMessage(final String message) {
-    logger.log(Level.INFO, message);
+    //logger.log(Level.INFO, message);
   }
 
   private boolean isExpandable(final Node node) {
@@ -321,7 +336,6 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     final StateEvaluatorHelper.ObservableData movablesData = StateEvaluatorHelper.getMovablesData(copyState);
     final StateEvaluatorHelper.ObservableData resourcesData = StateEvaluatorHelper.getResourcesData(copyState);
 
-    // todo get distance to closest enemy
     final Double avgNpcDist = getAverageDistance(npcData);
 
     final double distClosestResource = distanceToClosestObservable(avatarX, avatarY, resourcesData);
