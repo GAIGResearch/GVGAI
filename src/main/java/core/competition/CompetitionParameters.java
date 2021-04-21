@@ -9,7 +9,7 @@ public class CompetitionParameters {
    *
    * ttttttt
    */
-  public static final int ACTION_TIME = 40000;
+  public static final int ACTION_TIME = 40;
 
   /**
    * Milliseconds for controller disqualification, if it returns an action after this time.

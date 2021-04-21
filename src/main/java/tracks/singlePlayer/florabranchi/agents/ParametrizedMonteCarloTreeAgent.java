@@ -48,9 +48,11 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   public boolean EXPAND_ALL_CHILD_NODES;
   public boolean SAFETY_PREPRUNNING;
 
+  public boolean TIME_LIMITATION;
   public boolean RAW_GAME_SCORE;
 
   // Heuristic Weights
+  public int TIME_LIMITATION_IN_MILLIS;
   public int RAW_SCORE_WEIGHT;
   public int TOTAL_RESOURCES_SCORE_WEIGHT;
   public int RESOURCE_SCORE_WEIGHT;
@@ -98,6 +100,8 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     SIMULATION_DEPTH = propertyLoader.SIMULATION_DEPTH;
 
     TREE_REUSE = propertyLoader.TREE_REUSE;
+    TIME_LIMITATION_IN_MILLIS = propertyLoader.TIME_LIMITATION_IN_MILLIS;
+    TIME_LIMITATION = propertyLoader.TIME_LIMITATION;
     LOSS_AVOIDANCE = propertyLoader.LOSS_AVOIDANCE;
     RAW_GAME_SCORE = propertyLoader.RAW_GAME_SCORE;
     EXPAND_ALL_CHILD_NODES = propertyLoader.EXPAND_ALL_CHILD_NODES;
@@ -152,7 +156,15 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
                                               final ElapsedCpuTimer elapsedTimer,
                                               final ACTIONS previousAction) {
 
-    // todo time limit
+    if (!TIME_LIMITATION) {
+      return searchWithIterationLimit(stateObs, previousAction);
+    } else {
+      return searchWithTimeLimitation(stateObs, elapsedTimer, previousAction);
+    }
+  }
+
+  public ACTIONS searchWithIterationLimit(final StateObservation stateObs,
+                                          final ACTIONS previousAction) {
 
     if (TREE_REUSE && previousAction != null) {
       final Optional<Node> newRoot = rootNode.children.stream()
@@ -175,62 +187,122 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     } else {
       rootNode = new Node(null, null, stateObs);
     }
-
     int iterations = TREE_SEARCH_SIZE;
-    boolean skipTreeUpdate = false;
-    double initialScore = rootNode.currentGameState.getGameScore();
     for (int i = 0; i < iterations; i++) {
-
-      Node selectedNode = parametrizedSelection();
-
-      //Pair<Double, Node> rolloutResults;
-      double simulationReward = 0;
-
-      // Expansion - Expand node if not terminal
-      if (!selectedNode.currentGameState.isGameOver()) {
-
-        expansion(selectedNode, selectedNode.currentGameState.getAvailableActions());
-
-        // Rollout random children or self if no children
-
-        if (!selectedNode.children.isEmpty()) {
-          selectedNode = selectedNode.children.get(rand.nextInt(selectedNode.children.size()));
-        }
-
-        logMessage(String.format("Rollouting selected node %s", selectedNode.id));
-        simulationReward = rollout(selectedNode, initialScore);
-
-        if (simulationReward == LOSS_SCORE) {
-          skipTreeUpdate = true;
-        }
-
-        logMessage(String.format("Simulation Reward: %s", simulationReward));
-
-      } else {
-
-        StateObservation currentGameState = selectedNode.currentGameState;
-
-        // Selected node is game over
-        if (currentGameState.getGameWinner().equals(Types.WINNER.PLAYER_WINS)) {
-          simulationReward = WINNER_SCORE;
-        } else if (currentGameState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
-          simulationReward = LOSS_SCORE;
-
-          if (SAFETY_PREPRUNNING) {
-            skipTreeUpdate = true;
-          }
-        }
-      }
-      if (!skipTreeUpdate) {
-        // Backpropagation
-
-        // todo(flora) add discount factor
-        backup(selectedNode, simulationReward);
-      }
+      monteCarloSearch(stateObs);
     }
 
     final Node bestChild = getChildWithHighestScore(rootNode);
     return bestChild.previousAction;
+  }
+
+  public ACTIONS searchWithTimeLimitation(final StateObservation stateObs,
+                                          final ElapsedCpuTimer elapsedTimer,
+                                          final ACTIONS previousAction) {
+
+    final long initial = System.currentTimeMillis();
+    long remaining = TIME_LIMITATION_IN_MILLIS;
+
+    if (TREE_REUSE && previousAction != null) {
+      final Optional<Node> newRoot = rootNode.children.stream()
+          .filter(child -> child.previousAction.equals(previousAction)).findFirst();
+
+      if (newRoot.isPresent()) {
+        rootNode = newRoot.get();
+        rootNode.parent = null;
+
+        // flora(todo) how to prune state if different from expected?
+        // Build new root is state is different
+        if (!stateObs.equals(rootNode.currentGameState)) {
+          newRoot.orElseGet(() -> new Node(null, null, stateObs));
+        }
+
+      } else {
+        rootNode = newRoot.orElseGet(() -> new Node(null, null, stateObs));
+      }
+
+    } else {
+      rootNode = new Node(null, null, stateObs);
+    }
+    double avgTimeTaken = 0;
+    double acumTimeTaken = 0;
+    int iterations = 0;
+    int remainingLimit = 2;
+
+    while (remaining > 2 * avgTimeTaken && remaining > remainingLimit) {
+
+      ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
+      long initialIt = System.currentTimeMillis();
+
+      monteCarloSearch(stateObs);
+
+      //System.out.println(elapsedTimerIteration.elapsedMillis() + " --> " + acumTimeTaken + " (" + remaining + ") it " + iterations);
+      iterations++;
+      long itDelta = System.currentTimeMillis() - initialIt;
+      acumTimeTaken += itDelta;
+      avgTimeTaken = acumTimeTaken / iterations;
+      remaining -= itDelta;
+    }
+
+
+    final long finalTime = System.currentTimeMillis();
+    System.out.println(finalTime - initial);
+    final Node bestChild = getChildWithHighestScore(rootNode);
+    return bestChild.previousAction;
+
+  }
+
+  public void monteCarloSearch(final StateObservation stateObs) {
+
+    boolean skipTreeUpdate = false;
+    final double initialScore = stateObs.getGameScore();
+
+    Node selectedNode = parametrizedSelection();
+
+    //Pair<Double, Node> rolloutResults;
+    double simulationReward = 0;
+
+    // Expansion - Expand node if not terminal
+    if (!selectedNode.currentGameState.isGameOver()) {
+
+      expansion(selectedNode, selectedNode.currentGameState.getAvailableActions());
+
+      // Rollout random children or self if no children
+
+      if (!selectedNode.children.isEmpty()) {
+        selectedNode = selectedNode.children.get(rand.nextInt(selectedNode.children.size()));
+      }
+
+      logMessage(String.format("Rollouting selected node %s", selectedNode.id));
+      simulationReward = rollout(selectedNode, initialScore);
+
+      if (SAFETY_PREPRUNNING && simulationReward == LOSS_SCORE) {
+        skipTreeUpdate = true;
+      }
+
+      logMessage(String.format("Simulation Reward: %s", simulationReward));
+
+    } else {
+
+      StateObservation currentGameState = selectedNode.currentGameState;
+
+      // Selected node is game over
+      if (currentGameState.getGameWinner().equals(Types.WINNER.PLAYER_WINS)) {
+        simulationReward = WINNER_SCORE;
+      } else if (currentGameState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
+        simulationReward = LOSS_SCORE;
+
+        if (SAFETY_PREPRUNNING) {
+          skipTreeUpdate = true;
+        }
+      }
+    }
+    if (!skipTreeUpdate) {
+      // Backpropagation
+
+      // todo(flora) add discount factor
+      backup(selectedNode, simulationReward);
+    }
   }
 
   public Node parametrizedSelection() {

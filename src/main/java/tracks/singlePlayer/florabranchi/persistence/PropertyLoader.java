@@ -27,7 +27,9 @@ public class PropertyLoader {
   public float SARSA_EPSILON;
 
   // MCTS
+  public boolean TIME_LIMITATION;
   public int TREE_SEARCH_SIZE;
+  public int TIME_LIMITATION_IN_MILLIS;
   public int SIMULATION_DEPTH;
 
   // Enhancements
@@ -74,6 +76,8 @@ public class PropertyLoader {
     SHOW_TREE = Boolean.parseBoolean(prop.getProperty("SHOW_TREE"));
 
     // Monte Carlo properties, if required
+    TIME_LIMITATION = Boolean.parseBoolean(prop.getProperty("TIME_LIMITATION", "false"));
+    TIME_LIMITATION_IN_MILLIS = Integer.parseInt(prop.getProperty("TIME_LIMITATION_IN_MILLIS", "40"));
     TREE_SEARCH_SIZE = Integer.parseInt(prop.getProperty("TREE_SEARCH_SIZE", "0"));
     SIMULATION_DEPTH = Integer.parseInt(prop.getProperty("SIMULATION_DEPTH", "0"));
 
