@@ -7,11 +7,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.Random;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import core.game.StateObservation;
-import javafx.util.Pair;
 import ontology.Types;
 import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
@@ -180,6 +178,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
     int iterations = TREE_SEARCH_SIZE;
     boolean skipTreeUpdate = false;
+    double initialScore = rootNode.currentGameState.getGameScore();
     for (int i = 0; i < iterations; i++) {
 
       Node selectedNode = parametrizedSelection();
@@ -193,12 +192,13 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
         expansion(selectedNode, selectedNode.currentGameState.getAvailableActions());
 
         // Rollout random children or self if no children
+
         if (!selectedNode.children.isEmpty()) {
           selectedNode = selectedNode.children.get(rand.nextInt(selectedNode.children.size()));
         }
 
         logMessage(String.format("Rollouting selected node %s", selectedNode.id));
-        simulationReward = rollout(selectedNode);
+        simulationReward = rollout(selectedNode, initialScore);
 
         if (simulationReward == LOSS_SCORE) {
           skipTreeUpdate = true;
@@ -395,15 +395,13 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     return Math.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));
   }
 
-  public Double rollout(final Node node) {
+  public Double rollout(final Node node,
+                        final double initialScore) {
 
     final StateObservation currentState = node.currentGameState.copy();
-    double initialScore = currentState.getGameScore();
-
     int advancementsInRollout = SIMULATION_DEPTH;
 
     //Node currentNode = node;
-
     while (!currentState.isGameOver() && advancementsInRollout > 0) {
 
       final ArrayList<Types.ACTIONS> availableActions = currentState.getAvailableActions();
