@@ -114,8 +114,8 @@ public class PropertyLoader {
 
   public String castAgentPath(final String agentName) {
     switch (agentName) {
-      case "sarsa":
-        return "tracks.singlePlayer.florabranchi.agents.SarsaAgent";
+      case "sarsa_monte_carlo_visuals":
+        return "tracks.singlePlayer.florabranchi.agents.SavedManualExecutionAgent";
       case "sarsa_trainer":
         return "tracks.singlePlayer.florabranchi.agents.SarsaTrainerAgent";
       case "monte_carlo_visuals":

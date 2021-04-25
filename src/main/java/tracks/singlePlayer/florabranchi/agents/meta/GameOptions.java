@@ -2,15 +2,16 @@ package tracks.singlePlayer.florabranchi.agents.meta;
 
 public class GameOptions {
 
-  boolean reuseTree;
+  public boolean reuseTree;
 
-  boolean lossAvoidance;
-  boolean expandAllNodes;
-  boolean safetyPreprunning;
+  public boolean lossAvoidance;
+  public boolean expandAllNodes;
+  public boolean safetyPreprunning;
 
   // exploração produnda /rasa
+  public boolean shallowRollout;
 
-  boolean rawGameScore;
+  public boolean rawGameScore;
 
   // total de ações =  2^flags
 

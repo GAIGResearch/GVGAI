@@ -32,33 +32,7 @@ public class DatabaseClient {
     return null;
   }
 
-  public void createTables() {
 
-    final Statement stmt;
-    Connection conn = null;
-    try {
-      conn = getConnection();
-      stmt = conn.createStatement();
-
-      String sql = "CREATE TABLE REGISTRATION " +
-          "(id INTEGER not NULL, " +
-          " first VARCHAR(255), " +
-          " last VARCHAR(255), " +
-          " age INTEGER, " +
-          " PRIMARY KEY ( id ))";
-
-      stmt.executeUpdate(sql);
-
-    } catch (SQLException throwables) {
-      throwables.printStackTrace();
-    }
-    try {
-      conn.close();
-    } catch (SQLException se) {
-      se.printStackTrace();
-    }
-
-  }
 
   public void connect() {
 

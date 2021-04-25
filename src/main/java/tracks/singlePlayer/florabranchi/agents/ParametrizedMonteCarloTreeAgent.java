@@ -146,10 +146,16 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   public ACTIONS act(final StateObservation stateObs,
                      final ElapsedCpuTimer elapsedTimer) {
 
-    System.out.println("SCORE: " + stateObs.getGameScore());
+    //System.out.println("SCORE: " + stateObs.getGameScore());
     final ACTIONS selectedAction = monteCarloSearchParametrized(stateObs, elapsedTimer, lastAction);
     lastAction = selectedAction;
     return selectedAction;
+  }
+
+  @Override
+  public void result(final StateObservation stateObs,
+                     final ElapsedCpuTimer elapsedCpuTimer) {
+
   }
 
   public ACTIONS monteCarloSearchParametrized(final StateObservation stateObs,
@@ -246,7 +252,8 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
 
     final long finalTime = System.currentTimeMillis();
-    System.out.println(finalTime - initial);
+    //System.out.println(finalTime - initial);
+    System.out.print(iterations + " ");
     final Node bestChild = getChildWithHighestScore(rootNode);
     return bestChild.previousAction;
 

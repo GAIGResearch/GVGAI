@@ -18,6 +18,6 @@ public class SarsaTrainerAgent extends SarsaAgent {
 
   @Override
   protected String getPropertyPath() {
-    return "sarsa.trainer.properties";
+    return "depr/sarsa.trainer.properties";
   }
 }
