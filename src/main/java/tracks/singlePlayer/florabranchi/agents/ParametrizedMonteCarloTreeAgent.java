@@ -47,6 +47,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
   public boolean EXPAND_ALL_CHILD_NODES;
   public boolean SAFETY_PREPRUNNING;
+  public boolean EARLY_INITIALIZATION;
 
   public boolean TIME_LIMITATION;
   public boolean RAW_GAME_SCORE;
@@ -106,6 +107,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     RAW_GAME_SCORE = propertyLoader.RAW_GAME_SCORE;
     EXPAND_ALL_CHILD_NODES = propertyLoader.EXPAND_ALL_CHILD_NODES;
     SAFETY_PREPRUNNING = propertyLoader.SAFETY_PREPRUNNING;
+    EARLY_INITIALIZATION = true;
 
     // weights
     RAW_SCORE_WEIGHT = propertyLoader.RAW_SCORE_WEIGHT;
@@ -131,6 +133,12 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     }
 
     maxDistance = height * width;
+
+    if (EARLY_INITIALIZATION) {
+      searchWithTimeLimitation(stateObs, 800, null);
+    }
+
+    System.out.println(rootNode);
   }
 
   @Override
@@ -165,7 +173,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     if (!TIME_LIMITATION) {
       return searchWithIterationLimit(stateObs, previousAction);
     } else {
-      return searchWithTimeLimitation(stateObs, elapsedTimer, previousAction);
+      return searchWithTimeLimitation(stateObs, TIME_LIMITATION_IN_MILLIS, previousAction);
     }
   }
 
@@ -203,11 +211,12 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   }
 
   public ACTIONS searchWithTimeLimitation(final StateObservation stateObs,
-                                          final ElapsedCpuTimer elapsedTimer,
+                                          long remaining,
                                           final ACTIONS previousAction) {
 
     final long initial = System.currentTimeMillis();
-    long remaining = TIME_LIMITATION_IN_MILLIS;
+    //long remaining = TIME_LIMITATION_IN_MILLIS;
+    // long remaining = elapsedTimer.remainingTimeMillis();
 
     if (TREE_REUSE && previousAction != null) {
       final Optional<Node> newRoot = rootNode.children.stream()
@@ -233,7 +242,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     double avgTimeTaken = 0;
     double acumTimeTaken = 0;
     int iterations = 0;
-    int remainingLimit = 2;
+    int remainingLimit = 10;
 
     while (remaining > 2 * avgTimeTaken && remaining > remainingLimit) {
 
@@ -242,7 +251,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
       monteCarloSearch(stateObs);
 
-      //System.out.println(elapsedTimerIteration.elapsedMillis() + " --> " + acumTimeTaken + " (" + remaining + ") it " + iterations);
+      //System.out.println(elapsedTimerIteration.elapsedMillis() +nodes);
       iterations++;
       long itDelta = System.currentTimeMillis() - initialIt;
       acumTimeTaken += itDelta;
@@ -252,8 +261,9 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
 
     final long finalTime = System.currentTimeMillis();
-    //System.out.println(finalTime - initial);
-    System.out.print(iterations + " ");
+    final long l = finalTime - initial;
+    System.out.println("time: " + l);
+    System.out.println("iterations: " + iterations + " ");
     final Node bestChild = getChildWithHighestScore(rootNode);
     return bestChild.previousAction;
 
