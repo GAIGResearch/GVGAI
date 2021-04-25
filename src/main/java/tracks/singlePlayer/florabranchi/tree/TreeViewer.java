@@ -1,3 +1,4 @@
+/*
 package tracks.singlePlayer.florabranchi.tree;
 
 
@@ -174,12 +175,13 @@ public class TreeViewer implements ViewerListener {
     }
   }
 
-  /**
+*
    * Initial node placement.
    *
    * @param treeDepth        desired fixed tree depth.
    * @param availableActions node children
-   */
+
+
   public void createBaseNodesWithFixedPositionFromTop(int treeDepth,
                                                       List<Types.ACTIONS> availableActions) {
 
@@ -429,9 +431,10 @@ public class TreeViewer implements ViewerListener {
     return castedMap;
   }
 
-  /**
+*
    * Updates viewer tree with explored node values.
-   */
+
+
   public void updateTreeObjects(final int experimentId,
                                 final int gameTick,
                                 final int iteration,
@@ -575,3 +578,4 @@ public class TreeViewer implements ViewerListener {
 
   }
 }
+*/

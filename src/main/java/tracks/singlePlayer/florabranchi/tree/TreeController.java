@@ -30,7 +30,7 @@ public class TreeController {
 
   private Random rand = new Random();
 
-  private TreeViewer treeViewer;
+ // private TreeViewer treeViewer;
 
   private boolean showTree;
 
@@ -46,7 +46,7 @@ public class TreeController {
 
     this.showTree = showTree;
     if (showTree) {
-      treeViewer = new TreeViewer(initialState);
+      //treeViewer = new TreeViewer(initialState);
     }
     ROLLOUT_LOOK_AHEADS = rolloutLookAheads;
     helper = new TreeHelper(initialState.getAvailableActions());
@@ -69,7 +69,7 @@ public class TreeController {
                                       final int iteration,
                                       final Types.ACTIONS selectedAction) {
     if (showTree) {
-      treeViewer.updateTreeObjects(1, stateObs.getGameTick(), iteration, rootNode, stateObs, selectedAction);
+     // treeViewer.updateTreeObjects(1, stateObs.getGameTick(), iteration, rootNode, stateObs, selectedAction);
     }
   }
 

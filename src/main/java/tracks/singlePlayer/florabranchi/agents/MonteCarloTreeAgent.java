@@ -1,3 +1,4 @@
+/*
 package tracks.singlePlayer.florabranchi.agents;
 
 import java.util.ArrayList;
@@ -9,20 +10,37 @@ import tools.ElapsedCpuTimer;
 import tracks.singlePlayer.florabranchi.tree.TreeController;
 import tracks.singlePlayer.florabranchi.tree.TreeNode;
 
+*/
 /**
  * Flora Branchi (florabranchi@gmail.com) September 2019
- */
+ *
+ * Random generator for the agent.
+ *
+ * List of available actions for the agent
+ *
+ * ' initialize all variables for the agent
+ *
+ * @param stateObs     Observation of the current state.
+ * @param elapsedTimer Timer when the action returned is due.
+ *
+ * return Action given selected policy.
+ *//*
+
 public class MonteCarloTreeAgent extends AbstractAgent {
 
   private TreeController treeController;
-  /**
-   * Random generator for the agent.
-   */
+  */
+/**
+ * Random generator for the agent.
+ *//*
+
   protected Random randomGenerator;
 
-  /**
-   * List of available actions for the agent
-   */
+  */
+/**
+ * List of available actions for the agent
+ *//*
+
   protected ArrayList<ACTIONS> actions;
 
   protected boolean showTree;
@@ -30,12 +48,14 @@ public class MonteCarloTreeAgent extends AbstractAgent {
   public int TREE_SEARCH_SIZE;
   public int SIMULATION_DEPTH;
 
-  /**
-   * ' initialize all variables for the agent
-   *
-   * @param stateObs     Observation of the current state.
-   * @param elapsedTimer Timer when the action returned is due.
-   */
+  */
+/**
+ * ' initialize all variables for the agent
+ *
+ * @param stateObs     Observation of the current state.
+ * @param elapsedTimer Timer when the action returned is due.
+ *//*
+
   public MonteCarloTreeAgent(final StateObservation stateObs,
                              final ElapsedCpuTimer elapsedTimer) {
     super(stateObs, elapsedTimer);
@@ -59,9 +79,11 @@ public class MonteCarloTreeAgent extends AbstractAgent {
   }
 
 
-  /**
-   * return Action given selected policy.
-   */
+  */
+/**
+ * return Action given selected policy.
+ *//*
+
   @Override
   public ACTIONS act(final StateObservation stateObs,
                      final ElapsedCpuTimer elapsedTimer) {
@@ -100,3 +122,4 @@ public class MonteCarloTreeAgent extends AbstractAgent {
     return bestFoundAction;
   }
 }
+*/

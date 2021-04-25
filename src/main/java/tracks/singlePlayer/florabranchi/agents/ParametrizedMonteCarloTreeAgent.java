@@ -276,10 +276,6 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
       logMessage(String.format("Rollouting selected node %s", selectedNode.id));
       simulationReward = rollout(selectedNode, initialScore);
 
-      if (SAFETY_PREPRUNNING && simulationReward == LOSS_SCORE) {
-        skipTreeUpdate = true;
-      }
-
       logMessage(String.format("Simulation Reward: %s", simulationReward));
 
     } else {
@@ -291,18 +287,12 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
         simulationReward = WINNER_SCORE;
       } else if (currentGameState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
         simulationReward = LOSS_SCORE;
-
-        if (SAFETY_PREPRUNNING) {
-          skipTreeUpdate = true;
-        }
       }
     }
-    if (!skipTreeUpdate) {
-      // Backpropagation
+    // Backpropagation
 
-      // todo(flora) add discount factor
-      backup(selectedNode, simulationReward);
-    }
+    // todo(flora) add discount factor
+    backup(selectedNode, simulationReward);
   }
 
   public Node parametrizedSelection() {
