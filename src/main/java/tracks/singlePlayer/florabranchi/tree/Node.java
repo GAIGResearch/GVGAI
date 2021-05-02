@@ -25,6 +25,8 @@ public class Node {
 
   public StateObservation currentGameState;
 
+  public int depth;
+
   public Node(final Node parent,
               final Types.ACTIONS previousAction,
               final StateObservation currentGameState) {
@@ -32,6 +34,11 @@ public class Node {
     this.parent = parent;
     this.previousAction = previousAction;
     this.currentGameState = currentGameState;
+    if (parent != null) {
+      depth = parent.depth + 1;
+    } else {
+      depth = 1;
+    }
   }
 
   @Override
@@ -40,6 +47,7 @@ public class Node {
         .add("id=" + id)
         .add("value=" + value)
         .add("visits=" + visits)
+        .add("depth=" + depth)
         .add("previousAction=" + previousAction)
         .toString();
   }

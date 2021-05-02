@@ -28,6 +28,7 @@ public class PropertyLoader {
 
   // MCTS
   public boolean TIME_LIMITATION;
+  public boolean SELECT_HIGHEST_SCORE_CHILD;
   public int TREE_SEARCH_SIZE;
   public int TIME_LIMITATION_IN_MILLIS;
   public int SIMULATION_DEPTH;
@@ -38,6 +39,7 @@ public class PropertyLoader {
   public boolean RAW_GAME_SCORE;
   public boolean EXPAND_ALL_CHILD_NODES;
   public boolean SAFETY_PREPRUNNING;
+  public boolean EARLY_INITIALIZATION;
 
   public int RAW_SCORE_WEIGHT;
   public int TOTAL_RESOURCES_SCORE_WEIGHT;
@@ -77,6 +79,7 @@ public class PropertyLoader {
 
     // Monte Carlo properties, if required
     TIME_LIMITATION = Boolean.parseBoolean(prop.getProperty("TIME_LIMITATION", "false"));
+    SELECT_HIGHEST_SCORE_CHILD = Boolean.parseBoolean(prop.getProperty("SELECT_HIGHEST_SCORE_CHILD", "true"));
     TIME_LIMITATION_IN_MILLIS = Integer.parseInt(prop.getProperty("TIME_LIMITATION_IN_MILLIS", "40"));
     TREE_SEARCH_SIZE = Integer.parseInt(prop.getProperty("TREE_SEARCH_SIZE", "0"));
     SIMULATION_DEPTH = Integer.parseInt(prop.getProperty("SIMULATION_DEPTH", "0"));
@@ -86,6 +89,7 @@ public class PropertyLoader {
     RAW_GAME_SCORE = Boolean.parseBoolean(prop.getProperty("RAW_GAME_SCORE", "false"));
     EXPAND_ALL_CHILD_NODES = Boolean.parseBoolean(prop.getProperty("EXPAND_ALL_CHILD_NODES", "false"));
     SAFETY_PREPRUNNING = Boolean.parseBoolean(prop.getProperty("SAFETY_PREPRUNNING", "false"));
+    EARLY_INITIALIZATION = Boolean.parseBoolean(prop.getProperty("EARLY_INITIALIZATION", "false"));
 
     // Heuristic weights
     RAW_SCORE_WEIGHT = Integer.parseInt(prop.getProperty("RAW_SCORE_WEIGHT", "1"));
