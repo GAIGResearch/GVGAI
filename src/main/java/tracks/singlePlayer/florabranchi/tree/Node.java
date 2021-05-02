@@ -17,7 +17,9 @@ public class Node {
 
   public List<Node> children = new ArrayList<>();
 
-  public double value;
+  public double totalValue;
+
+  public double currentValue;
 
   public int visits;
 
@@ -41,12 +43,19 @@ public class Node {
     }
   }
 
+  public void updateNodeReward(final double reward) {
+    this.visits++;
+    this.totalValue = this.totalValue + reward;
+    this.currentValue = this.totalValue / this.visits;
+  }
+
   @Override
   public String toString() {
     return new StringJoiner(", ", TreeNode.class.getSimpleName() + "[", "]")
         .add("id=" + id)
-        .add("value=" + value)
+        .add("currentValue=" + currentValue)
         .add("visits=" + visits)
+        .add("totalValue=" + totalValue)
         .add("depth=" + depth)
         .add("previousAction=" + previousAction)
         .toString();
