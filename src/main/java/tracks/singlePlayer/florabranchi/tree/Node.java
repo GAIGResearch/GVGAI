@@ -29,6 +29,20 @@ public class Node {
 
   public int depth;
 
+  public void resetTree() {
+    nodeId = 0;
+  }
+
+  // root node builder
+  public Node(final StateObservation currentGameState) {
+    resetTree();
+    this.id = nodeId++;
+    this.parent = null;
+    this.previousAction = null;
+    this.currentGameState = currentGameState;
+    this.depth = 1;
+  }
+
   public Node(final Node parent,
               final Types.ACTIONS previousAction,
               final StateObservation currentGameState) {

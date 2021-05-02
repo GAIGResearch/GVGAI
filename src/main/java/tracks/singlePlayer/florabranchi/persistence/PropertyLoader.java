@@ -32,6 +32,7 @@ public class PropertyLoader {
   public int TREE_SEARCH_SIZE;
   public int TIME_LIMITATION_IN_MILLIS;
   public int SIMULATION_DEPTH;
+  public int MAX_DEPTH;
 
   // Enhancements
   public boolean TREE_REUSE;
@@ -83,6 +84,7 @@ public class PropertyLoader {
     TIME_LIMITATION_IN_MILLIS = Integer.parseInt(prop.getProperty("TIME_LIMITATION_IN_MILLIS", "40"));
     TREE_SEARCH_SIZE = Integer.parseInt(prop.getProperty("TREE_SEARCH_SIZE", "0"));
     SIMULATION_DEPTH = Integer.parseInt(prop.getProperty("SIMULATION_DEPTH", "0"));
+    MAX_DEPTH = Integer.parseInt(prop.getProperty("MAX_DEPTH", "0"));
 
     TREE_REUSE = Boolean.parseBoolean(prop.getProperty("TREE_REUSE", "false"));
     LOSS_AVOIDANCE = Boolean.parseBoolean(prop.getProperty("LOSS_AVOIDANCE", "false"));
