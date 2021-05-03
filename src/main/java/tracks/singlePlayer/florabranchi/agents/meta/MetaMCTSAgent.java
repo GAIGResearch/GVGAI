@@ -1,4 +1,3 @@
-/*
 package tracks.singlePlayer.florabranchi.agents.meta;
 
 import java.util.ArrayList;
@@ -15,21 +14,22 @@ import core.game.StateObservation;
 import ontology.Types;
 import tools.ElapsedCpuTimer;
 import tracks.singlePlayer.florabranchi.GameResults;
-import tracks.singlePlayer.florabranchi.agents.AbstractAgent;
 import tracks.singlePlayer.florabranchi.persistence.PersistenceController;
+import tracks.singlePlayer.florabranchi.persistence.PropertyLoader;
 import tracks.singlePlayer.florabranchi.persistence.weights.OfflineTrainerResults;
-import tracks.singlePlayer.florabranchi.persistence.weights.TrainingWeights;
 import tracks.singlePlayer.florabranchi.training.FeatureVectorController;
 import tracks.singlePlayer.florabranchi.training.LearningAgentDebug;
 import tracks.singlePlayer.florabranchi.training.PossibleHarmfulSprite;
 
-public class MetaMCTSAgent extends AbstractAgent {
+public class MetaMCTSAgent {
 
   public double ALFA = 0.3;
   public double GAMMA = 0.9;
   public double EXPLORATION_EPSILON = 10;
 
-  protected final static Logger LOGGER = Logger.getLogger("GVGAI_BOT");
+  public PropertyLoader propertyLoader;
+
+  protected final static Logger LOGGER = Logger.getLogger("MetaMCTSAgent");
 
   private LearningAgentDebug learningAgentDebug;
 
@@ -40,19 +40,17 @@ public class MetaMCTSAgent extends AbstractAgent {
   protected Random randomGenerator = new Random();
 
   // Data
-  public TrainingWeights trainingWeights;
+  public MetaWeights metaWeights;
 
-  public OfflineTrainerResults previousResults;
+  public MetaWeights previousResults;
 
   // State related data
-  private Types.ACTIONS previousAction;
-  private StateObservation previousState;
+  private EMetaActions previousAction;
+  private GameOptions previousState;
   private double previousScore;
   private int previousEnemyCount;
 
-  public MetaMCTSAgent(final StateObservation stateObs,
-                       final ElapsedCpuTimer elapsedTimer) {
-    super(stateObs, elapsedTimer);
+  public MetaMCTSAgent() {
     ALFA = propertyLoader.SARSA_ALFA;
     GAMMA = propertyLoader.SARSA_GAMMA;
     EXPLORATION_EPSILON = propertyLoader.SARSA_EPSILON;
@@ -62,9 +60,6 @@ public class MetaMCTSAgent extends AbstractAgent {
     gameOptionFeatureController = new GameOptionFeatureController(gameOptions);
     //initializeTrainingWeightVector(featureVectorController.getSize());
 
-    if (displayDebug()) {
-      learningAgentDebug = new LearningAgentDebug(stateObs, previousResults);
-    }
   }
 
   protected boolean displayDebug() {
@@ -75,16 +70,16 @@ public class MetaMCTSAgent extends AbstractAgent {
     return "sarsa.properties";
   }
 
-  @Override
-  public Types.ACTIONS act(final StateObservation stateObs,
-                           final ElapsedCpuTimer elapsedTimer) {
+  public EMetaActions act(final GameOptions gameOptions,
+                          final boolean won,
+                          final int score,
+                          final int iteration) {
 
-    persistenceController.addLog(String.format("Act for Game Tick %d", stateObs.getGameTick()));
+    persistenceController.addLog(String.format("Act for Game Tick %d", iteration));
 
-    return getActionAndUpdateWeightVectorValues(stateObs, elapsedTimer);
+    return getActionAndUpdateWeightVectorValues(gameOptions, won, score);
   }
 
-  @Override
   public void result(final StateObservation stateObs,
                      final ElapsedCpuTimer elapsedCpuTimer) {
 
@@ -110,7 +105,7 @@ public class MetaMCTSAgent extends AbstractAgent {
     final double finalScore = stateObs.getGameScore();
 
     updateRecord(won);
-    updateAfterLastAction(reward, previousAction, previousState);
+    //updateAfterLastAction(reward, previousAction, previousState);
 
     logCurrentWeights();
     persistStatisticsAndWeights(won, finalScore, possibleHarmfulSprite);
@@ -118,7 +113,7 @@ public class MetaMCTSAgent extends AbstractAgent {
     if (learningAgentDebug != null) {
       learningAgentDebug.closeJframe();
     }
-    super.result(stateObs, elapsedCpuTimer);
+    //super.result(stateObs, elapsedCpuTimer);
   }
 
   public void updateRecord(boolean won) {
@@ -128,12 +123,12 @@ public class MetaMCTSAgent extends AbstractAgent {
   }
 
 
-  private void updateWeightVectorForAction(final Types.ACTIONS previousAction,
+  private void updateWeightVectorForAction(final EMetaActions previousAction,
                                            final TreeMap<String, Double> featureVectorForState,
                                            final double delta) {
 
     // Get Weight vector for previous action (a) (W i a)
-    final TreeMap<String, Double> relatedWeightVector = trainingWeights.getWeightVectorForAction(previousAction);
+    final TreeMap<String, Double> relatedWeightVector = metaWeights.getWeightVectorMap().get(previousAction);
 
     for (Map.Entry<String, Double> weightMapEntry : relatedWeightVector.entrySet()) {
 
@@ -143,15 +138,15 @@ public class MetaMCTSAgent extends AbstractAgent {
       final double updatedWeight = weightMapEntry.getValue() + (ALFA * delta * featureVectorForState.get(featureType));
 
       // Update
-      trainingWeights.updateWeightVector(previousAction, featureType, updatedWeight);
+      metaWeights.updateWeightVector(previousAction, featureType, updatedWeight);
     }
   }
 
   // need: a', s', a, s, r
   public void getActionAndUpdateWeightVectorValues(final double stateReward,
-                                                   final Types.ACTIONS previousAction,
+                                                   final EMetaActions previousAction,
                                                    final GameOptions previousState,
-                                                   final Types.ACTIONS currentAction,
+                                                   final EMetaActions currentAction,
                                                    final GameOptions currentState) {
 
     // Get feature values for previous state (s)
@@ -166,8 +161,8 @@ public class MetaMCTSAgent extends AbstractAgent {
   }
 
   public void updateAfterLastAction(final double stateReward,
-                                    final Types.ACTIONS previousAction,
-                                    final StateObservation previousState) {
+                                    final EMetaActions previousAction,
+                                    final GameOptions previousState) {
 
 
     // delta = r - Qa(s)
@@ -175,105 +170,66 @@ public class MetaMCTSAgent extends AbstractAgent {
 
     // Get feature values for previous state (s)
     // fi(s, a)
-    final TreeMap<String, Double> featureVector = featureVectorController.extractFeatureVector(previousState);
+    final TreeMap<String, Double> featureVector = gameOptionFeatureController.extractFeatureVector(previousState);
 
     updateWeightVectorForAction(previousAction, featureVector, delta);
-
   }
 
 
-  public Types.ACTIONS returnRandomAction(final StateObservation stateObservation) {
-
-    if (stateObservation.getAvailableActions().isEmpty()) {
-      return Types.ACTIONS.ACTION_NIL;
-    }
-
-    int index = randomGenerator.nextInt(stateObservation.getAvailableActions().size());
-    return stateObservation.getAvailableActions().get(index);
+  public EMetaActions returnRandomAction() {
+    int index = randomGenerator.nextInt(MetaWeights.avallableGameActions.size());
+    return MetaWeights.avallableGameActions.get(index);
   }
 
 
-  */
-/**
- * Uses default game score to update values
- *
- * Execute dot product between weights and features
- *//*
-
-  public Types.ACTIONS getActionAndUpdateWeightVectorValues(final StateObservation stateObs,
-                                                            final ElapsedCpuTimer elapsedTimer) {
+  public EMetaActions getActionAndUpdateWeightVectorValues(final GameOptions gameOptions,
+                                                           final boolean won,
+                                                           final int reward) {
 
     // Reward = curr score - previous score
-    double stateScore = stateObs.getGameScore();
-    double reward = stateScore - previousScore;
-
-    // try to give more points for killing enemies
-
-    final int enemiesNow = countEnemies(stateObs);
-    boolean killedAlien = previousEnemyCount < enemiesNow;
-    if (killedAlien) {
-      reward += 1;
-    }
-
+    double stateScore = won ? 1000 + reward : -1000;
 
     // First play
     if (previousAction == null) {
-      final Types.ACTIONS currentAction = selectBestPerceivedAction(stateObs);
+      final EMetaActions currentAction = selectBestPerceivedAction(gameOptions);
 
       // a
       previousAction = currentAction;
       // s
-      previousState = stateObs;
+      previousState = gameOptions;
       previousScore = 0;
 
       return currentAction;
     }
 
     // Select best action given current q values for (s') / exploration play
-    final Types.ACTIONS selectedAction = selectBestPerceivedAction(stateObs);
+    final EMetaActions selectedAction = selectBestPerceivedAction(gameOptions);
 
     // need: s, a r, s', a'
-    getActionAndUpdateWeightVectorValues(reward, previousAction, previousState, selectedAction, stateObs);
+    getActionAndUpdateWeightVectorValues(reward, previousAction, previousState, selectedAction, gameOptions);
 
-    final TreeMap<String, Double> featuresForCurrState = featureVectorController.extractFeatureVector(stateObs);
+    final TreeMap<String, Double> featuresForCurrState = gameOptionFeatureController.extractFeatureVector(gameOptions);
 
-    if (learningAgentDebug != null && learningAgentDebug.showJframe) {
+/*    if (learningAgentDebug != null && learningAgentDebug.showJframe) {
       learningAgentDebug.writeResultsToUi(featuresForCurrState, selectedAction, trainingWeights, previousResults.getEpisodeTotalScoreMap());
-    }
+    }*/
 
     // Update last values
     previousAction = selectedAction;
-    previousState = stateObs;
-    previousScore = stateObs.getGameScore();
-    previousEnemyCount = enemiesNow;
-
+    previousState = gameOptions;
+    previousScore = stateScore;
 
     return selectedAction;
   }
 
-  private int countEnemies(final StateObservation stateObs) {
-    final ArrayList<Observation>[] npcPositions = stateObs.getNPCPositions();
-    int count = 0;
-    if (npcPositions != null && npcPositions.length > 0) {
-      count = npcPositions[0].size();
-    }
-    return count;
-  }
-
-
-  */
-/**
- * Execute dot product between weights and features
- *//*
-
   public double getQValueForAction(final GameOptions options,
-                                   final Types.ACTIONS action) {
+                                   final EMetaActions action) {
 
     // Extract feature array
     final TreeMap<String, Double> featureAfterAction = gameOptionFeatureController.extractFeatureVector(options);
 
     // Get related weight vector
-    final TreeMap<String, Double> weightVectorForAction = trainingWeights.getWeightVectorForAction(action);
+    final TreeMap<String, Double> weightVectorForAction = metaWeights.getWeightVectorMap().get(action);
 
     return dotProduct(featureAfterAction, weightVectorForAction);
   }
@@ -282,40 +238,38 @@ public class MetaMCTSAgent extends AbstractAgent {
                                           final double score,
                                           final PossibleHarmfulSprite harmfulSprite) {
 
-    persistenceController.updateScoreProgressionLog(score);
-    final int episode = previousResults.update(trainingWeights, won, score);
+    //persistenceController.updateScoreProgressionLog(score);
+    //final int episode = previousResults.update(trainingWeights, won, score);
 
-    if (harmfulSprite != null) {
-      previousResults.addNewHarmfulSprite(harmfulSprite);
-    }
-
-    persistenceController.saveScoreProgression(episode);
-    persistenceController.persistWeights(previousResults);
+    //persistenceController.saveScoreProgression(episode);
+    //persistenceController.persistWeights(previousResults);
   }
 
 
-  public Types.ACTIONS selectBestPerceivedAction(final GameOptions options) {
+  public EMetaActions selectBestPerceivedAction(final GameOptions options) {
+/*
 
     if (stateObservation.getAvailableActions().isEmpty()) {
       persistenceController.addLog("Selecting NIL action to calculate last weight vector");
       return Types.ACTIONS.ACTION_NIL;
     }
+*/
 
     // Exploration parameter
     int rand = randomGenerator.nextInt(100);
     if (rand <= EXPLORATION_EPSILON) {
-      final Types.ACTIONS randomAction = returnRandomAction(stateObservation);
+      final EMetaActions randomAction = returnRandomAction();
       persistenceController.addLog(String.format("Exploring random action %s", randomAction));
-      return returnRandomAction(stateObservation);
+      return returnRandomAction();
     }
 
     double maxValue = -Double.MAX_VALUE;
-    Types.ACTIONS bestAction = Types.ACTIONS.ACTION_NIL;
+    EMetaActions bestAction = EMetaActions.ACTION_NIL;
 
-    List<Types.ACTIONS> duplicatedActions = new ArrayList<>();
+    List<EMetaActions> duplicatedActions = new ArrayList<>();
 
 
-    for (Types.ACTIONS action : stateObservation.getAvailableActions()) {
+    for (EMetaActions action : MetaWeights.avallableGameActions) {
       final double actionExpectedReward = getQValueForAction(options, action);
       if (actionExpectedReward >= maxValue) {
 
@@ -328,10 +282,10 @@ public class MetaMCTSAgent extends AbstractAgent {
         maxValue = actionExpectedReward;
         bestAction = action;
 
-        // Update Q Values in UI
+/*        // Update Q Values in UI
         if (learningAgentDebug != null && learningAgentDebug.showJframe) {
           learningAgentDebug.updateQLabel(action, maxValue);
-        }
+        }*/
       }
     }
 
@@ -339,7 +293,7 @@ public class MetaMCTSAgent extends AbstractAgent {
     if (duplicatedActions.size() > 1) {
 
       Collections.shuffle(duplicatedActions);
-      final Types.ACTIONS selectedActon = duplicatedActions.get(randomGenerator.nextInt(duplicatedActions.size() - 1));
+      final EMetaActions selectedActon = duplicatedActions.get(randomGenerator.nextInt(duplicatedActions.size() - 1));
       persistenceController.addLog(String.format("Best play: draw for score %s, selected: %s", maxValue, selectedActon));
       return selectedActon;
     }
@@ -350,7 +304,7 @@ public class MetaMCTSAgent extends AbstractAgent {
 
 
   public void logCurrentWeights() {
-    final TreeMap<Types.ACTIONS, TreeMap<String, Double>> weightVectorMap = trainingWeights.getWeightVectorMap();
+    final TreeMap<EMetaActions, TreeMap<String, Double>> weightVectorMap = metaWeights.getWeightVectorMap();
     weightVectorMap.forEach((key, value) -> {
       persistenceController.addLog(String.format("Weight Vector for %s", key));
       value.forEach((key1, value1) -> persistenceController.addLog(String.format("%s - %s", key1, value1)));
@@ -367,18 +321,18 @@ public class MetaMCTSAgent extends AbstractAgent {
     }
 
     // read file
-    previousResults = persistenceController.readPreviousWeights();
+    ///previousResults = persistenceController.readPreviousWeights();
 
     // if could not load initialize
     if (previousResults == null) {
       persistenceController.addLog("No previous results, creating new Weights");
       previousResults = new OfflineTrainerResults(featureVectorSize);
-      trainingWeights = new TrainingWeights(featureVectorSize);
+      metaWeights = new MetaWeights();
       logCurrentWeights();
     } else {
       int previousEpisode = previousResults.getTotalGames();
       persistenceController.addLog(String.format("Loading previous results from episode %s", previousEpisode));
-      trainingWeights = previousResults.getWeightVector();
+      metaWeights = previousResults.getWeightVector();
       logCurrentWeights();
     }
   }
@@ -390,11 +344,10 @@ public class MetaMCTSAgent extends AbstractAgent {
     for (String property : FeatureVectorController.getAvailableProperties()) {
       sum += a.get(property) * b.get(property);
     }
-
     return sum;
   }
 
 
 }
 
-*/
+

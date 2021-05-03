@@ -1,6 +1,8 @@
 package tracks.singlePlayer.florabranchi.agents.meta;
 
-public class RunOptions {
+import java.io.Serializable;
+
+public class RunOptions implements Serializable {
 
   public String game;
 

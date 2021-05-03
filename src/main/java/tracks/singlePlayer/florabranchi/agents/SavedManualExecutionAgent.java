@@ -13,6 +13,12 @@ public class SavedManualExecutionAgent extends ParametrizedMonteCarloTreeAgent {
   }
 
   @Override
+  public void result(final StateObservation stateObs,
+                     final ElapsedCpuTimer elapsedCpuTimer) {
+
+  }
+
+  @Override
   protected String getPropertyPath() {
     return "sarsa.properties";
   }

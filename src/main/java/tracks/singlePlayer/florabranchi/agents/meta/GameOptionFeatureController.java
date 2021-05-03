@@ -11,17 +11,9 @@ public class GameOptionFeatureController {
   private GameOptions gameOptions;
 
   private static final String TREE_REUSE = "TREE_REUSE";
-  private static final String LOSS_AVOIDANCE = "LOSS_AVOIDANCE";
   private static final String RAW_GAME_SCORE = "RAW_GAME_SCORE";
   private static final String EXPAND_ALL_CHILD_NODES = "EXPAND_ALL_CHILD_NODES";
-  private static final String SAFETY_PREPRUNNING = "SAFETY_PREPRUNNING";
 
-  private static final String RAW_SCORE_WEIGHT = "RAW_SCORE_WEIGHT";
-  private static final String TOTAL_RESOURCES_SCORE_WEIGHT = "TOTAL_RESOURCES_SCORE_WEIGHT";
-  private static final String RESOURCE_SCORE_WEIGHT = "RESOURCE_SCORE_WEIGHT";
-  private static final String EXPLORATION_SCORE_WEIGHT = "EXPLORATION_SCORE_WEIGHT";
-  private static final String MOVABLES_SCORE_WEIGHT = "MOVABLES_SCORE_WEIGHT";
-  private static final String PORTALS_SCORE_WEIGHT = "PORTALS_SCORE_WEIGHT";
 
   public static TreeSet<String> availableProperties = new TreeSet<>();
 
@@ -31,17 +23,8 @@ public class GameOptionFeatureController {
 
   static {
     availableProperties.add(TREE_REUSE);
-    availableProperties.add(LOSS_AVOIDANCE);
     availableProperties.add(RAW_GAME_SCORE);
     availableProperties.add(EXPAND_ALL_CHILD_NODES);
-    availableProperties.add(SAFETY_PREPRUNNING);
-
-    availableProperties.add(RAW_SCORE_WEIGHT);
-    availableProperties.add(TOTAL_RESOURCES_SCORE_WEIGHT);
-    availableProperties.add(RESOURCE_SCORE_WEIGHT);
-    availableProperties.add(EXPLORATION_SCORE_WEIGHT);
-    availableProperties.add(MOVABLES_SCORE_WEIGHT);
-    availableProperties.add(PORTALS_SCORE_WEIGHT);
   }
 
   public double getFeatureNormalizedValue(final String property, double value,
