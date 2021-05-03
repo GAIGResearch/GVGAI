@@ -1,6 +1,8 @@
 package tracks.singlePlayer.florabranchi.agents.meta;
 
-import static tracks.singlePlayer.florabranchi.agents.meta.EMetaActions.TREE_REUSE_OFF;
+import static tracks.singlePlayer.florabranchi.agents.meta.EMetaActions.NIL;
+import static tracks.singlePlayer.florabranchi.agents.meta.EMetaActions.TURN_TREE_REUSE_OFF;
+import static tracks.singlePlayer.florabranchi.agents.meta.EMetaActions.TURN_TREE_REUSE_ON;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -21,7 +23,9 @@ public class MetaWeights implements Serializable {
 
   static {
 
-    avallableGameActions.add(TREE_REUSE_OFF);
+    avallableGameActions.add(NIL);
+    avallableGameActions.add(TURN_TREE_REUSE_ON);
+    avallableGameActions.add(TURN_TREE_REUSE_OFF);
 
     // what are metabot actions?? "naive"
     // opt a - mais simples

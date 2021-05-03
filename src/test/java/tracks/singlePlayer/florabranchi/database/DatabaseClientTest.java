@@ -80,7 +80,7 @@ public class DatabaseClientTest {
     MetaWeights metaWeights = new MetaWeights();
     TreeMap treeMap = new TreeMap<>();
     treeMap.put("1", 123);
-    metaWeights.getWeightVectorMap().put(EMetaActions.IS_ALIENS, treeMap);
+    //metaWeights.getWeightVectorMap().put(EMetaActions.IS_ALIENS, treeMap);
 
     SavedMetaWeights savedMetaWeights = new SavedMetaWeights(runOptions);
     savedMetaWeights.metaWeights = metaWeights;

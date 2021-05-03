@@ -1,5 +1,6 @@
 package tracks.singlePlayer.florabranchi.agents.meta;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,15 +9,11 @@ import java.util.Random;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
-import core.game.Event;
-import core.game.Observation;
-import core.game.StateObservation;
-import ontology.Types;
-import tools.ElapsedCpuTimer;
 import tracks.singlePlayer.florabranchi.GameResults;
+import tracks.singlePlayer.florabranchi.database.DatabaseClient;
+import tracks.singlePlayer.florabranchi.database.MetaWeightsDAO;
 import tracks.singlePlayer.florabranchi.persistence.PersistenceController;
 import tracks.singlePlayer.florabranchi.persistence.PropertyLoader;
-import tracks.singlePlayer.florabranchi.persistence.weights.OfflineTrainerResults;
 import tracks.singlePlayer.florabranchi.training.FeatureVectorController;
 import tracks.singlePlayer.florabranchi.training.LearningAgentDebug;
 import tracks.singlePlayer.florabranchi.training.PossibleHarmfulSprite;
@@ -50,7 +47,17 @@ public class MetaMCTSAgent {
   private double previousScore;
   private int previousEnemyCount;
 
+  MetaWeightsDAO metaWeightsDAO = new MetaWeightsDAO(new DatabaseClient());
+
   public MetaMCTSAgent() {
+
+    try {
+      propertyLoader = new PropertyLoader(getPropertyPath());
+
+    } catch (IOException ex) {
+      LOGGER.severe("Error loading properties");
+    }
+
     ALFA = propertyLoader.SARSA_ALFA;
     GAMMA = propertyLoader.SARSA_GAMMA;
     EXPLORATION_EPSILON = propertyLoader.SARSA_EPSILON;
@@ -58,7 +65,7 @@ public class MetaMCTSAgent {
     GameOptions gameOptions = new GameOptions();
 
     gameOptionFeatureController = new GameOptionFeatureController(gameOptions);
-    //initializeTrainingWeightVector(featureVectorController.getSize());
+    initializeTrainingWeightVector();
 
   }
 
@@ -70,45 +77,36 @@ public class MetaMCTSAgent {
     return "sarsa.properties";
   }
 
-  public EMetaActions act(final GameOptions gameOptions,
-                          final boolean won,
-                          final int score,
-                          final int iteration) {
 
-    persistenceController.addLog(String.format("Act for Game Tick %d", iteration));
-
-    return getActionAndUpdateWeightVectorValues(gameOptions, won, score);
-  }
-
-  public void result(final StateObservation stateObs,
-                     final ElapsedCpuTimer elapsedCpuTimer) {
+  public void result(final GameOptions gameOptions,
+                     final boolean won,
+                     final int score,
+                     final int iteration) {
+    persistenceController.addLog(String.format("Result for Game %d", iteration));
+    getActionAndUpdateWeightVectorValues(gameOptions, won, score);
 
     // last update - reward if won, negative if loss
-    final Types.WINNER gameWinner = stateObs.getGameWinner();
     double reward = 5000;
-    boolean won = false;
     Integer harmfulSpriteId = null;
     PossibleHarmfulSprite possibleHarmfulSprite = null;
 
-    if (gameWinner.equals(Types.WINNER.PLAYER_LOSES)) {
+    if (!won) {
       reward = -reward;
-      final Event last = stateObs.getEventsHistory().last();
 
-      LOGGER.info(String.format("Agent LOST - score: [%s]", stateObs.getGameScore()));
+      LOGGER.info(String.format("Agent LOST - score: [%s]", iteration));
       persistenceController.addLog("Player lost");
     } else {
-      won = true;
-      LOGGER.info(String.format("Agent WON - score: [%s]", stateObs.getGameScore()));
+      LOGGER.info(String.format("Agent WON - score: [%s]", iteration));
       persistenceController.addLog("Player won");
     }
 
-    final double finalScore = stateObs.getGameScore();
+    final double finalScore = score;
 
-    updateRecord(won);
-    //updateAfterLastAction(reward, previousAction, previousState);
+    //updateRecord(won);
+    updateAfterLastAction(reward, previousAction, previousState);
 
     logCurrentWeights();
-    persistStatisticsAndWeights(won, finalScore, possibleHarmfulSprite);
+    persistStatisticsAndWeights(won, finalScore);
 
     if (learningAgentDebug != null) {
       learningAgentDebug.closeJframe();
@@ -235,8 +233,7 @@ public class MetaMCTSAgent {
   }
 
   public void persistStatisticsAndWeights(final boolean won,
-                                          final double score,
-                                          final PossibleHarmfulSprite harmfulSprite) {
+                                          final double score) {
 
     //persistenceController.updateScoreProgressionLog(score);
     //final int episode = previousResults.update(trainingWeights, won, score);
@@ -264,7 +261,7 @@ public class MetaMCTSAgent {
     }
 
     double maxValue = -Double.MAX_VALUE;
-    EMetaActions bestAction = EMetaActions.ACTION_NIL;
+    EMetaActions bestAction = EMetaActions.NIL;
 
     List<EMetaActions> duplicatedActions = new ArrayList<>();
 
@@ -312,7 +309,9 @@ public class MetaMCTSAgent {
   }
 
 
-  public void initializeTrainingWeightVector(int featureVectorSize) {
+  public void initializeTrainingWeightVector() {
+
+    final long idForNow = 1;
 
     if (previousResults != null) {
       persistenceController.addLog("Previous results still in memory");
@@ -321,18 +320,18 @@ public class MetaMCTSAgent {
     }
 
     // read file
-    ///previousResults = persistenceController.readPreviousWeights();
+    MetaWeights previousResults = metaWeightsDAO.getMetaWeights(idForNow);
 
     // if could not load initialize
     if (previousResults == null) {
       persistenceController.addLog("No previous results, creating new Weights");
-      previousResults = new OfflineTrainerResults(featureVectorSize);
-      metaWeights = new MetaWeights();
+      previousResults = new MetaWeights();
+      this.metaWeights = new MetaWeights();
       logCurrentWeights();
     } else {
-      int previousEpisode = previousResults.getTotalGames();
-      persistenceController.addLog(String.format("Loading previous results from episode %s", previousEpisode));
-      metaWeights = previousResults.getWeightVector();
+      /*int previousEpisode = previousResults.getTotalGames();*/
+      //persistenceController.addLog(String.format("Loading previous results from episode %s", previousEpisode));
+      this.metaWeights = previousResults;
       logCurrentWeights();
     }
   }
@@ -341,7 +340,7 @@ public class MetaMCTSAgent {
   public double dotProduct(TreeMap<String, Double> a,
                            TreeMap<String, Double> b) {
     double sum = 0;
-    for (String property : FeatureVectorController.getAvailableProperties()) {
+    for (String property : GameOptionFeatureController.getAvailableProperties()) {
       sum += a.get(property) * b.get(property);
     }
     return sum;

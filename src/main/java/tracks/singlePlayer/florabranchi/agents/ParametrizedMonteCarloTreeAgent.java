@@ -86,15 +86,8 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
   private final int[][] visitCount;
 
-  /**
-   * ' initialize all variables for the agent
-   *
-   * @param stateObs     Observation of the current state.
-   * @param elapsedTimer Timer when the action returned is due.
-   */
-  public ParametrizedMonteCarloTreeAgent(final StateObservation stateObs,
-                                         final ElapsedCpuTimer elapsedTimer) {
-    super(stateObs, elapsedTimer);
+  public void reloadProperties() {
+
     showTree = propertyLoader.SHOW_TREE;
 
     TREE_SEARCH_SIZE = propertyLoader.TREE_SEARCH_SIZE;
@@ -111,13 +104,26 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     SAFETY_PREPRUNNING = propertyLoader.SAFETY_PREPRUNNING;
     EARLY_INITIALIZATION = propertyLoader.EARLY_INITIALIZATION;
 
-    // weights
     RAW_SCORE_WEIGHT = propertyLoader.RAW_SCORE_WEIGHT;
     TOTAL_RESOURCES_SCORE_WEIGHT = propertyLoader.TOTAL_RESOURCES_SCORE_WEIGHT;
     RESOURCE_SCORE_WEIGHT = propertyLoader.RESOURCE_SCORE_WEIGHT;
     EXPLORATION_SCORE_WEIGHT = propertyLoader.EXPLORATION_SCORE_WEIGHT;
     MOVABLES_SCORE_WEIGHT = propertyLoader.MOVABLES_SCORE_WEIGHT;
     PORTALS_SCORE_WEIGHT = propertyLoader.PORTALS_SCORE_WEIGHT;
+  }
+
+  /**
+   * ' initialize all variables for the agent
+   *
+   * @param stateObs     Observation of the current state.
+   * @param elapsedTimer Timer when the action returned is due.
+   */
+  public ParametrizedMonteCarloTreeAgent(final StateObservation stateObs,
+                                         final ElapsedCpuTimer elapsedTimer) {
+    super(stateObs, elapsedTimer);
+    showTree = propertyLoader.SHOW_TREE;
+
+    reloadProperties();
 
     randomGenerator = new Random();
 

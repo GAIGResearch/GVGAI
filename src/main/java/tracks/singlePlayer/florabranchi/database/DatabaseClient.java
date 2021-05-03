@@ -48,22 +48,28 @@ public class DatabaseClient {
     ResultSet rs = pstmt.executeQuery();
     rs.next();
 
-    Object object = rs.getObject(1);
+    if (rs.next()) {
 
-    byte[] buf = rs.getBytes(1);
-    ObjectInputStream objectIn = null;
-    if (buf != null)
-      objectIn = new ObjectInputStream(new ByteArrayInputStream(buf));
+      Object object = rs.getObject(1);
 
-    Object deSerializedObject = objectIn.readObject();
+      byte[] buf = rs.getBytes(1);
+      ObjectInputStream objectIn = null;
+      if (buf != null)
+        objectIn = new ObjectInputStream(new ByteArrayInputStream(buf));
+
+      Object deSerializedObject = objectIn.readObject();
+
+      System.out.println("Java object de-serialized from database. Object: "
+          + deSerializedObject + " Classname: "
+          + deSerializedObject.getClass().getName());
+      return (SavedMetaWeights) deSerializedObject;
+    }
+
 
     rs.close();
     pstmt.close();
 
-    System.out.println("Java object de-serialized from database. Object: "
-        + deSerializedObject + " Classname: "
-        + deSerializedObject.getClass().getName());
-    return (SavedMetaWeights) deSerializedObject;
+    return null;
   }
 
 

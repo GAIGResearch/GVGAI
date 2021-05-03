@@ -59,7 +59,7 @@ public class GameOptionFeatureController {
     // Add default values in case of unavalable information
     TreeMap<String, Double> propertyMap = new TreeMap<>();
     availableProperties.forEach(entry -> propertyMap.put(entry, 0d));
-
+    propertyMap.put(TREE_REUSE, gameOptions.reuseTree ? 1d : 0);
 
     return propertyMap;
 

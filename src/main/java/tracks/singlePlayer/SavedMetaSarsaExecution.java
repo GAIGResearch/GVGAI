@@ -9,14 +9,16 @@ import java.util.logging.Logger;
 
 import tools.Utils;
 import tracks.ArcadeMachine;
+import tracks.singlePlayer.florabranchi.agents.meta.EMetaActions;
 import tracks.singlePlayer.florabranchi.agents.meta.GameOptions;
+import tracks.singlePlayer.florabranchi.agents.meta.MetaMCTSAgent;
 import tracks.singlePlayer.florabranchi.agents.meta.RunOptions;
 import tracks.singlePlayer.florabranchi.persistence.PropertyLoader;
 
 /**
  * author: Flora Branchi (florabranchi@gmail.com)
  */
-public class SavedExecution {
+public class SavedMetaSarsaExecution {
 
 
   private final static Logger LOGGER = Logger.getLogger("GVGAI_BOT");
@@ -86,11 +88,25 @@ public class SavedExecution {
       levelFiles = new String[1];
       levelFiles[0] = level1;
 
+      MetaMCTSAgent agent = new MetaMCTSAgent();
+      agent.initializeTrainingWeightVector();
+
       for (int i = 0; i < episodes; i++) {
         final double[] doubles = ArcadeMachine.runOneGame(game, level1, visuals, selectedAgent, recordActionsFile, seed, 0);
         System.out.println(Arrays.toString(doubles));
+
+        final boolean won = doubles[0] == 1;
+        final int score = (int) doubles[1];
+        final int ticks = (int) doubles[2];
+
+        agent.result(gameOptions, won, score, ticks);
+        //selectedAgent.
+
+        final EMetaActions actions = agent.getActionAndUpdateWeightVectorValues(gameOptions, won, score);
+
+        gameOptions.act(actions);
       }
-      
+
       //ArcadeMachine.runGames(game, levelFiles, episodes, selectedAgent, null);
     }
 
