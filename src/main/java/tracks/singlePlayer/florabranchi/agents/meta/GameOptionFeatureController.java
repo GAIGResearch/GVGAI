@@ -11,6 +11,7 @@ public class GameOptionFeatureController {
   private GameOptions gameOptions;
 
   private static final String TREE_REUSE = "TREE_REUSE";
+  private static final String MACRO_ACTIONS = "MACRO_ACTIONS";
   private static final String RAW_GAME_SCORE = "RAW_GAME_SCORE";
   private static final String EXPAND_ALL_CHILD_NODES = "EXPAND_ALL_CHILD_NODES";
 
@@ -25,6 +26,7 @@ public class GameOptionFeatureController {
     availableProperties.add(TREE_REUSE);
     availableProperties.add(RAW_GAME_SCORE);
     availableProperties.add(EXPAND_ALL_CHILD_NODES);
+    availableProperties.add(MACRO_ACTIONS);
   }
 
   public double getFeatureNormalizedValue(final String property, double value,
@@ -61,6 +63,7 @@ public class GameOptionFeatureController {
     availableProperties.forEach(entry -> propertyMap.put(entry, 0d));
     propertyMap.put(TREE_REUSE, gameOptions.reuseTree ? 1d : 0);
     propertyMap.put(RAW_GAME_SCORE, gameOptions.rawGameScore ? 1d : 0);
+    propertyMap.put(MACRO_ACTIONS, gameOptions.macroActions ? 1d : 0);
 
     return propertyMap;
 

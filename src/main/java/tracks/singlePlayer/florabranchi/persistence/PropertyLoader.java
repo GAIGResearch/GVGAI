@@ -35,8 +35,10 @@ public class PropertyLoader {
   public static int SIMULATION_DEPTH;
   public static int MAX_DEPTH;
 
+
   // Enhancements
   public static boolean TREE_REUSE;
+  public static boolean MACRO_ACTIONS;
   public static boolean LOSS_AVOIDANCE;
   public static boolean RAW_GAME_SCORE;
   public static boolean EXPAND_ALL_CHILD_NODES;
@@ -88,6 +90,7 @@ public class PropertyLoader {
     MAX_DEPTH = Integer.parseInt(prop.getProperty("MAX_DEPTH", "0"));
 
     TREE_REUSE = Boolean.parseBoolean(prop.getProperty("TREE_REUSE", "false"));
+    MACRO_ACTIONS = Boolean.parseBoolean(prop.getProperty("MACRO_ACTIONS", "false"));
     LOSS_AVOIDANCE = Boolean.parseBoolean(prop.getProperty("LOSS_AVOIDANCE", "false"));
     RAW_GAME_SCORE = Boolean.parseBoolean(prop.getProperty("RAW_GAME_SCORE", "false"));
     EXPAND_ALL_CHILD_NODES = Boolean.parseBoolean(prop.getProperty("EXPAND_ALL_CHILD_NODES", "false"));

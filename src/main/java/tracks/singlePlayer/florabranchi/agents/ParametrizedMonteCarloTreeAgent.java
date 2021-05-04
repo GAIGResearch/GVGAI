@@ -58,6 +58,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   public boolean TIME_LIMITATION;
   public boolean SELECT_HIGHEST_SCORE_CHILD;
   public boolean RAW_GAME_SCORE;
+  public boolean MACRO_ACTIONS;
 
   // Heuristic Weights
   public int TIME_LIMITATION_IN_MILLIS;
@@ -81,6 +82,12 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
   private final int[][] visitCount;
 
+  private static int MACRO_ACTIONS_DURATION = 2;
+
+  private ACTIONS currentMacroAction;
+  private int remainingMacroActionRepetitions;
+  boolean resetAlgorithm = false;
+
   public void reloadProperties() {
 
     showTree = propertyLoader.SHOW_TREE;
@@ -90,6 +97,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     MAX_DEPTH = PropertyLoader.MAX_DEPTH;
 
     TREE_REUSE = PropertyLoader.TREE_REUSE;
+    MACRO_ACTIONS = PropertyLoader.MACRO_ACTIONS;
     TIME_LIMITATION_IN_MILLIS = PropertyLoader.TIME_LIMITATION_IN_MILLIS;
     TIME_LIMITATION = PropertyLoader.TIME_LIMITATION;
     SELECT_HIGHEST_SCORE_CHILD = PropertyLoader.SELECT_HIGHEST_SCORE_CHILD;
@@ -183,37 +191,91 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
                                               final ElapsedCpuTimer elapsedTimer,
                                               final ACTIONS previousAction) {
 
-    if (TREE_REUSE && previousAction != null) {
-      final Optional<Node> newRoot = rootNode.children.stream()
-          .filter(child -> child.previousAction.equals(previousAction)).findFirst();
 
-      if (newRoot.isPresent() && stateObs.equals(rootNode.currentGameState)) {
-        rootNode = newRoot.get();
-        rootNode.parent = null;
+    if (MACRO_ACTIONS) {
 
-        // fix depth
-        final List<Node> nodes = returnAllNodes(rootNode);
-        nodes.forEach(node -> node.depth--);
+      if (currentMacroAction == null) {
+        System.out.println("Setting first MA");
+        rootNode = buildRootNode(stateObs);
+        decideMacro(stateObs);
+      } else {
+        System.out.printf("Current MA: %s Remaining reps: %d \n", currentMacroAction, remainingMacroActionRepetitions);
 
-        //todo add decay
+        for (int i = 0; i < remainingMacroActionRepetitions; i++) {
+          stateObs.advance(currentMacroAction);
+        }
 
+        if (remainingMacroActionRepetitions > 0) {
+          System.out.println("Macro action is set. Remaining uses: " + remainingMacroActionRepetitions);
+          if (resetAlgorithm) {
+            System.out.println("Reseting algorithm");
+            rootNode = buildRootNode(stateObs);
+            search(stateObs);
+            resetAlgorithm = false;
+          }
+        } else {
+          System.out.println("New MacroAction: " + remainingMacroActionRepetitions);
+          decideMacro(stateObs);
+        }
+      }
+
+      remainingMacroActionRepetitions--;
+      System.out.println("Executing " + currentMacroAction);
+      return currentMacroAction;
+
+    } else {
+      // Regular search
+
+      if (TREE_REUSE && previousAction != null) {
+        final Optional<Node> newRoot = rootNode.children.stream()
+            .filter(child -> child.previousAction.equals(previousAction)).findFirst();
+
+        if (newRoot.isPresent() && stateObs.equals(rootNode.currentGameState)) {
+          rootNode = newRoot.get();
+          rootNode.parent = null;
+
+          // fix depth
+          final List<Node> nodes = returnAllNodes(rootNode);
+          nodes.forEach(node -> node.depth--);
+
+          //todo add decay
+
+        } else {
+          rootNode = buildRootNode(stateObs);
+        }
       } else {
         rootNode = buildRootNode(stateObs);
       }
-    } else {
-      rootNode = buildRootNode(stateObs);
+
+      search(stateObs);
     }
+
+    return nextMove();
+  }
+
+  private ACTIONS decideMacro(final StateObservation stateObs) {
+    System.out.println("No macro action set. serching");
+    remainingMacroActionRepetitions = MACRO_ACTIONS_DURATION;
+    search(stateObs);
+    currentMacroAction = nextMove();
+    resetAlgorithm = true;
+    return currentMacroAction;
+  }
+
+  private ACTIONS nextMove() {
+    if (SELECT_HIGHEST_SCORE_CHILD) {
+      return getChildWithHighestScore(rootNode).previousAction;
+    } else {
+      return getMostVisitedChild(rootNode).previousAction;
+    }
+  }
+
+  private void search(final StateObservation stateObs) {
 
     if (!TIME_LIMITATION) {
       searchWithIterationLimit(stateObs);
     } else {
       searchWithTimeLimitation(stateObs, TIME_LIMITATION_IN_MILLIS, 2);
-    }
-
-    if (SELECT_HIGHEST_SCORE_CHILD) {
-      return getChildWithHighestScore(rootNode).previousAction;
-    } else {
-      return getMostVisitedChild(rootNode).previousAction;
     }
   }
 

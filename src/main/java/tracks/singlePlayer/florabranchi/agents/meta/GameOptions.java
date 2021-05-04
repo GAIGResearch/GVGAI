@@ -12,6 +12,7 @@ public class GameOptions {
   public boolean shallowRollout;
 
   public boolean rawGameScore;
+  public boolean macroActions;
 
   // total de ações =  2^flags
 
