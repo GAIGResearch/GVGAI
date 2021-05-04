@@ -82,7 +82,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
   private final int[][] visitCount;
 
-  private static final int MACRO_ACTIONS_DURATION = 3;
+  private static final int MACRO_ACTIONS_DURATION = 5;
 
   private ACTIONS currentMacroAction;
   private int remainingMacroActionRepetitions;
@@ -213,6 +213,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
             search(stateObs);
             resetAlgorithm = false;
           }
+          search(stateObs);
         } else {
           System.out.println("0 actions left.");
           currentMacroAction = decideMacro(stateObs);
@@ -254,12 +255,12 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   }
 
   private ACTIONS decideMacro(final StateObservation stateObs) {
-    System.out.println("Deciding new MacroAction.");
+    //System.out.println("Deciding new MacroAction.");
     search(stateObs);
     remainingMacroActionRepetitions = MACRO_ACTIONS_DURATION;
     resetAlgorithm = true;
     final ACTIONS nextMacro = nextMove();
-    System.out.println("New MacroAction: " + nextMacro);
+    //System.out.println("New MacroAction: " + nextMacro);
     return nextMacro;
   }
 
