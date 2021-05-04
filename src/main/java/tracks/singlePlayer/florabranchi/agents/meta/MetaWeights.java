@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 
 public class MetaWeights implements Serializable {
 
+  public int currentVersion = 1;
 
   private final static Logger LOGGER = Logger.getLogger("MetaWeights");
 

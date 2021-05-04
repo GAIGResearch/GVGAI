@@ -3,7 +3,6 @@ package tracks.singlePlayer.florabranchi.database;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -17,7 +16,7 @@ public class MetaWeightsDAO {
     this.databaseClient = databaseClient;
   }
 
-  public void save(SavedMetaWeights results) {
+  public void save(MetaWeights results) {
 
     String sql = "INSERT INTO meta_weights(version,weights)" + " VALUES(?,?)";
 
@@ -57,7 +56,8 @@ public class MetaWeightsDAO {
     try {
       conn = databaseClient.getConnection();
 
-      DatabaseClient.deSerializeWeights(conn, "meta_weights", id);
+      return DatabaseClient.deSerializeWeights(conn, "meta_weights", id);
+
 
     } catch (SQLException | IOException | ClassNotFoundException throwables) {
       throwables.printStackTrace();
@@ -68,7 +68,7 @@ public class MetaWeightsDAO {
       se.printStackTrace();
     }
 
-    return new MetaWeights();
+    return null;
 
 
   }

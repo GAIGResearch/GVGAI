@@ -86,7 +86,7 @@ public class DatabaseClientTest {
     savedMetaWeights.metaWeights = metaWeights;
 
     MetaWeightsDAO metaWeightsDAO = new MetaWeightsDAO(new DatabaseClient());
-    metaWeightsDAO.save(savedMetaWeights);
+    metaWeightsDAO.save(metaWeights);
   }
 
   @Test

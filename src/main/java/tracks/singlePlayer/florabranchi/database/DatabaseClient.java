@@ -9,6 +9,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import tracks.singlePlayer.florabranchi.agents.meta.MetaWeights;
+
 public class DatabaseClient {
 
   //
@@ -25,7 +27,7 @@ public class DatabaseClient {
 
   public static void serializeWeights(Connection connection,
                                       final String table,
-                                      SavedMetaWeights objectToSerialize) throws SQLException {
+                                      MetaWeights objectToSerialize) throws SQLException {
 
     PreparedStatement pstmt = connection
         .prepareStatement(String.format(SQL_SERIALIZE_OBJECT, table));
@@ -38,7 +40,7 @@ public class DatabaseClient {
     System.out.println("Java object serialized to database. Object: " + objectToSerialize);
   }
 
-  public static SavedMetaWeights deSerializeWeights(Connection connection,
+  public static MetaWeights deSerializeWeights(Connection connection,
                                                     final String table,
                                                     long id) throws SQLException, IOException,
       ClassNotFoundException {
@@ -62,7 +64,7 @@ public class DatabaseClient {
       System.out.println("Java object de-serialized from database. Object: "
           + deSerializedObject + " Classname: "
           + deSerializedObject.getClass().getName());
-      return (SavedMetaWeights) deSerializedObject;
+      return (MetaWeights) deSerializedObject;
     }
 
 
@@ -78,7 +80,7 @@ public class DatabaseClient {
       Class.forName("com.mysql.cj.jdbc.Driver");
       Connection conn = DriverManager.getConnection(dbURL, username, password);
       if (conn != null) {
-        System.out.println("Connected");
+        //System.out.println("Connected");
       }
 
       return conn;

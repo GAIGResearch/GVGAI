@@ -60,6 +60,7 @@ public class GameOptionFeatureController {
     TreeMap<String, Double> propertyMap = new TreeMap<>();
     availableProperties.forEach(entry -> propertyMap.put(entry, 0d));
     propertyMap.put(TREE_REUSE, gameOptions.reuseTree ? 1d : 0);
+    propertyMap.put(RAW_GAME_SCORE, gameOptions.rawGameScore ? 1d : 0);
 
     return propertyMap;
 

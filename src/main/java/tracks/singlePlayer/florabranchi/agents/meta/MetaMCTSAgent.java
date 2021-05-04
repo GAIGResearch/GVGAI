@@ -14,11 +14,13 @@ import tracks.singlePlayer.florabranchi.database.DatabaseClient;
 import tracks.singlePlayer.florabranchi.database.MetaWeightsDAO;
 import tracks.singlePlayer.florabranchi.persistence.PersistenceController;
 import tracks.singlePlayer.florabranchi.persistence.PropertyLoader;
-import tracks.singlePlayer.florabranchi.training.FeatureVectorController;
 import tracks.singlePlayer.florabranchi.training.LearningAgentDebug;
 import tracks.singlePlayer.florabranchi.training.PossibleHarmfulSprite;
 
 public class MetaMCTSAgent {
+
+  public static double maxDouble = Math.pow(10, 6);
+  public static double minDouble = Math.pow(10, -6);
 
   public double ALFA = 0.3;
   public double GAMMA = 0.9;
@@ -67,6 +69,8 @@ public class MetaMCTSAgent {
     gameOptionFeatureController = new GameOptionFeatureController(gameOptions);
     initializeTrainingWeightVector();
 
+    metaWeights = metaWeightsDAO.getMetaWeights(1);
+
   }
 
   protected boolean displayDebug() {
@@ -78,12 +82,11 @@ public class MetaMCTSAgent {
   }
 
 
-  public void result(final GameOptions gameOptions,
-                     final boolean won,
-                     final int score,
-                     final int iteration) {
-    persistenceController.addLog(String.format("Result for Game %d", iteration));
-    getActionAndUpdateWeightVectorValues(gameOptions, won, score);
+  public double result(final GameOptions gameOptions,
+                       final boolean won,
+                       final int score,
+                       final int iteration) {
+
 
     // last update - reward if won, negative if loss
     double reward = 5000;
@@ -94,24 +97,27 @@ public class MetaMCTSAgent {
       reward = -reward;
 
       LOGGER.info(String.format("Agent LOST - score: [%s]", iteration));
-      persistenceController.addLog("Player lost");
+      //persistenceController.addLog("Player lost");
     } else {
       LOGGER.info(String.format("Agent WON - score: [%s]", iteration));
-      persistenceController.addLog("Player won");
+      //persistenceController.addLog("Player won");
     }
 
-    final double finalScore = score;
+    reward += score;
+    reward -= iteration;
 
     //updateRecord(won);
-    updateAfterLastAction(reward, previousAction, previousState);
+    //updateAfterLastAction(reward, previousAction, gameOptions);
 
     logCurrentWeights();
-    persistStatisticsAndWeights(won, finalScore);
+    metaWeightsDAO.save(metaWeights);
 
     if (learningAgentDebug != null) {
       learningAgentDebug.closeJframe();
     }
     //super.result(stateObs, elapsedCpuTimer);
+    System.out.println("Reward: \n" + reward);
+    return reward;
   }
 
   public void updateRecord(boolean won) {
@@ -182,7 +188,7 @@ public class MetaMCTSAgent {
 
   public EMetaActions getActionAndUpdateWeightVectorValues(final GameOptions gameOptions,
                                                            final boolean won,
-                                                           final int reward) {
+                                                           final double reward) {
 
     // Reward = curr score - previous score
     double stateScore = won ? 1000 + reward : -1000;
@@ -234,6 +240,9 @@ public class MetaMCTSAgent {
 
   public void persistStatisticsAndWeights(final boolean won,
                                           final double score) {
+
+    final MetaWeights metaWeights = metaWeightsDAO.getMetaWeights(1);
+    metaWeightsDAO.save(metaWeights);
 
     //persistenceController.updateScoreProgressionLog(score);
     //final int episode = previousResults.update(trainingWeights, won, score);

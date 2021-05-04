@@ -55,12 +55,12 @@ public class SavedMetaSarsaExecution {
 
 
     GameOptions gameOptions = new GameOptions();
-    gameOptions.reuseTree = propertyLoader.TREE_REUSE;
-    gameOptions.lossAvoidance = propertyLoader.LOSS_AVOIDANCE;
-    gameOptions.expandAllNodes = propertyLoader.EXPAND_ALL_CHILD_NODES;
-    gameOptions.safetyPreprunning = propertyLoader.SAFETY_PREPRUNNING;
-    gameOptions.shallowRollout = propertyLoader.SIMULATION_DEPTH <= 50;
-    gameOptions.rawGameScore = propertyLoader.TREE_REUSE;
+    gameOptions.reuseTree = PropertyLoader.TREE_REUSE;
+    gameOptions.lossAvoidance = PropertyLoader.LOSS_AVOIDANCE;
+    gameOptions.expandAllNodes = PropertyLoader.EXPAND_ALL_CHILD_NODES;
+    gameOptions.safetyPreprunning = PropertyLoader.SAFETY_PREPRUNNING;
+    gameOptions.shallowRollout = PropertyLoader.SIMULATION_DEPTH <= 50;
+    gameOptions.rawGameScore = PropertyLoader.TREE_REUSE;
 
     RunOptions runOptions = new RunOptions();
     runOptions.game = "aliens";
@@ -99,11 +99,11 @@ public class SavedMetaSarsaExecution {
         final int score = (int) doubles[1];
         final int ticks = (int) doubles[2];
 
-        agent.result(gameOptions, won, score, ticks);
-        //selectedAgent.
+        final double result = agent.result(gameOptions, won, score, ticks);
 
-        final EMetaActions actions = agent.getActionAndUpdateWeightVectorValues(gameOptions, won, score);
+        final EMetaActions actions = agent.getActionAndUpdateWeightVectorValues(gameOptions, won, result);
 
+        System.out.println("Selected action: \n" + actions);
         gameOptions.act(actions);
       }
 
