@@ -29,7 +29,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
   //UCB1
   //private final static double C = 1 / Math.sqrt(2);
-  private final static double C = 0.2;
+  private final static double C = 0.6;
 
   /**
    * Random generator for the agent.
@@ -43,6 +43,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
   protected boolean showTree;
 
+  public int TIME_LIMITATION_IN_MILLIS;
   public int TREE_SEARCH_SIZE;
   public int SIMULATION_DEPTH;
   public int MAX_DEPTH;
@@ -61,13 +62,12 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   public boolean MACRO_ACTIONS;
 
   // Heuristic Weights
-  public int TIME_LIMITATION_IN_MILLIS;
-  public int RAW_SCORE_WEIGHT;
-  public int TOTAL_RESOURCES_SCORE_WEIGHT;
-  public int RESOURCE_SCORE_WEIGHT;
-  public int EXPLORATION_SCORE_WEIGHT;
-  public int MOVABLES_SCORE_WEIGHT;
-  public int PORTALS_SCORE_WEIGHT;
+  public int RAW_SCORE_WEIGHT = 1;
+  public int TOTAL_RESOURCES_SCORE_WEIGHT = 1;
+  public int RESOURCE_SCORE_WEIGHT = 2;
+  public int EXPLORATION_SCORE_WEIGHT = 5;
+  public int MOVABLES_SCORE_WEIGHT = 1;
+  public int PORTALS_SCORE_WEIGHT = 1;
 
   private final int maxDistance;
 
@@ -106,13 +106,6 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     EXPAND_ALL_CHILD_NODES = PropertyLoader.EXPAND_ALL_CHILD_NODES;
     SAFETY_PREPRUNNING = PropertyLoader.SAFETY_PREPRUNNING;
     EARLY_INITIALIZATION = PropertyLoader.EARLY_INITIALIZATION;
-
-    RAW_SCORE_WEIGHT = PropertyLoader.RAW_SCORE_WEIGHT;
-    TOTAL_RESOURCES_SCORE_WEIGHT = PropertyLoader.TOTAL_RESOURCES_SCORE_WEIGHT;
-    RESOURCE_SCORE_WEIGHT = PropertyLoader.RESOURCE_SCORE_WEIGHT;
-    EXPLORATION_SCORE_WEIGHT = PropertyLoader.EXPLORATION_SCORE_WEIGHT;
-    MOVABLES_SCORE_WEIGHT = PropertyLoader.MOVABLES_SCORE_WEIGHT;
-    PORTALS_SCORE_WEIGHT = PropertyLoader.PORTALS_SCORE_WEIGHT;
   }
 
   /**
@@ -195,20 +188,20 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     if (MACRO_ACTIONS) {
 
       if (currentMacroAction == null) {
-        System.out.println("Setting first MA");
+        //System.out.println("Setting first MA");
         rootNode = buildRootNode(stateObs);
         currentMacroAction = decideMacro(stateObs);
       } else {
-        System.out.printf("Current MA: %s Remaining reps: %d \n", currentMacroAction, remainingMacroActionRepetitions);
+        //System.out.printf("Current MA: %s Remaining reps: %d \n", currentMacroAction, remainingMacroActionRepetitions);
 
         for (int i = 0; i < remainingMacroActionRepetitions; i++) {
           stateObs.advance(currentMacroAction);
         }
 
         if (remainingMacroActionRepetitions > 0) {
-          System.out.println("Macro action is set. Remaining uses: " + remainingMacroActionRepetitions);
+          //System.out.println("Macro action is set. Remaining uses: " + remainingMacroActionRepetitions);
           if (resetAlgorithm) {
-            System.out.println("Reseting algorithm");
+            //System.out.println("Reseting algorithm");
             rootNode = buildRootNode(stateObs);
             search(stateObs);
             resetAlgorithm = false;
@@ -221,7 +214,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
       }
 
       remainingMacroActionRepetitions--;
-      System.out.println("Executing " + currentMacroAction);
+      //System.out.println("Executing " + currentMacroAction);
       return currentMacroAction;
 
     } else {

@@ -54,11 +54,12 @@ public class SavedMetaSarsaExecution {
     String level1 = game.replace(gameName, gameName + "_lvl" + levelIdx);
 
     GameOptions gameOptions = new GameOptions();
+    gameOptions.gameId = gameIdx;
     gameOptions.reuseTree = PropertyLoader.TREE_REUSE;
-    gameOptions.lossAvoidance = PropertyLoader.LOSS_AVOIDANCE;
+/*    gameOptions.lossAvoidance = PropertyLoader.LOSS_AVOIDANCE;
     gameOptions.expandAllNodes = PropertyLoader.EXPAND_ALL_CHILD_NODES;
     gameOptions.safetyPreprunning = PropertyLoader.SAFETY_PREPRUNNING;
-    gameOptions.shallowRollout = PropertyLoader.SIMULATION_DEPTH <= 50;
+    gameOptions.shallowRollout = PropertyLoader.SIMULATION_DEPTH <= 50;*/
     gameOptions.rawGameScore = PropertyLoader.TREE_REUSE;
 
     //todo fix run options
@@ -91,7 +92,6 @@ public class SavedMetaSarsaExecution {
         final boolean won = doubles[0] == 1;
         final int score = (int) doubles[1];
         final int ticks = (int) doubles[2];
-
         final double result = agent.result(gameOptions, won, score, ticks);
 
         final EMetaActions actions = agent.getActionAndUpdateWeightVectorValues(gameOptions, won, result);

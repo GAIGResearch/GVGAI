@@ -35,10 +35,10 @@ public class DatabaseClientTest {
 
     GameOptions gameOptions = new GameOptions();
     gameOptions.reuseTree = true;
-    gameOptions.lossAvoidance = true;
+/*    gameOptions.lossAvoidance = true;
     gameOptions.expandAllNodes = true;
     gameOptions.safetyPreprunning = true;
-    gameOptions.shallowRollout = true;
+    gameOptions.shallowRollout = true;*/
     gameOptions.rawGameScore = true;
 
     RunOptions runOptions = new RunOptions();

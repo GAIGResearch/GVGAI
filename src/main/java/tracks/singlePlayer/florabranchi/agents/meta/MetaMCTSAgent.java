@@ -65,7 +65,7 @@ public class MetaMCTSAgent {
 
     GameOptions gameOptions = new GameOptions();
 
-    gameOptionFeatureController = new GameOptionFeatureController(gameOptions);
+    gameOptionFeatureController = new GameOptionFeatureController();
     initializeTrainingWeightVector();
 
     metaWeights = metaWeightsDAO.getMetaWeights(1);
@@ -152,7 +152,7 @@ public class MetaMCTSAgent {
                                                    final GameOptions currentState) {
 
     // Get feature values for previous state (s)
-    final TreeMap<String, Double> initialFeatureVector = gameOptionFeatureController.extractFeatureVector(previousState);
+    final TreeMap<String, Double> initialFeatureVector = gameOptionFeatureController.extractFeatureVector(previousState.gameId);
 
     // delta = r + gamma (Qa'(s')) - Qa(s)
     double delta = stateReward + (GAMMA * getQValueForAction(currentState, currentAction)) - getQValueForAction(previousState, previousAction);
@@ -172,7 +172,7 @@ public class MetaMCTSAgent {
 
     // Get feature values for previous state (s)
     // fi(s, a)
-    final TreeMap<String, Double> featureVector = gameOptionFeatureController.extractFeatureVector(previousState);
+    final TreeMap<String, Double> featureVector = gameOptionFeatureController.extractFeatureVector(previousState.gameId);
 
     updateWeightVectorForAction(previousAction, featureVector, delta);
   }
@@ -208,7 +208,7 @@ public class MetaMCTSAgent {
     // need: s, a r, s', a'
     getActionAndUpdateWeightVectorValues(reward, previousAction, previousState, selectedAction, gameOptions);
 
-    final TreeMap<String, Double> featuresForCurrState = gameOptionFeatureController.extractFeatureVector(gameOptions);
+    final TreeMap<String, Double> featuresForCurrState = gameOptionFeatureController.extractFeatureVector(gameOptions.gameId);
 
 /*    if (learningAgentDebug != null && learningAgentDebug.showJframe) {
       learningAgentDebug.writeResultsToUi(featuresForCurrState, selectedAction, trainingWeights, previousResults.getEpisodeTotalScoreMap());
@@ -226,7 +226,7 @@ public class MetaMCTSAgent {
                                    final EMetaActions action) {
 
     // Extract feature array
-    final TreeMap<String, Double> featureAfterAction = gameOptionFeatureController.extractFeatureVector(options);
+    final TreeMap<String, Double> featureAfterAction = gameOptionFeatureController.extractFeatureVector(options.gameId);
 
     // Get related weight vector
     final TreeMap<String, Double> weightVectorForAction = metaWeights.getWeightVectorMap().get(action);

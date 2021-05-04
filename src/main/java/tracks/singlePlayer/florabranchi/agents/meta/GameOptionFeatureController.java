@@ -8,13 +8,11 @@ public class GameOptionFeatureController {
 
   private final static Logger LOGGER = Logger.getLogger("GVGAI_BOT");
 
-  private GameOptions gameOptions;
-
-  private static final String TREE_REUSE = "TREE_REUSE";
-  private static final String MACRO_ACTIONS = "MACRO_ACTIONS";
-  private static final String RAW_GAME_SCORE = "RAW_GAME_SCORE";
-  private static final String EXPAND_ALL_CHILD_NODES = "EXPAND_ALL_CHILD_NODES";
-
+  // game state features
+  private static final String IS_DETERMINISTIC = "IS_DETERMINISTIC";
+  private static final String CAN_USE = "CAN_USE";
+  private static final String CAN_DIE = "CAN_DIE";
+  private static final String IS_SURVIVAL = "IS_SURVIVAL";
 
   public static TreeSet<String> availableProperties = new TreeSet<>();
 
@@ -23,10 +21,10 @@ public class GameOptionFeatureController {
   }
 
   static {
-    availableProperties.add(TREE_REUSE);
-    availableProperties.add(RAW_GAME_SCORE);
-    availableProperties.add(EXPAND_ALL_CHILD_NODES);
-    availableProperties.add(MACRO_ACTIONS);
+    availableProperties.add(IS_DETERMINISTIC);
+    availableProperties.add(CAN_USE);
+    availableProperties.add(CAN_DIE);
+    availableProperties.add(IS_SURVIVAL);
   }
 
   public double getFeatureNormalizedValue(final String property, double value,
@@ -52,18 +50,21 @@ public class GameOptionFeatureController {
     propertyMap.put(property, featureNormalizedValue);
   }
 
-  public GameOptionFeatureController(final GameOptions gameOptions) {
-    this.gameOptions = gameOptions;
+  public GameOptionFeatureController() {
+
   }
 
-  public TreeMap<String, Double> extractFeatureVector(final GameOptions gameOptions) {
+  public TreeMap<String, Double> extractFeatureVector(final int gameId) {
+
+    final GameFeaturesHelper.GameFeatures gameFeatures = GameFeaturesHelper.getGameFeatures(gameId);
 
     // Add default values in case of unavalable information
     TreeMap<String, Double> propertyMap = new TreeMap<>();
     availableProperties.forEach(entry -> propertyMap.put(entry, 0d));
-    propertyMap.put(TREE_REUSE, gameOptions.reuseTree ? 1d : 0);
-    propertyMap.put(RAW_GAME_SCORE, gameOptions.rawGameScore ? 1d : 0);
-    propertyMap.put(MACRO_ACTIONS, gameOptions.macroActions ? 1d : 0);
+    propertyMap.put(IS_DETERMINISTIC, gameFeatures.isDeterministic ? 1d : 0);
+    propertyMap.put(CAN_USE, gameFeatures.canUse ? 1d : 0);
+    propertyMap.put(CAN_DIE, gameFeatures.canDie ? 1d : 0);
+    propertyMap.put(IS_SURVIVAL, gameFeatures.isSurvival ? 1d : 0);
 
     return propertyMap;
 

@@ -2,6 +2,8 @@ package tracks.singlePlayer.florabranchi.agents.meta;
 
 public class GameOptions {
 
+  public int gameId;
+
   public boolean reuseTree;
   public boolean rawGameScore;
   public boolean macroActions;

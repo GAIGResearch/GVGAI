@@ -35,7 +35,6 @@ public class PropertyLoader {
   public static int SIMULATION_DEPTH;
   public static int MAX_DEPTH;
 
-
   // Enhancements
   public static boolean TREE_REUSE;
   public static boolean MACRO_ACTIONS;
@@ -44,13 +43,6 @@ public class PropertyLoader {
   public static boolean EXPAND_ALL_CHILD_NODES;
   public static boolean SAFETY_PREPRUNNING;
   public static boolean EARLY_INITIALIZATION;
-
-  public static int RAW_SCORE_WEIGHT;
-  public static int TOTAL_RESOURCES_SCORE_WEIGHT;
-  public static int RESOURCE_SCORE_WEIGHT;
-  public static int EXPLORATION_SCORE_WEIGHT;
-  public static int MOVABLES_SCORE_WEIGHT;
-  public static int PORTALS_SCORE_WEIGHT;
 
   public PropertyLoader(final String configFile) throws IOException {
 
@@ -86,24 +78,15 @@ public class PropertyLoader {
     SELECT_HIGHEST_SCORE_CHILD = Boolean.parseBoolean(prop.getProperty("SELECT_HIGHEST_SCORE_CHILD", "true"));
     TIME_LIMITATION_IN_MILLIS = Integer.parseInt(prop.getProperty("TIME_LIMITATION_IN_MILLIS", "40"));
     TREE_SEARCH_SIZE = Integer.parseInt(prop.getProperty("TREE_SEARCH_SIZE", "0"));
-    SIMULATION_DEPTH = Integer.parseInt(prop.getProperty("SIMULATION_DEPTH", "0"));
-    MAX_DEPTH = Integer.parseInt(prop.getProperty("MAX_DEPTH", "0"));
+    SIMULATION_DEPTH = Integer.parseInt(prop.getProperty("SELECTION_DEPTH", "0"));
+    MAX_DEPTH = Integer.parseInt(prop.getProperty("ROLLOUT_DEPTH", "0"));
 
     TREE_REUSE = Boolean.parseBoolean(prop.getProperty("TREE_REUSE", "false"));
     MACRO_ACTIONS = Boolean.parseBoolean(prop.getProperty("MACRO_ACTIONS", "false"));
     LOSS_AVOIDANCE = Boolean.parseBoolean(prop.getProperty("LOSS_AVOIDANCE", "false"));
     RAW_GAME_SCORE = Boolean.parseBoolean(prop.getProperty("RAW_GAME_SCORE", "false"));
     EXPAND_ALL_CHILD_NODES = Boolean.parseBoolean(prop.getProperty("EXPAND_ALL_CHILD_NODES", "false"));
-    SAFETY_PREPRUNNING = Boolean.parseBoolean(prop.getProperty("SAFETY_PREPRUNNING", "false"));
     EARLY_INITIALIZATION = Boolean.parseBoolean(prop.getProperty("EARLY_INITIALIZATION", "false"));
-
-    // Heuristic weights
-    RAW_SCORE_WEIGHT = Integer.parseInt(prop.getProperty("RAW_SCORE_WEIGHT", "1"));
-    TOTAL_RESOURCES_SCORE_WEIGHT = Integer.parseInt(prop.getProperty("TOTAL_RESOURCES_SCORE_WEIGHT", "1"));
-    RESOURCE_SCORE_WEIGHT = Integer.parseInt(prop.getProperty("RESOURCE_SCORE_WEIGHT", "1"));
-    EXPLORATION_SCORE_WEIGHT = Integer.parseInt(prop.getProperty("EXPLORATION_SCORE_WEIGHT", "1"));
-    MOVABLES_SCORE_WEIGHT = Integer.parseInt(prop.getProperty("MOVABLES_SCORE_WEIGHT", "1"));
-    PORTALS_SCORE_WEIGHT = Integer.parseInt(prop.getProperty("PORTALS_SCORE_WEIGHT", "1"));
 
     // Sarsa properties, if required
     SARSA_ALFA = Float.parseFloat(prop.getProperty("SARSA_ALFA", "0"));
@@ -212,7 +195,7 @@ public class PropertyLoader {
   }
 
   public void setTIME_LIMITATION(final boolean TIME_LIMITATION) {
-    this.TIME_LIMITATION = TIME_LIMITATION;
+    PropertyLoader.TIME_LIMITATION = TIME_LIMITATION;
   }
 
   public boolean isSELECT_HIGHEST_SCORE_CHILD() {
@@ -220,7 +203,7 @@ public class PropertyLoader {
   }
 
   public void setSELECT_HIGHEST_SCORE_CHILD(final boolean SELECT_HIGHEST_SCORE_CHILD) {
-    this.SELECT_HIGHEST_SCORE_CHILD = SELECT_HIGHEST_SCORE_CHILD;
+    PropertyLoader.SELECT_HIGHEST_SCORE_CHILD = SELECT_HIGHEST_SCORE_CHILD;
   }
 
   public int getTREE_SEARCH_SIZE() {
@@ -228,7 +211,7 @@ public class PropertyLoader {
   }
 
   public void setTREE_SEARCH_SIZE(final int TREE_SEARCH_SIZE) {
-    this.TREE_SEARCH_SIZE = TREE_SEARCH_SIZE;
+    PropertyLoader.TREE_SEARCH_SIZE = TREE_SEARCH_SIZE;
   }
 
   public int getTIME_LIMITATION_IN_MILLIS() {
@@ -236,7 +219,7 @@ public class PropertyLoader {
   }
 
   public void setTIME_LIMITATION_IN_MILLIS(final int TIME_LIMITATION_IN_MILLIS) {
-    this.TIME_LIMITATION_IN_MILLIS = TIME_LIMITATION_IN_MILLIS;
+    PropertyLoader.TIME_LIMITATION_IN_MILLIS = TIME_LIMITATION_IN_MILLIS;
   }
 
   public int getSIMULATION_DEPTH() {
@@ -244,7 +227,7 @@ public class PropertyLoader {
   }
 
   public void setSIMULATION_DEPTH(final int SIMULATION_DEPTH) {
-    this.SIMULATION_DEPTH = SIMULATION_DEPTH;
+    PropertyLoader.SIMULATION_DEPTH = SIMULATION_DEPTH;
   }
 
   public int getMAX_DEPTH() {
@@ -252,7 +235,7 @@ public class PropertyLoader {
   }
 
   public void setMAX_DEPTH(final int MAX_DEPTH) {
-    this.MAX_DEPTH = MAX_DEPTH;
+    PropertyLoader.MAX_DEPTH = MAX_DEPTH;
   }
 
   public boolean isTREE_REUSE() {
@@ -260,7 +243,7 @@ public class PropertyLoader {
   }
 
   public void setTREE_REUSE(final boolean TREE_REUSE) {
-    this.TREE_REUSE = TREE_REUSE;
+    PropertyLoader.TREE_REUSE = TREE_REUSE;
   }
 
   public boolean isLOSS_AVOIDANCE() {
@@ -268,7 +251,7 @@ public class PropertyLoader {
   }
 
   public void setLOSS_AVOIDANCE(final boolean LOSS_AVOIDANCE) {
-    this.LOSS_AVOIDANCE = LOSS_AVOIDANCE;
+    PropertyLoader.LOSS_AVOIDANCE = LOSS_AVOIDANCE;
   }
 
   public boolean isRAW_GAME_SCORE() {
@@ -276,7 +259,7 @@ public class PropertyLoader {
   }
 
   public void setRAW_GAME_SCORE(final boolean RAW_GAME_SCORE) {
-    this.RAW_GAME_SCORE = RAW_GAME_SCORE;
+    PropertyLoader.RAW_GAME_SCORE = RAW_GAME_SCORE;
   }
 
   public boolean isEXPAND_ALL_CHILD_NODES() {
@@ -284,7 +267,7 @@ public class PropertyLoader {
   }
 
   public void setEXPAND_ALL_CHILD_NODES(final boolean EXPAND_ALL_CHILD_NODES) {
-    this.EXPAND_ALL_CHILD_NODES = EXPAND_ALL_CHILD_NODES;
+    PropertyLoader.EXPAND_ALL_CHILD_NODES = EXPAND_ALL_CHILD_NODES;
   }
 
   public boolean isSAFETY_PREPRUNNING() {
@@ -292,7 +275,7 @@ public class PropertyLoader {
   }
 
   public void setSAFETY_PREPRUNNING(final boolean SAFETY_PREPRUNNING) {
-    this.SAFETY_PREPRUNNING = SAFETY_PREPRUNNING;
+    PropertyLoader.SAFETY_PREPRUNNING = SAFETY_PREPRUNNING;
   }
 
   public boolean isEARLY_INITIALIZATION() {
@@ -300,55 +283,7 @@ public class PropertyLoader {
   }
 
   public void setEARLY_INITIALIZATION(final boolean EARLY_INITIALIZATION) {
-    this.EARLY_INITIALIZATION = EARLY_INITIALIZATION;
-  }
-
-  public int getRAW_SCORE_WEIGHT() {
-    return RAW_SCORE_WEIGHT;
-  }
-
-  public void setRAW_SCORE_WEIGHT(final int RAW_SCORE_WEIGHT) {
-    this.RAW_SCORE_WEIGHT = RAW_SCORE_WEIGHT;
-  }
-
-  public int getTOTAL_RESOURCES_SCORE_WEIGHT() {
-    return TOTAL_RESOURCES_SCORE_WEIGHT;
-  }
-
-  public void setTOTAL_RESOURCES_SCORE_WEIGHT(final int TOTAL_RESOURCES_SCORE_WEIGHT) {
-    this.TOTAL_RESOURCES_SCORE_WEIGHT = TOTAL_RESOURCES_SCORE_WEIGHT;
-  }
-
-  public int getRESOURCE_SCORE_WEIGHT() {
-    return RESOURCE_SCORE_WEIGHT;
-  }
-
-  public void setRESOURCE_SCORE_WEIGHT(final int RESOURCE_SCORE_WEIGHT) {
-    this.RESOURCE_SCORE_WEIGHT = RESOURCE_SCORE_WEIGHT;
-  }
-
-  public int getEXPLORATION_SCORE_WEIGHT() {
-    return EXPLORATION_SCORE_WEIGHT;
-  }
-
-  public void setEXPLORATION_SCORE_WEIGHT(final int EXPLORATION_SCORE_WEIGHT) {
-    this.EXPLORATION_SCORE_WEIGHT = EXPLORATION_SCORE_WEIGHT;
-  }
-
-  public int getMOVABLES_SCORE_WEIGHT() {
-    return MOVABLES_SCORE_WEIGHT;
-  }
-
-  public void setMOVABLES_SCORE_WEIGHT(final int MOVABLES_SCORE_WEIGHT) {
-    this.MOVABLES_SCORE_WEIGHT = MOVABLES_SCORE_WEIGHT;
-  }
-
-  public int getPORTALS_SCORE_WEIGHT() {
-    return PORTALS_SCORE_WEIGHT;
-  }
-
-  public void setPORTALS_SCORE_WEIGHT(final int PORTALS_SCORE_WEIGHT) {
-    this.PORTALS_SCORE_WEIGHT = PORTALS_SCORE_WEIGHT;
+    PropertyLoader.EARLY_INITIALIZATION = EARLY_INITIALIZATION;
   }
 
   public int castGame(final String game) {
@@ -364,6 +299,8 @@ public class PropertyLoader {
     switch (agentName) {
       case "sarsa_monte_carlo_visuals":
         return "tracks.singlePlayer.florabranchi.agents.SavedManualExecutionAgent";
+      case "base_monte_carlo":
+        return "tracks.singlePlayer.florabranchi.agents.BaseMCTSAgent";
       case "sarsa_trainer":
         return "tracks.singlePlayer.florabranchi.trash.SarsaTrainerAgent";
       case "monte_carlo_visuals":
