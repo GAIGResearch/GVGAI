@@ -1,7 +1,8 @@
-package tracks.singlePlayer.florabranchi.agents;
+package tracks.singlePlayer.florabranchi.trash;
 
 import core.game.StateObservation;
 import tools.ElapsedCpuTimer;
+import tracks.singlePlayer.florabranchi.trash.SarsaAgent;
 
 public class SarsaTrainerAgent extends SarsaAgent {
 

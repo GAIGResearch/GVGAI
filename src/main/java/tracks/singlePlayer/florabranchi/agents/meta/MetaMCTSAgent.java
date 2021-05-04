@@ -9,22 +9,21 @@ import java.util.Random;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
-import tracks.singlePlayer.florabranchi.GameResults;
+import tracks.singlePlayer.florabranchi.trash.GameResults;
 import tracks.singlePlayer.florabranchi.database.DatabaseClient;
 import tracks.singlePlayer.florabranchi.database.MetaWeightsDAO;
 import tracks.singlePlayer.florabranchi.persistence.PersistenceController;
 import tracks.singlePlayer.florabranchi.persistence.PropertyLoader;
 import tracks.singlePlayer.florabranchi.training.LearningAgentDebug;
-import tracks.singlePlayer.florabranchi.training.PossibleHarmfulSprite;
 
 public class MetaMCTSAgent {
 
   public static double maxDouble = Math.pow(10, 6);
   public static double minDouble = Math.pow(10, -6);
 
-  public double ALFA = 0.3;
-  public double GAMMA = 0.9;
-  public double EXPLORATION_EPSILON = 10;
+  public double ALFA;
+  public double GAMMA;
+  public double EXPLORATION_EPSILON;
 
   public PropertyLoader propertyLoader;
 
@@ -90,8 +89,6 @@ public class MetaMCTSAgent {
 
     // last update - reward if won, negative if loss
     double reward = 5000;
-    Integer harmfulSpriteId = null;
-    PossibleHarmfulSprite possibleHarmfulSprite = null;
 
     if (!won) {
       reward = -reward;
@@ -127,6 +124,7 @@ public class MetaMCTSAgent {
   }
 
 
+  @SuppressWarnings("DuplicatedCode")
   private void updateWeightVectorForAction(final EMetaActions previousAction,
                                            final TreeMap<String, Double> featureVectorForState,
                                            final double delta) {
@@ -179,12 +177,10 @@ public class MetaMCTSAgent {
     updateWeightVectorForAction(previousAction, featureVector, delta);
   }
 
-
   public EMetaActions returnRandomAction() {
     int index = randomGenerator.nextInt(MetaWeights.avallableGameActions.size());
     return MetaWeights.avallableGameActions.get(index);
   }
-
 
   public EMetaActions getActionAndUpdateWeightVectorValues(final GameOptions gameOptions,
                                                            final boolean won,
@@ -253,13 +249,6 @@ public class MetaMCTSAgent {
 
 
   public EMetaActions selectBestPerceivedAction(final GameOptions options) {
-/*
-
-    if (stateObservation.getAvailableActions().isEmpty()) {
-      persistenceController.addLog("Selecting NIL action to calculate last weight vector");
-      return Types.ACTIONS.ACTION_NIL;
-    }
-*/
 
     // Exploration parameter
     int rand = randomGenerator.nextInt(100);
@@ -338,8 +327,7 @@ public class MetaMCTSAgent {
       this.metaWeights = new MetaWeights();
       logCurrentWeights();
     } else {
-      /*int previousEpisode = previousResults.getTotalGames();*/
-      //persistenceController.addLog(String.format("Loading previous results from episode %s", previousEpisode));
+      System.out.println("Loaded DB previous weiohts.");
       this.metaWeights = previousResults;
       logCurrentWeights();
     }

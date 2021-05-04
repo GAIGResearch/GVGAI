@@ -8,6 +8,6 @@ public enum EMetaActions implements Serializable {
   TURN_TREE_REUSE_ON,
   RAW_SCORE_ON,
   RAW_SCORE_OFF,
-  META_ACTIONS_ON,
-  META_ACTIONS_OFF,
+  MACRO_ACTIONS_ON,
+  MACRO_ACTIONS_OFF,
 }

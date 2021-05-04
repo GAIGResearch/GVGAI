@@ -15,6 +15,7 @@ import core.game.StateObservation;
 import ontology.Types;
 import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
+import tracks.singlePlayer.florabranchi.persistence.PropertyLoader;
 import tracks.singlePlayer.florabranchi.training.StateEvaluatorHelper;
 import tracks.singlePlayer.florabranchi.tree.Node;
 import tracks.singlePlayer.florabranchi.tree.TreeController;
@@ -42,7 +43,6 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
   protected boolean showTree;
 
-  // flora(todo) add time
   public int TREE_SEARCH_SIZE;
   public int SIMULATION_DEPTH;
   public int MAX_DEPTH;
@@ -68,11 +68,6 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   public int MOVABLES_SCORE_WEIGHT;
   public int PORTALS_SCORE_WEIGHT;
 
-  // todo
-  // breadth first initialization
-  // macroactions
-  // reversal penalty
-
   private final int maxDistance;
 
   private ACTIONS lastAction = null;
@@ -90,26 +85,26 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
     showTree = propertyLoader.SHOW_TREE;
 
-    TREE_SEARCH_SIZE = propertyLoader.TREE_SEARCH_SIZE;
-    SIMULATION_DEPTH = propertyLoader.SIMULATION_DEPTH;
-    MAX_DEPTH = propertyLoader.MAX_DEPTH;
+    TREE_SEARCH_SIZE = PropertyLoader.TREE_SEARCH_SIZE;
+    SIMULATION_DEPTH = PropertyLoader.SIMULATION_DEPTH;
+    MAX_DEPTH = PropertyLoader.MAX_DEPTH;
 
-    TREE_REUSE = propertyLoader.TREE_REUSE;
-    TIME_LIMITATION_IN_MILLIS = propertyLoader.TIME_LIMITATION_IN_MILLIS;
-    TIME_LIMITATION = propertyLoader.TIME_LIMITATION;
-    SELECT_HIGHEST_SCORE_CHILD = propertyLoader.SELECT_HIGHEST_SCORE_CHILD;
-    LOSS_AVOIDANCE = propertyLoader.LOSS_AVOIDANCE;
-    RAW_GAME_SCORE = propertyLoader.RAW_GAME_SCORE;
-    EXPAND_ALL_CHILD_NODES = propertyLoader.EXPAND_ALL_CHILD_NODES;
-    SAFETY_PREPRUNNING = propertyLoader.SAFETY_PREPRUNNING;
-    EARLY_INITIALIZATION = propertyLoader.EARLY_INITIALIZATION;
+    TREE_REUSE = PropertyLoader.TREE_REUSE;
+    TIME_LIMITATION_IN_MILLIS = PropertyLoader.TIME_LIMITATION_IN_MILLIS;
+    TIME_LIMITATION = PropertyLoader.TIME_LIMITATION;
+    SELECT_HIGHEST_SCORE_CHILD = PropertyLoader.SELECT_HIGHEST_SCORE_CHILD;
+    LOSS_AVOIDANCE = PropertyLoader.LOSS_AVOIDANCE;
+    RAW_GAME_SCORE = PropertyLoader.RAW_GAME_SCORE;
+    EXPAND_ALL_CHILD_NODES = PropertyLoader.EXPAND_ALL_CHILD_NODES;
+    SAFETY_PREPRUNNING = PropertyLoader.SAFETY_PREPRUNNING;
+    EARLY_INITIALIZATION = PropertyLoader.EARLY_INITIALIZATION;
 
-    RAW_SCORE_WEIGHT = propertyLoader.RAW_SCORE_WEIGHT;
-    TOTAL_RESOURCES_SCORE_WEIGHT = propertyLoader.TOTAL_RESOURCES_SCORE_WEIGHT;
-    RESOURCE_SCORE_WEIGHT = propertyLoader.RESOURCE_SCORE_WEIGHT;
-    EXPLORATION_SCORE_WEIGHT = propertyLoader.EXPLORATION_SCORE_WEIGHT;
-    MOVABLES_SCORE_WEIGHT = propertyLoader.MOVABLES_SCORE_WEIGHT;
-    PORTALS_SCORE_WEIGHT = propertyLoader.PORTALS_SCORE_WEIGHT;
+    RAW_SCORE_WEIGHT = PropertyLoader.RAW_SCORE_WEIGHT;
+    TOTAL_RESOURCES_SCORE_WEIGHT = PropertyLoader.TOTAL_RESOURCES_SCORE_WEIGHT;
+    RESOURCE_SCORE_WEIGHT = PropertyLoader.RESOURCE_SCORE_WEIGHT;
+    EXPLORATION_SCORE_WEIGHT = PropertyLoader.EXPLORATION_SCORE_WEIGHT;
+    MOVABLES_SCORE_WEIGHT = PropertyLoader.MOVABLES_SCORE_WEIGHT;
+    PORTALS_SCORE_WEIGHT = PropertyLoader.PORTALS_SCORE_WEIGHT;
   }
 
   /**

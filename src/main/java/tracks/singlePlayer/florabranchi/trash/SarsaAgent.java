@@ -1,4 +1,4 @@
-package tracks.singlePlayer.florabranchi.agents;
+package tracks.singlePlayer.florabranchi.trash;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,7 +13,8 @@ import core.game.Observation;
 import core.game.StateObservation;
 import ontology.Types;
 import tools.ElapsedCpuTimer;
-import tracks.singlePlayer.florabranchi.GameResults;
+import tracks.singlePlayer.florabranchi.agents.AbstractAgent;
+import tracks.singlePlayer.florabranchi.trash.GameResults;
 import tracks.singlePlayer.florabranchi.persistence.PersistenceController;
 import tracks.singlePlayer.florabranchi.persistence.weights.OfflineTrainerResults;
 import tracks.singlePlayer.florabranchi.persistence.weights.TrainingWeights;

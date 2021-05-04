@@ -1,4 +1,4 @@
-package tracks.singlePlayer.florabranchi;
+package tracks.singlePlayer.florabranchi.trash;
 
 import core.game.StateObservation;
 import ontology.Types;

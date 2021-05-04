@@ -6,7 +6,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import tracks.singlePlayer.florabranchi.GameResults;
+import tracks.singlePlayer.florabranchi.trash.GameResults;
 import tracks.singlePlayer.florabranchi.persistence.weights.OfflineTrainerResults;
 
 public class PersistenceController {

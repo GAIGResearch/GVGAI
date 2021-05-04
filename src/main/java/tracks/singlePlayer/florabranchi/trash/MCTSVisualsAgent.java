@@ -1,5 +1,6 @@
 /*
-package tracks.singlePlayer.florabranchi.agents;
+
+package tracks.singlePlayer.florabranchi.trash;
 
 import core.game.StateObservation;
 import tools.ElapsedCpuTimer;
@@ -22,4 +23,5 @@ public class MCTSVisualsAgent extends MonteCarloTreeAgent {
     return "mcts.visuals.properties";
   }
 }
+
 */

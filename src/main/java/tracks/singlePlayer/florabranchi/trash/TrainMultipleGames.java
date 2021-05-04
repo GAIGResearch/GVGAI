@@ -1,4 +1,4 @@
-package tracks.singlePlayer;
+package tracks.singlePlayer.florabranchi.trash;
 
 import static com.sun.xml.internal.ws.spi.db.BindingContextFactory.LOGGER;
 
@@ -25,7 +25,7 @@ public class TrainMultipleGames {
     boolean visuals = false;
     int seed = new Random().nextInt();
 
-    String floraController = "tracks.singlePlayer.florabranchi.agents.SarsaAgent";
+    String floraController = "tracks.singlePlayer.florabranchi.trash.SarsaAgent";
 
     // Load available games
     String spGamesCollection = "examples/all_games_sp.csv";

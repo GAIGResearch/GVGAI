@@ -53,7 +53,6 @@ public class SavedMetaSarsaExecution {
     String game = games[gameIdx][0];
     String level1 = game.replace(gameName, gameName + "_lvl" + levelIdx);
 
-
     GameOptions gameOptions = new GameOptions();
     gameOptions.reuseTree = PropertyLoader.TREE_REUSE;
     gameOptions.lossAvoidance = PropertyLoader.LOSS_AVOIDANCE;
@@ -62,15 +61,8 @@ public class SavedMetaSarsaExecution {
     gameOptions.shallowRollout = PropertyLoader.SIMULATION_DEPTH <= 50;
     gameOptions.rawGameScore = PropertyLoader.TREE_REUSE;
 
+    //todo fix run options
     RunOptions runOptions = new RunOptions();
-    runOptions.game = "aliens";
-    runOptions.level = 1;
-    runOptions.totalGames = 1;
-    runOptions.scores = new int[5];
-    runOptions.scores[1] = 50;
-    runOptions.scores[2] = 40;
-    runOptions.scores[3] = 30;
-    runOptions.wr = 30.5;
 
     // where to record the actions
     // executed. null if not to save.
@@ -80,7 +72,8 @@ public class SavedMetaSarsaExecution {
     }
 
     if (visuals) {
-      final double[] doubles = ArcadeMachine.runOneGame(game, level1, visuals, selectedAgent, recordActionsFile, seed, 0);
+      final double[] doubles = ArcadeMachine.runOneGame(game, level1, visuals, selectedAgent,
+          recordActionsFile, seed, 0);
 
       System.out.println(Arrays.toString(doubles));
     } else {

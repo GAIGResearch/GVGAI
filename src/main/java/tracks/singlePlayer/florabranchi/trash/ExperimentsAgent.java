@@ -1,4 +1,4 @@
-package tracks.singlePlayer.florabranchi.agents;
+package tracks.singlePlayer.florabranchi.trash;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,8 +10,7 @@ import core.game.StateObservation;
 import core.player.AbstractPlayer;
 import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
-import tracks.singlePlayer.florabranchi.GameStateHeuristic;
-import tracks.singlePlayer.florabranchi.tree.TreeNode;
+import tracks.singlePlayer.florabranchi.trash.GameStateHeuristic;
 
 /**
  * Flora Branchi (florabranchi@gmail.com) September 2019

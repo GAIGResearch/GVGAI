@@ -1,4 +1,4 @@
-package tracks.singlePlayer.florabranchi;
+package tracks.singlePlayer.florabranchi.trash;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
