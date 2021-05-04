@@ -3,14 +3,6 @@ package tracks.singlePlayer.florabranchi.agents.meta;
 public class GameOptions {
 
   public boolean reuseTree;
-
-  public boolean lossAvoidance;
-  public boolean expandAllNodes;
-  public boolean safetyPreprunning;
-
-  // exploração produnda /rasa
-  public boolean shallowRollout;
-
   public boolean rawGameScore;
   public boolean macroActions;
 
@@ -32,6 +24,12 @@ public class GameOptions {
         break;
       case RAW_SCORE_OFF:
         rawGameScore = false;
+        break;
+      case MACRO_ACTIONS_ON:
+        macroActions = true;
+        break;
+      case MACRO_ACTIONS_OFF:
+        macroActions = false;
         break;
       default:
         break;

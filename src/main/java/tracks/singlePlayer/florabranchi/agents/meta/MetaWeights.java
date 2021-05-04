@@ -24,10 +24,6 @@ public class MetaWeights implements Serializable {
 
   static {
 
-    avallableGameActions.add(NIL);
-    avallableGameActions.add(TURN_TREE_REUSE_ON);
-    avallableGameActions.add(TURN_TREE_REUSE_OFF);
-
     // what are metabot actions?? "naive"
     // opt a - mais simples
     // bool isBrainman isAliens
@@ -38,6 +34,12 @@ public class MetaWeights implements Serializable {
     // 0 0 0
     // 1 0 0
     // 1 1 0 ....etc
+
+    // Are slots defined here?
+
+    avallableGameActions.add(NIL);
+    avallableGameActions.add(TURN_TREE_REUSE_ON);
+    avallableGameActions.add(TURN_TREE_REUSE_OFF);
 
 
   }
