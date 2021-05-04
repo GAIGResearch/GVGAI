@@ -82,7 +82,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
   private final int[][] visitCount;
 
-  private static int MACRO_ACTIONS_DURATION = 2;
+  private static int MACRO_ACTIONS_DURATION = 5;
 
   private ACTIONS currentMacroAction;
   private int remainingMacroActionRepetitions;
