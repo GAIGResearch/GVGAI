@@ -32,11 +32,11 @@ public class ExecutionEpisodeResultsDAO {
 
       pstm.setString(1, results.usedOptions.game);
       pstm.setInt(2, results.usedOptions.level);
-      pstm.setString(3, String.valueOf(results.usedOptions.gameOptions.reuseTree));
-      pstm.setString(4, String.valueOf(results.usedOptions.gameOptions.reuseTree));
-      pstm.setString(5, String.valueOf(results.usedOptions.gameOptions.reuseTree));
-      pstm.setString(6, String.valueOf(results.usedOptions.gameOptions.reuseTree));
-      pstm.setString(7, String.valueOf(results.usedOptions.gameOptions.reuseTree));
+      pstm.setString(3, String.valueOf(results.usedOptions.gameOptions.treeReuse));
+      pstm.setString(4, String.valueOf(results.usedOptions.gameOptions.treeReuse));
+      pstm.setString(5, String.valueOf(results.usedOptions.gameOptions.treeReuse));
+      pstm.setString(6, String.valueOf(results.usedOptions.gameOptions.treeReuse));
+      pstm.setString(7, String.valueOf(results.usedOptions.gameOptions.treeReuse));
 
       pstm.setInt(8, results.usedOptions.totalGames);
       pstm.setString(9, Arrays.toString(results.usedOptions.scores));

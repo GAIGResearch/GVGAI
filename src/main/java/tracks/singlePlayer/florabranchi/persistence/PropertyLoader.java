@@ -11,16 +11,17 @@ import java.util.logging.Level;
 
 public class PropertyLoader {
 
-  public int GAME;
-  public int EPISODES;
-  public int LEVEL;
+  public static int GAME;
+  public static String GAME_NAME;
+  public static int EPISODES;
+  public static int LEVEL;
 
-  public String AGENT;
-  public Level LOGGER_LEVEL;
+  public static String AGENT;
+  public static Level LOGGER_LEVEL;
 
   public boolean DEBUG_VIEWER;
   public boolean SAVE_RESULTS;
-  public boolean VISUALS;
+  public static boolean VISUALS;
   public boolean SHOW_TREE;
 
   public float SARSA_ALFA;
@@ -32,8 +33,7 @@ public class PropertyLoader {
   public static boolean SELECT_HIGHEST_SCORE_CHILD;
   public static int TREE_SEARCH_SIZE;
   public static int TIME_LIMITATION_IN_MILLIS;
-  public static int SIMULATION_DEPTH;
-  public static int MAX_DEPTH;
+  public static int ROLLOUT_DEPTH;
 
   // Enhancements
   public static boolean TREE_REUSE;
@@ -64,6 +64,7 @@ public class PropertyLoader {
 
     // get the property value and print it out
     GAME = castGame(prop.getProperty("GAME"));
+    GAME_NAME = prop.getProperty("GAME");
     LEVEL = Integer.parseInt(prop.getProperty("LEVEL"));
     EPISODES = Integer.parseInt(prop.getProperty("EPISODES"));
 
@@ -78,8 +79,7 @@ public class PropertyLoader {
     SELECT_HIGHEST_SCORE_CHILD = Boolean.parseBoolean(prop.getProperty("SELECT_HIGHEST_SCORE_CHILD", "true"));
     TIME_LIMITATION_IN_MILLIS = Integer.parseInt(prop.getProperty("TIME_LIMITATION_IN_MILLIS", "40"));
     TREE_SEARCH_SIZE = Integer.parseInt(prop.getProperty("TREE_SEARCH_SIZE", "0"));
-    SIMULATION_DEPTH = Integer.parseInt(prop.getProperty("SELECTION_DEPTH", "0"));
-    MAX_DEPTH = Integer.parseInt(prop.getProperty("ROLLOUT_DEPTH", "0"));
+    ROLLOUT_DEPTH = Integer.parseInt(prop.getProperty("ROLLOUT_DEPTH", "0"));
 
     TREE_REUSE = Boolean.parseBoolean(prop.getProperty("TREE_REUSE", "false"));
     MACRO_ACTIONS = Boolean.parseBoolean(prop.getProperty("MACRO_ACTIONS", "false"));
@@ -220,22 +220,6 @@ public class PropertyLoader {
 
   public void setTIME_LIMITATION_IN_MILLIS(final int TIME_LIMITATION_IN_MILLIS) {
     PropertyLoader.TIME_LIMITATION_IN_MILLIS = TIME_LIMITATION_IN_MILLIS;
-  }
-
-  public int getSIMULATION_DEPTH() {
-    return SIMULATION_DEPTH;
-  }
-
-  public void setSIMULATION_DEPTH(final int SIMULATION_DEPTH) {
-    PropertyLoader.SIMULATION_DEPTH = SIMULATION_DEPTH;
-  }
-
-  public int getMAX_DEPTH() {
-    return MAX_DEPTH;
-  }
-
-  public void setMAX_DEPTH(final int MAX_DEPTH) {
-    PropertyLoader.MAX_DEPTH = MAX_DEPTH;
   }
 
   public boolean isTREE_REUSE() {

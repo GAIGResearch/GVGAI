@@ -41,12 +41,13 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
    */
   protected ArrayList<ACTIONS> actions;
 
+  public String gameName;
+
   protected boolean showTree;
 
   public int TIME_LIMITATION_IN_MILLIS;
   public int TREE_SEARCH_SIZE;
-  public int SIMULATION_DEPTH;
-  public int MAX_DEPTH;
+  public int ROLLOUT_DEPTH;
 
   // Enhancements
   public boolean TREE_REUSE;
@@ -90,11 +91,12 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
   public void reloadProperties() {
 
+    gameName = PropertyLoader.GAME_NAME;
+
     showTree = propertyLoader.SHOW_TREE;
 
     TREE_SEARCH_SIZE = PropertyLoader.TREE_SEARCH_SIZE;
-    SIMULATION_DEPTH = PropertyLoader.SIMULATION_DEPTH;
-    MAX_DEPTH = PropertyLoader.MAX_DEPTH;
+    ROLLOUT_DEPTH = PropertyLoader.ROLLOUT_DEPTH;
 
     TREE_REUSE = PropertyLoader.TREE_REUSE;
     MACRO_ACTIONS = PropertyLoader.MACRO_ACTIONS;
@@ -368,7 +370,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
     Node selectedNode = rootNode;
 
-    while (!selectedNode.currentGameState.isGameOver() && selectedNode.depth < MAX_DEPTH) {
+    while (!selectedNode.currentGameState.isGameOver()) {
 
       if (isExpandable(selectedNode)) {
         expansion(selectedNode, getAvailableActions(selectedNode.currentGameState));
@@ -537,7 +539,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
                         final double initialScore) {
 
     final StateObservation currentState = node.currentGameState.copy();
-    int advancementsInRollout = SIMULATION_DEPTH;
+    int advancementsInRollout = ROLLOUT_DEPTH;
 
     //Node currentNode = node;
     while (!currentState.isGameOver() && advancementsInRollout > 0) {

@@ -55,7 +55,7 @@ public class SavedMetaSarsaExecution {
 
     GameOptions gameOptions = new GameOptions();
     gameOptions.gameId = gameIdx;
-    gameOptions.reuseTree = PropertyLoader.TREE_REUSE;
+    gameOptions.treeReuse = PropertyLoader.TREE_REUSE;
 /*    gameOptions.lossAvoidance = PropertyLoader.LOSS_AVOIDANCE;
     gameOptions.expandAllNodes = PropertyLoader.EXPAND_ALL_CHILD_NODES;
     gameOptions.safetyPreprunning = PropertyLoader.SAFETY_PREPRUNNING;
@@ -97,7 +97,7 @@ public class SavedMetaSarsaExecution {
         final EMetaActions actions = agent.getActionAndUpdateWeightVectorValues(gameOptions, won, result);
 
         System.out.println("Selected action: \n" + actions);
-        gameOptions.act(actions);
+        //gameOptions.act(actions);
       }
 
       //ArcadeMachine.runGames(game, levelFiles, episodes, selectedAgent, null);

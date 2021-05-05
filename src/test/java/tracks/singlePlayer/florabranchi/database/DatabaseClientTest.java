@@ -34,7 +34,7 @@ public class DatabaseClientTest {
   public void testAddEpisode() {
 
     GameOptions gameOptions = new GameOptions();
-    gameOptions.reuseTree = true;
+    gameOptions.treeReuse = true;
 /*    gameOptions.lossAvoidance = true;
     gameOptions.expandAllNodes = true;
     gameOptions.safetyPreprunning = true;

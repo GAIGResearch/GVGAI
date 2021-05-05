@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 
 import tools.Utils;
 import tracks.ArcadeMachine;
-import tracks.singlePlayer.florabranchi.agents.meta.MetaMCTSAgent;
 import tracks.singlePlayer.florabranchi.persistence.PropertyLoader;
 
 /**
@@ -37,12 +36,12 @@ public class BaseMonteCarloExecution {
     String spGamesCollection = "examples/all_games_sp.csv";
     String[][] games = Utils.readGames(spGamesCollection);
 
-    int gameIdx = propertyLoader.GAME;
-    int levelIdx = propertyLoader.LEVEL;
-    int episodes = propertyLoader.EPISODES;
+    int gameIdx = PropertyLoader.GAME;
+    int levelIdx = PropertyLoader.LEVEL;
+    int episodes = PropertyLoader.EPISODES;
 
-    String selectedAgent = propertyLoader.AGENT;
-    boolean visuals = propertyLoader.VISUALS;
+    String selectedAgent = PropertyLoader.AGENT;
+    boolean visuals = PropertyLoader.VISUALS;
 
     String gameName = games[gameIdx][1];
     String game = games[gameIdx][0];
