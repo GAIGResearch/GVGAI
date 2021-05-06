@@ -15,6 +15,12 @@ public class BaseMCTSAgent extends ParametrizedMonteCarloTreeAgent {
 
   public BaseMCTSAgent(final StateObservation stateObs, final ElapsedCpuTimer elapsedTimer) {
     super(stateObs, elapsedTimer);
+    gameName = PropertyLoader.GAME_NAME;
+  }
+
+  @Override
+  public Types.ACTIONS act(final StateObservation stateObs, final ElapsedCpuTimer elapsedTimer) {
+    return super.act(stateObs, elapsedTimer);
   }
 
   @Override
@@ -33,6 +39,7 @@ public class BaseMCTSAgent extends ParametrizedMonteCarloTreeAgent {
     baseMonteCarloResult.finalScore = stateObs.getGameScore();
     baseMonteCarloResult.won = stateObs.getGameWinner().equals(Types.WINNER.PLAYER_WINS);
     baseMonteCarloResult.treeReuse = PropertyLoader.TREE_REUSE;
+    baseMonteCarloResult.avgNodesExplored = (int) totalNodes.stream().mapToInt(val -> val).average().orElse(0);
     baseMonteCarloResult.rawGameScore = PropertyLoader.RAW_GAME_SCORE;
     baseMonteCarloResult.macroActions = PropertyLoader.MACRO_ACTIONS;
     baseMonteCarloResult.lossAvoidance = PropertyLoader.LOSS_AVOIDANCE;

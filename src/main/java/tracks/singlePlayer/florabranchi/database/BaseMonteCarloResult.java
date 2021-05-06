@@ -1,14 +1,14 @@
 package tracks.singlePlayer.florabranchi.database;
 
 import java.io.Serializable;
-import java.util.Calendar;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "base_mcts_results")
@@ -27,6 +27,7 @@ public class BaseMonteCarloResult implements Serializable {
   public double finalScore;
 
   public boolean won;
+  public int avgNodesExplored;
 
   public boolean treeReuse;
   public boolean rawGameScore;
@@ -35,11 +36,11 @@ public class BaseMonteCarloResult implements Serializable {
   public boolean earlyInitialization;
   public boolean selectHighestScoreChild;
 
-  @Temporal(TemporalType.DATE)
-  private Calendar timestamp;
+  private final String timestamp;
 
   public BaseMonteCarloResult() {
-
+    DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+    timestamp = dateFormat.format(new Date(System.currentTimeMillis()));
 
   }
 

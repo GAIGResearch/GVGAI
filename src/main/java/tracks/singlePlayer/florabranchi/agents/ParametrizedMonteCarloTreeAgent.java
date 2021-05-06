@@ -41,26 +41,26 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
    */
   protected ArrayList<ACTIONS> actions;
 
-  public String gameName;
+  public static String gameName;
 
-  protected boolean showTree;
+  public static boolean showTree;
 
-  public int TIME_LIMITATION_IN_MILLIS;
-  public int TREE_SEARCH_SIZE;
-  public int ROLLOUT_DEPTH;
+  public static int TIME_LIMITATION_IN_MILLIS;
+  public static int TREE_SEARCH_SIZE;
+  public static int ROLLOUT_DEPTH;
 
   // Enhancements
-  public boolean TREE_REUSE;
-  public boolean LOSS_AVOIDANCE;
+  public static boolean TREE_REUSE;
+  public static boolean LOSS_AVOIDANCE;
 
-  public boolean EXPAND_ALL_CHILD_NODES;
-  public boolean SAFETY_PREPRUNNING;
-  public boolean EARLY_INITIALIZATION;
+  public static boolean EXPAND_ALL_CHILD_NODES;
+  public static boolean SAFETY_PREPRUNNING;
+  public static boolean EARLY_INITIALIZATION;
 
-  public boolean TIME_LIMITATION;
-  public boolean SELECT_HIGHEST_SCORE_CHILD;
-  public boolean RAW_GAME_SCORE;
-  public boolean MACRO_ACTIONS;
+  public static boolean TIME_LIMITATION;
+  public static boolean SELECT_HIGHEST_SCORE_CHILD;
+  public static boolean RAW_GAME_SCORE;
+  public static boolean MACRO_ACTIONS;
 
   // Heuristic Weights
   public int RAW_SCORE_WEIGHT = 1;
@@ -69,6 +69,8 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   public int EXPLORATION_SCORE_WEIGHT = 5;
   public int MOVABLES_SCORE_WEIGHT = 1;
   public int PORTALS_SCORE_WEIGHT = 1;
+
+  protected List<Integer> totalNodes = new ArrayList<>();
 
   private final int maxDistance;
 
@@ -89,11 +91,11 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   private int remainingMacroActionRepetitions;
   boolean resetAlgorithm = false;
 
-  public void reloadProperties() {
+  public static void reloadProperties() {
 
-    gameName = PropertyLoader.GAME_NAME;
+    // gameName = PropertyLoader.GAME_NAME;
 
-    showTree = propertyLoader.SHOW_TREE;
+    showTree = PropertyLoader.SHOW_TREE;
 
     TREE_SEARCH_SIZE = PropertyLoader.TREE_SEARCH_SIZE;
     ROLLOUT_DEPTH = PropertyLoader.ROLLOUT_DEPTH;
@@ -165,6 +167,9 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     final ACTIONS selectedAction = monteCarloSearchParametrized(stateObs, elapsedTimer, lastAction);
     //measureTime(startTime, "act");
     lastAction = selectedAction;
+    totalNodes.add(rootNode.visits);
+    System.out.println(rootNode.visits);
+    System.out.println(totalNodes.stream().mapToInt(val -> val).average().orElse(0));
     return selectedAction;
   }
 
@@ -179,6 +184,8 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   @Override
   public void result(final StateObservation stateObs,
                      final ElapsedCpuTimer elapsedCpuTimer) {
+
+    reloadProperties();
 
   }
 

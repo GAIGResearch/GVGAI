@@ -20,9 +20,10 @@ public class PropertyLoader {
   public static Level LOGGER_LEVEL;
 
   public boolean DEBUG_VIEWER;
+  public boolean LOAD_RUN_INSTRUCTIONS;
   public boolean SAVE_RESULTS;
   public static boolean VISUALS;
-  public boolean SHOW_TREE;
+  public static boolean SHOW_TREE;
 
   public float SARSA_ALFA;
   public float SARSA_GAMMA;
@@ -62,10 +63,14 @@ public class PropertyLoader {
     LOGGER_LEVEL = Level.parse(loggerLevel);
     Date time = new Date(System.currentTimeMillis());
 
-    // get the property value and print it out
-    GAME = castGame(prop.getProperty("GAME"));
-    GAME_NAME = prop.getProperty("GAME");
-    LEVEL = Integer.parseInt(prop.getProperty("LEVEL"));
+    LOAD_RUN_INSTRUCTIONS = Boolean.parseBoolean(prop.getProperty("LOAD_RUN_INSTRUCTIONS"));
+
+    if (!LOAD_RUN_INSTRUCTIONS) {
+      GAME = castGame(prop.getProperty("GAME"));
+      GAME_NAME = prop.getProperty("GAME");
+      LEVEL = Integer.parseInt(prop.getProperty("LEVEL"));
+    }
+
     EPISODES = Integer.parseInt(prop.getProperty("EPISODES"));
 
     // Agent
@@ -73,6 +78,7 @@ public class PropertyLoader {
     DEBUG_VIEWER = Boolean.parseBoolean(prop.getProperty("DEBUG_VIEWER"));
     VISUALS = Boolean.parseBoolean(prop.getProperty("VISUALS"));
     SHOW_TREE = Boolean.parseBoolean(prop.getProperty("SHOW_TREE"));
+
 
     // Monte Carlo properties, if required
     TIME_LIMITATION = Boolean.parseBoolean(prop.getProperty("TIME_LIMITATION", "false"));
