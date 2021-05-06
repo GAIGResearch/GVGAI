@@ -6,10 +6,13 @@ import javax.persistence.Persistence;
 
 public class BaseMonteCarloResultDAO {
 
-
-  EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("base_mcts_results");
+  static EntityManagerFactory entityManagerFactory = null;
 
   public BaseMonteCarloResultDAO() {
+
+    if (entityManagerFactory == null) {
+      entityManagerFactory = Persistence.createEntityManagerFactory("base_mcts_results");
+    }
   }
 
   public void save(BaseMonteCarloResult baseMonteCarloResult) {

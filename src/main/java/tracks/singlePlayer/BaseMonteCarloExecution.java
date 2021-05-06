@@ -48,11 +48,12 @@ public class BaseMonteCarloExecution {
 
     //String gameName = games[gameIdx][1];
 
+    //camelRace //aliens", "butterflies", "painter // brainman
     // group 1 - aliens butterfly, painter
     // group 2 - camelRace frogs chase
     // group 3 - jaws seaquest, surviving_zombies
     // group 4 - brainmain, plants eggomania
-    List<String> gameList = Arrays.asList("camelRace");
+    List<String> gameList = Arrays.asList("brainman");//,  "frogs", "chase"); //brainmain, plants eggomania
 
     if (visuals) {
       String game = games[gameIdx][0];
