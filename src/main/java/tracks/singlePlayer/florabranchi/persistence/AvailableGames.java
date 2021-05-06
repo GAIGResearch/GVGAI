@@ -59,7 +59,10 @@ public enum AvailableGames {
   G_58(58, "labyrinth"),
   G_59(59, "labyrinthdual"),
   G_60(60, "lasers"),
-  G_70(70, "painter");
+  G_70(70, "painter"),
+  G_77(77, "seaquest"),
+  G_84(84, "surviving_zombies"),
+  G_61(61, "plants");
 
   private Integer id;
   private String name;

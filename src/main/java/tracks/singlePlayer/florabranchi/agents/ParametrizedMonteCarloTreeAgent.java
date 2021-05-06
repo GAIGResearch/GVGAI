@@ -168,8 +168,8 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     //measureTime(startTime, "act");
     lastAction = selectedAction;
     totalNodes.add(rootNode.visits);
-    System.out.println(rootNode.visits);
-    System.out.println(totalNodes.stream().mapToInt(val -> val).average().orElse(0));
+    //System.out.println(rootNode.visits);
+    // System.out.println(totalNodes.stream().mapToInt(val -> val).average().orElse(0));
     return selectedAction;
   }
 
@@ -217,7 +217,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
           }
           search(stateObs);
         } else {
-          System.out.println("0 actions left.");
+          //System.out.println("0 actions left.");
           currentMacroAction = decideMacro(stateObs);
         }
       }

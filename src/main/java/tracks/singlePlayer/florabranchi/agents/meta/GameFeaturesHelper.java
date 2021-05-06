@@ -15,6 +15,7 @@ public class GameFeaturesHelper {
 
   static {
 
+    // flora usar id?
     // group 1 - aliens 1, butterfly 13, painter 70
     featuresByGame.put(0, new GameFeatures(true, false, false, false));
     featuresByGame.put(13, new GameFeatures(false, false, false, false));
@@ -23,11 +24,17 @@ public class GameFeaturesHelper {
     // group 2 - camelRace 15 frogs 44 chase 18
     featuresByGame.put(15, new GameFeatures(true, false, false, false));
     featuresByGame.put(44, new GameFeatures(false, false, true, false));
+    featuresByGame.put(18, new GameFeatures(false, false, true, false));
 
-    // group 3 - jaws, seaquest 77, surviving zombies 84
+    // group 3 - jaws 56, seaquest 77, surviving zombies 84
+    featuresByGame.put(56, new GameFeatures(true, false, false, false));
+    featuresByGame.put(77, new GameFeatures(false, false, true, false));
+    featuresByGame.put(84, new GameFeatures(false, false, true, false));
 
-    // group 4 - brainmain, plants, eggmania
-    // frogs 44
+    // group 4 - brainmain 12, plants 61, eggomania
+    featuresByGame.put(12, new GameFeatures(true, false, false, false));
+    featuresByGame.put(61, new GameFeatures(false, false, true, false));
+    featuresByGame.put(34, new GameFeatures(false, false, true, false));
 
   }
 
