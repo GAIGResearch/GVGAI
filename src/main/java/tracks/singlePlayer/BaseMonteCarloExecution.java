@@ -49,7 +49,7 @@ public class BaseMonteCarloExecution {
     //String gameName = games[gameIdx][1];
 
 
-    List<String> gameList = Arrays.asList("aliens");
+    List<String> gameList = Arrays.asList("camelRace");
 
     if (visuals) {
       String game = games[gameIdx][0];
@@ -60,6 +60,7 @@ public class BaseMonteCarloExecution {
       System.out.println(Arrays.toString(doubles));
     } else {
 
+      int episodesPerLevel = 20;
       RunInstructions runInstructions = new RunInstructions();
       for (String gameName : gameList) {
         gameIdx = Objects.requireNonNull(AvailableGames.fromName(gameName)).getId();
@@ -67,7 +68,7 @@ public class BaseMonteCarloExecution {
         for (int levelIt = 0; levelIt < 5; levelIt++) {
           String game = games[gameIdx][0];
           String levelPath = game.replace(gameName, gameName + "_lvl" + levelIt);
-          runInstructions.addInstruction(new RunInstructions.RunInstruction(game, gameName, levelPath, levelIt, 5));
+          runInstructions.addInstruction(new RunInstructions.RunInstruction(game, gameName, levelPath, levelIt, episodesPerLevel));
         }
       }
 

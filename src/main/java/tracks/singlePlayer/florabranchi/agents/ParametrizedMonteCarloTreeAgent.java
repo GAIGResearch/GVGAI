@@ -42,25 +42,23 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   protected ArrayList<ACTIONS> actions;
 
   public static String gameName;
+  public static int TREE_SEARCH_SIZE;
 
   public static boolean showTree;
-
+  public static boolean TIME_LIMITATION;
   public static int TIME_LIMITATION_IN_MILLIS;
-  public static int TREE_SEARCH_SIZE;
   public static int ROLLOUT_DEPTH;
+
+  // Implementation Options
+  public static boolean EXPAND_ALL_CHILD_NODES;
+  public static boolean SELECT_HIGHEST_SCORE_CHILD;
 
   // Enhancements
   public static boolean TREE_REUSE;
   public static boolean LOSS_AVOIDANCE;
-
-  public static boolean EXPAND_ALL_CHILD_NODES;
-  public static boolean SAFETY_PREPRUNNING;
-  public static boolean EARLY_INITIALIZATION;
-
-  public static boolean TIME_LIMITATION;
-  public static boolean SELECT_HIGHEST_SCORE_CHILD;
   public static boolean RAW_GAME_SCORE;
   public static boolean MACRO_ACTIONS;
+  public static boolean EARLY_INITIALIZATION;
 
   // Heuristic Weights
   public int RAW_SCORE_WEIGHT = 1;
@@ -78,7 +76,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
   public Node rootNode;
 
-  private Random rand = new Random();
+  private final Random rand = new Random();
 
   private static final double WINNER_SCORE = Math.pow(10, 6);
   private static final double LOSS_SCORE = Math.pow(10, -6);
@@ -108,7 +106,6 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     LOSS_AVOIDANCE = PropertyLoader.LOSS_AVOIDANCE;
     RAW_GAME_SCORE = PropertyLoader.RAW_GAME_SCORE;
     EXPAND_ALL_CHILD_NODES = PropertyLoader.EXPAND_ALL_CHILD_NODES;
-    SAFETY_PREPRUNNING = PropertyLoader.SAFETY_PREPRUNNING;
     EARLY_INITIALIZATION = PropertyLoader.EARLY_INITIALIZATION;
   }
 
@@ -121,7 +118,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   public ParametrizedMonteCarloTreeAgent(final StateObservation stateObs,
                                          final ElapsedCpuTimer elapsedTimer) {
     super(stateObs, elapsedTimer);
-    showTree = propertyLoader.SHOW_TREE;
+    showTree = PropertyLoader.SHOW_TREE;
 
     reloadProperties();
 
@@ -185,47 +182,14 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   public void result(final StateObservation stateObs,
                      final ElapsedCpuTimer elapsedCpuTimer) {
 
-    reloadProperties();
-
   }
 
   public ACTIONS monteCarloSearchParametrized(final StateObservation stateObs,
                                               final ElapsedCpuTimer elapsedTimer,
                                               final ACTIONS previousAction) {
 
-
     if (MACRO_ACTIONS) {
-
-      if (currentMacroAction == null) {
-        //System.out.println("Setting first MA");
-        rootNode = buildRootNode(stateObs);
-        currentMacroAction = decideMacro(stateObs);
-      } else {
-        //System.out.printf("Current MA: %s Remaining reps: %d \n", currentMacroAction, remainingMacroActionRepetitions);
-
-        for (int i = 0; i < remainingMacroActionRepetitions; i++) {
-          stateObs.advance(currentMacroAction);
-        }
-
-        if (remainingMacroActionRepetitions > 0) {
-          //System.out.println("Macro action is set. Remaining uses: " + remainingMacroActionRepetitions);
-          if (resetAlgorithm) {
-            //System.out.println("Reseting algorithm");
-            rootNode = buildRootNode(stateObs);
-            search(stateObs);
-            resetAlgorithm = false;
-          }
-          search(stateObs);
-        } else {
-          //System.out.println("0 actions left.");
-          currentMacroAction = decideMacro(stateObs);
-        }
-      }
-
-      remainingMacroActionRepetitions--;
-      //System.out.println("Executing " + currentMacroAction);
-      return currentMacroAction;
-
+      return executeMacroActions(stateObs);
     } else {
       // Regular search
 
@@ -241,8 +205,6 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
           final List<Node> nodes = returnAllNodes(rootNode);
           nodes.forEach(node -> node.depth--);
 
-          //todo add decay
-
         } else {
           rootNode = buildRootNode(stateObs);
         }
@@ -256,14 +218,35 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     return nextMove();
   }
 
+  private ACTIONS executeMacroActions(final StateObservation stateObs) {
+    if (currentMacroAction == null) {
+      rootNode = buildRootNode(stateObs);
+      currentMacroAction = decideMacro(stateObs);
+    } else {
+      for (int i = 0; i < remainingMacroActionRepetitions; i++) {
+        stateObs.advance(currentMacroAction);
+      }
+
+      if (remainingMacroActionRepetitions > 0) {
+        if (resetAlgorithm) {
+          rootNode = buildRootNode(stateObs);
+          search(stateObs);
+          resetAlgorithm = false;
+        }
+        search(stateObs);
+      } else {
+        currentMacroAction = decideMacro(stateObs);
+      }
+    }
+    remainingMacroActionRepetitions--;
+    return currentMacroAction;
+  }
+
   private ACTIONS decideMacro(final StateObservation stateObs) {
-    //System.out.println("Deciding new MacroAction.");
     search(stateObs);
     remainingMacroActionRepetitions = MACRO_ACTIONS_DURATION;
     resetAlgorithm = true;
-    final ACTIONS nextMacro = nextMove();
-    //System.out.println("New MacroAction: " + nextMacro);
-    return nextMacro;
+    return nextMove();
   }
 
   private ACTIONS nextMove() {
@@ -275,7 +258,6 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   }
 
   private void search(final StateObservation stateObs) {
-
     if (!TIME_LIMITATION) {
       searchWithIterationLimit(stateObs);
     } else {
@@ -303,10 +285,6 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
                                        final int remainingMillisLimit) {
 
     final long initial = System.currentTimeMillis();
-
-    //long remaining = TIME_LIMITATION_IN_MILLIS;
-    // long remaining = elapsedTimer.remainingTimeMillis();
-
     double avgTimeTaken = 0;
     double acumTimeTaken = 0;
     int iterations = 0;
@@ -476,14 +454,10 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     final int avatarX = (int) copyState.getAvatarPosition().x;
     final int avatarY = (int) copyState.getAvatarPosition().y;
 
-    double totalScore = 0;
-
     final StateEvaluatorHelper.ObservableData npcData = StateEvaluatorHelper.getNpcData(copyState);
     final StateEvaluatorHelper.ObservableData portalsData = StateEvaluatorHelper.getPortalsData(copyState);
     final StateEvaluatorHelper.ObservableData movablesData = StateEvaluatorHelper.getMovablesData(copyState);
     final StateEvaluatorHelper.ObservableData resourcesData = StateEvaluatorHelper.getResourcesData(copyState);
-
-    final Double avgNpcDist = getAverageDistance(npcData);
 
     final double distClosestResource = distanceToClosestObservable(avatarX, avatarY, resourcesData);
     final double distClosestPortal = distanceToClosestObservable(avatarX, avatarY, portalsData);
@@ -498,14 +472,8 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
     double exporationScore = ((double) 1 - visitCount[avatarX][avatarY]) / maxDistance;
     double resourceScore = distClosestResource == 0 ? 0 : (1 - distClosestResource) / maxDistance;
-    //double resourceScore = (1 - distClosestResource) / maxDistance;
     double movableScore = distClosestMovable / maxDistance;
-
-    // should npc score be removed? quando é inimigo, atrapalha
-
-    double npcScore = distClosestNpc / maxDistance;
     double portalScore = distClosestPortal == 0 ? 0 : (1 - distClosestPortal) / maxDistance;
-    //double portalScore = (1 - distClosestPortal) / maxDistance;
 
     final int resources = copyState.getAvatarResources().size();
 
@@ -572,7 +540,6 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
       }
     }
     return reward;
-    //return new Pair<Double, Node>(reward, currentNode);
   }
 
   public Node getMostVisitedChild(final Node node) {
