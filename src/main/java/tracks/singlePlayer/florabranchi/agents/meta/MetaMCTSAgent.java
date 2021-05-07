@@ -3,6 +3,7 @@ package tracks.singlePlayer.florabranchi.agents.meta;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -29,26 +30,18 @@ public class MetaMCTSAgent {
 
   protected final static Logger LOGGER = Logger.getLogger("MetaMCTSAgent");
 
-  private LearningAgentDebug learningAgentDebug;
-
   private GameOptionFeatureController gameOptionFeatureController;
-
-  private PersistenceController persistenceController = new PersistenceController();
 
   protected Random randomGenerator = new Random();
 
-  // Data
-  public MetaWeights metaWeights;
-
-  public MetaWeights previousResults;
-
   // State related data
-  private EMetaActions previousAction;
-  private GameOptions previousState;
-  private double previousScore;
-  private int previousEnemyCount;
+  public Map<MabParameters, MabData> mabsData = new HashMap<>();
+  public Map<MabParameters, MabData> previousData = new HashMap<>();
+  MabParameters previousAction;
 
+  MultiArmedNaiveSampler sampler = new MultiArmedNaiveSampler();
   MetaWeightsDAO metaWeightsDAO = new MetaWeightsDAO(new DatabaseClient());
+
 
   public MetaMCTSAgent() {
 
@@ -68,7 +61,11 @@ public class MetaMCTSAgent {
     gameOptionFeatureController = new GameOptionFeatureController();
     initializeTrainingWeightVector();
 
-    metaWeights = metaWeightsDAO.getMetaWeights(1);
+    // load
+    mabsData = new HashMap<>();
+    previousData = new HashMap<>();
+
+    sampler.loadMabs();
 
   }
 
@@ -81,7 +78,7 @@ public class MetaMCTSAgent {
   }
 
 
-  public double result(final GameOptions gameOptions,
+  public double result(final MabParameters gameOptions,
                        final boolean won,
                        final int score,
                        final int iteration) {
@@ -107,30 +104,28 @@ public class MetaMCTSAgent {
     //updateAfterLastAction(reward, previousAction, gameOptions);
 
     logCurrentWeights();
-    metaWeightsDAO.save(metaWeights);
+    //metaWeightsDAO.save(metaWeights);
 
-    if (learningAgentDebug != null) {
-      learningAgentDebug.closeJframe();
-    }
     //super.result(stateObs, elapsedCpuTimer);
     System.out.println("Reward: \n" + reward);
     return reward;
   }
 
   public void updateRecord(boolean won) {
-    GameResults previousResults = persistenceController.readPreviousGameResults();
-    previousResults.updateResults(won);
-    persistenceController.saveGameResults(previousResults);
+    // GameResults previousResults = persistenceController.readPreviousGameResults();
+    //previousResults.updateResults(won);
+    //persistenceController.saveGameResults(previousResults);
   }
 
 
   @SuppressWarnings("DuplicatedCode")
-  private void updateWeightVectorForAction(final EMetaActions previousAction,
+  private void updateWeightVectorForAction(final MabParameters previousAction,
                                            final TreeMap<String, Double> featureVectorForState,
                                            final double delta) {
 
     // Get Weight vector for previous action (a) (W i a)
-    final TreeMap<String, Double> relatedWeightVector = metaWeights.getWeightVectorMap().get(previousAction);
+    final MabData mabData = mabsData.get(previousAction);
+    final TreeMap<String, Double> relatedWeightVector = mabData.getWeightVectorMap();
 
     for (Map.Entry<String, Double> weightMapEntry : relatedWeightVector.entrySet()) {
 
@@ -140,16 +135,16 @@ public class MetaMCTSAgent {
       final double updatedWeight = weightMapEntry.getValue() + (ALFA * delta * featureVectorForState.get(featureType));
 
       // Update
-      metaWeights.updateWeightVector(previousAction, featureType, updatedWeight);
+      mabData.updateWeightVector(featureType, updatedWeight);
     }
   }
 
   // need: a', s', a, s, r
-  public void getActionAndUpdateWeightVectorValues(final double stateReward,
-                                                   final EMetaActions previousAction,
-                                                   final GameOptions previousState,
-                                                   final EMetaActions currentAction,
-                                                   final GameOptions currentState) {
+  public void updateAndGetNewMab(final double stateReward,
+                                 final MabParameters previousAction,
+                                 final GameOptions previousState,
+                                 final MabParameters currentAction,
+                                 final GameOptions currentState) {
 
     // Get feature values for previous state (s)
     final TreeMap<String, Double> initialFeatureVector = gameOptionFeatureController.extractFeatureVector(previousState.gameId);
@@ -163,7 +158,7 @@ public class MetaMCTSAgent {
   }
 
   public void updateAfterLastAction(final double stateReward,
-                                    final EMetaActions previousAction,
+                                    final MabParameters previousAction,
                                     final GameOptions previousState) {
 
 
@@ -177,21 +172,24 @@ public class MetaMCTSAgent {
     updateWeightVectorForAction(previousAction, featureVector, delta);
   }
 
-  public EMetaActions returnRandomAction() {
-    int index = randomGenerator.nextInt(MetaWeights.avallableGameActions.size());
-    return MetaWeights.avallableGameActions.get(index);
+  public MabParameters returnRandomAction() {
+
+    return null;
+    // return random mab
+    //int index = randomGenerator.nextInt(MetaWeights.availableParameters.size());
+    //return MetaWeights.availableParameters.get(index);
   }
 
-  public EMetaActions getActionAndUpdateWeightVectorValues(final GameOptions gameOptions,
-                                                           final boolean won,
-                                                           final double reward) {
+  public MabParameters updateAndGetNewMab(final MabParameters gameOptions,
+                                          final boolean won,
+                                          final double reward) {
 
     // Reward = curr score - previous score
     double stateScore = won ? 1000 + reward : -1000;
 
     // First play
     if (previousAction == null) {
-      final EMetaActions currentAction = selectBestPerceivedAction(gameOptions);
+      final MabParameters currentAction = selectBestPerceivedAction(gameOptions);
 
       // a
       previousAction = currentAction;
@@ -203,10 +201,10 @@ public class MetaMCTSAgent {
     }
 
     // Select best action given current q values for (s') / exploration play
-    final EMetaActions selectedAction = selectBestPerceivedAction(gameOptions);
+    final EMetaParameters selectedAction = selectBestPerceivedAction(gameOptions);
 
     // need: s, a r, s', a'
-    getActionAndUpdateWeightVectorValues(reward, previousAction, previousState, selectedAction, gameOptions);
+    updateAndGetNewMab(reward, previousAction, previousState, selectedAction, gameOptions);
 
     final TreeMap<String, Double> featuresForCurrState = gameOptionFeatureController.extractFeatureVector(gameOptions.gameId);
 
@@ -223,13 +221,13 @@ public class MetaMCTSAgent {
   }
 
   public double getQValueForAction(final GameOptions options,
-                                   final EMetaActions action) {
+                                   final MabParameters action) {
 
     // Extract feature array
     final TreeMap<String, Double> featureAfterAction = gameOptionFeatureController.extractFeatureVector(options.gameId);
 
     // Get related weight vector
-    final TreeMap<String, Double> weightVectorForAction = metaWeights.getWeightVectorMap().get(action);
+    final TreeMap<String, Double> weightVectorForAction = mabsData.get(action).getWeightVectorMap();
 
     return dotProduct(featureAfterAction, weightVectorForAction);
   }
@@ -248,23 +246,23 @@ public class MetaMCTSAgent {
   }
 
 
-  public EMetaActions selectBestPerceivedAction(final GameOptions options) {
+  public MabParameters selectBestPerceivedAction(final GameOptions options) {
 
     // Exploration parameter
     int rand = randomGenerator.nextInt(100);
     if (rand <= EXPLORATION_EPSILON) {
-      final EMetaActions randomAction = returnRandomAction();
-      persistenceController.addLog(String.format("Exploring random action %s", randomAction));
+      final MabParameters randomAction = returnRandomAction();
+      //persistenceController.addLog(String.format("Exploring random action %s", randomAction));
       return returnRandomAction();
     }
 
     double maxValue = -Double.MAX_VALUE;
-    EMetaActions bestAction = EMetaActions.NIL;
+    MabParameters bestAction = null;
 
-    List<EMetaActions> duplicatedActions = new ArrayList<>();
+    List<MabParameters> duplicatedActions = new ArrayList<>();
 
 
-    for (EMetaActions action : MetaWeights.avallableGameActions) {
+    for (MabParameters action : mabsData.keySet()) {
       final double actionExpectedReward = getQValueForAction(options, action);
       if (actionExpectedReward >= maxValue) {
 
@@ -288,21 +286,21 @@ public class MetaMCTSAgent {
     if (duplicatedActions.size() > 1) {
 
       Collections.shuffle(duplicatedActions);
-      final EMetaActions selectedActon = duplicatedActions.get(randomGenerator.nextInt(duplicatedActions.size() - 1));
-      persistenceController.addLog(String.format("Best play: draw for score %s, selected: %s", maxValue, selectedActon));
+      final MabParameters selectedActon = duplicatedActions.get(randomGenerator.nextInt(duplicatedActions.size() - 1));
+      //persistenceController.addLog(String.format("Best play: draw for score %s, selected: %s", maxValue, selectedActon));
       return selectedActon;
     }
 
-    persistenceController.addLog(String.format("Best play: %s - score - %.2f", bestAction, maxValue));
+    //persistenceController.addLog(String.format("Best play: %s - score - %.2f", bestAction, maxValue));
     return bestAction;
   }
 
 
   public void logCurrentWeights() {
-    final TreeMap<EMetaActions, TreeMap<String, Double>> weightVectorMap = metaWeights.getWeightVectorMap();
+    final TreeMap<MabParameters, TreeMap<String, Double>> weightVectorMap = (TreeMap<MabParameters, TreeMap<String, Double>>) mabsData.values().stream().map(MabData::getWeightVectorMap);
     weightVectorMap.forEach((key, value) -> {
-      persistenceController.addLog(String.format("Weight Vector for %s", key));
-      value.forEach((key1, value1) -> persistenceController.addLog(String.format("%s - %s", key1, value1)));
+      // persistenceController.addLog(String.format("Weight Vector for %s", key));
+      //value.forEach((key1, value1) -> persistenceController.addLog(String.format("%s - %s", key1, value1)));
     });
   }
 
@@ -311,24 +309,24 @@ public class MetaMCTSAgent {
 
     final long idForNow = 1;
 
-    if (previousResults != null) {
-      persistenceController.addLog("Previous results still in memory");
+    if (mabsData != null) {
+      //persistenceController.addLog("Previous results still in memory");
       logCurrentWeights();
       return;
     }
 
     // read file
-    MetaWeights previousResults = metaWeightsDAO.getMetaWeights(idForNow);
+    //MetaWeights previousData = metaWeightsDAO.getMetaWeights(idForNow);
 
     // if could not load initialize
-    if (previousResults == null) {
-      persistenceController.addLog("No previous results, creating new Weights");
-      previousResults = new MetaWeights();
-      this.metaWeights = new MetaWeights();
+    if (previousData == null) {
+      //persistenceController.addLog("No previous results, creating new Weights");
+      previousData = new HashMap<>();
+      this.mabsData = new HashMap<>();
       logCurrentWeights();
     } else {
       System.out.println("Loaded DB previous weiohts.");
-      this.metaWeights = previousResults;
+      //this.metaWeights = previousResults;
       logCurrentWeights();
     }
   }

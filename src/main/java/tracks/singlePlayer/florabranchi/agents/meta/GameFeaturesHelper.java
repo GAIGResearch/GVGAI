@@ -47,6 +47,13 @@ public class GameFeaturesHelper {
     return featuresByGame.getOrDefault(gameId, null);
   }
 
+  enum EGameFeatures {
+    isDeterministic,
+    canUse,
+    canDie,
+    isSurvival,
+  }
+
   static class GameFeatures {
     public boolean isDeterministic;
     public boolean canUse;

@@ -9,8 +9,9 @@ import java.util.logging.Logger;
 
 import tools.Utils;
 import tracks.ArcadeMachine;
-import tracks.singlePlayer.florabranchi.agents.meta.EMetaActions;
+import tracks.singlePlayer.florabranchi.agents.meta.EMetaParameters;
 import tracks.singlePlayer.florabranchi.agents.meta.GameOptions;
+import tracks.singlePlayer.florabranchi.agents.meta.MabParameters;
 import tracks.singlePlayer.florabranchi.agents.meta.MetaMCTSAgent;
 import tracks.singlePlayer.florabranchi.agents.meta.RunOptions;
 import tracks.singlePlayer.florabranchi.persistence.PropertyLoader;
@@ -53,14 +54,14 @@ public class SavedMetaSarsaExecution {
     String game = games[gameIdx][0];
     String level1 = game.replace(gameName, gameName + "_lvl" + levelIdx);
 
-    GameOptions gameOptions = new GameOptions();
-    gameOptions.gameId = gameIdx;
-    gameOptions.treeReuse = PropertyLoader.TREE_REUSE;
+    MabParameters gameOptions = new MabParameters();
+    //gameOptions.addParameter() = gameIdx;
+    //gameOptions.treeReuse = PropertyLoader.TREE_REUSE;
 /*    gameOptions.lossAvoidance = PropertyLoader.LOSS_AVOIDANCE;
     gameOptions.expandAllNodes = PropertyLoader.EXPAND_ALL_CHILD_NODES;
     gameOptions.safetyPreprunning = PropertyLoader.SAFETY_PREPRUNNING;
     gameOptions.shallowRollout = PropertyLoader.SIMULATION_DEPTH <= 50;*/
-    gameOptions.rawGameScore = PropertyLoader.TREE_REUSE;
+    //gameOptions.rawGameScore = PropertyLoader.TREE_REUSE;
 
     //todo fix run options
     RunOptions runOptions = new RunOptions();
@@ -86,6 +87,8 @@ public class SavedMetaSarsaExecution {
       agent.initializeTrainingWeightVector();
 
       for (int i = 0; i < episodes; i++) {
+
+        // Setup Agent parameters
         final double[] doubles = ArcadeMachine.runOneGame(game, level1, visuals, selectedAgent, recordActionsFile, seed, 0);
         System.out.println(Arrays.toString(doubles));
 
@@ -94,7 +97,7 @@ public class SavedMetaSarsaExecution {
         final int ticks = (int) doubles[2];
         final double result = agent.result(gameOptions, won, score, ticks);
 
-        final EMetaActions actions = agent.getActionAndUpdateWeightVectorValues(gameOptions, won, result);
+        final MabParameters actions = agent.updateAndGetNewMab(gameOptions, won, result);
 
         System.out.println("Selected action: \n" + actions);
         //gameOptions.act(actions);

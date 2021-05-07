@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import java.util.TreeMap;
 
-import tracks.singlePlayer.florabranchi.agents.meta.EMetaActions;
 import tracks.singlePlayer.florabranchi.agents.meta.GameOptions;
 import tracks.singlePlayer.florabranchi.agents.meta.MetaWeights;
 import tracks.singlePlayer.florabranchi.agents.meta.RunOptions;
