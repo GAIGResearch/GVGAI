@@ -23,11 +23,9 @@ public class MabData {
 
   public MabData() {
     weightVectorMap = new TreeMap<>();
-
-    TreeMap<GameFeaturesHelper.EGameFeatures, Double> emptyPropertyMap = new TreeMap<>();
     final GameFeaturesHelper.EGameFeatures[] propertyValueMap = GameFeaturesHelper.EGameFeatures.values();
     for (final GameFeaturesHelper.EGameFeatures property : propertyValueMap) {
-      emptyPropertyMap.put(property, 0d);
+      weightVectorMap.put(property.toString(), 0d);
     }
   }
 

@@ -48,10 +48,10 @@ public class GameFeaturesHelper {
   }
 
   enum EGameFeatures {
-    isDeterministic,
-    canUse,
-    canDie,
-    isSurvival,
+    IS_DETERMINISTIC,
+    CAN_USE,
+    CAN_DIE,
+    IS_SURVIVAL,
   }
 
 

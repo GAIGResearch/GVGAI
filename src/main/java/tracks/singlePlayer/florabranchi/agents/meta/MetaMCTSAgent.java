@@ -59,6 +59,14 @@ public class MetaMCTSAgent {
     mabsData = new HashMap<>();
     previousData = new HashMap<>();
 
+    MabParameters mabParameters = new MabParameters();
+    mabParameters.addParameter(EMetaParameters.TREE_REUSE, PropertyLoader.TREE_REUSE);
+    mabParameters.addParameter(EMetaParameters.SELECT_HIGHEST_SCORE_CHILD, PropertyLoader.SELECT_HIGHEST_SCORE_CHILD);
+    mabParameters.addParameter(EMetaParameters.EARLY_INITIALIZATION, PropertyLoader.EARLY_INITIALIZATION);
+    mabParameters.addParameter(EMetaParameters.LOSS_AVOIDANCE, PropertyLoader.LOSS_AVOIDANCE);
+    mabParameters.addParameter(EMetaParameters.RAW_GAME_SCORE, PropertyLoader.RAW_GAME_SCORE);
+    mabsData.put(mabParameters, new MabData());
+
     sampler.loadMabs();
   }
 
@@ -83,11 +91,10 @@ public class MetaMCTSAgent {
     // need: s, a r, s', a'
     updateAndGetNewMab(reward, previousAction, previousState, selectedAction, currentState);
 
-    final TreeMap<String, Double> featuresForCurrState = gameOptionFeatureController.extractFeatureVector(PropertyLoader.GAME);
-
     // Update last values
     previousAction = selectedAction;
     previousState = currentState;
+    previousData = mabsData;
     return selectedAction;
 
   }
@@ -164,10 +171,24 @@ public class MetaMCTSAgent {
 
   public MabParameters returnRandomAction() {
 
-    return null;
-    // return random mab
-    //int index = randomGenerator.nextInt(MetaWeights.availableParameters.size());
-    //return MetaWeights.availableParameters.get(index);
+    // check for local mabs still unexplored
+    List<MabParameters> unexploredLocalMabs = new ArrayList<>();
+    final Map<EMetaParameters, MabParameters> localMabs = sampler.localMabs;
+    localMabs.values().forEach(localMab -> {
+      if (!mabsData.containsKey(localMab)) {
+        unexploredLocalMabs.add(localMab);
+      }
+    });
+    if (!unexploredLocalMabs.isEmpty()) {
+      final MabParameters mabParameters = unexploredLocalMabs.get(randomGenerator.nextInt(unexploredLocalMabs.size()));
+      mabsData.put(mabParameters, new MabData());
+      return mabParameters;
+    }
+
+    // Return random
+    final MabParameters mabParameters = sampler.addRandomSample();
+    mabsData.put(mabParameters, new MabData());
+    return mabParameters;
   }
 
   public MabParameters updateAndGetNewMab(final boolean won,
@@ -232,9 +253,8 @@ public class MetaMCTSAgent {
   public MabParameters selectBestPerceivedAction(final GameFeatures options) {
 
     // Exploration parameter
-    int rand = randomGenerator.nextInt(100);
+    int rand = randomGenerator.nextInt(2);
     if (rand <= EXPLORATION_EPSILON) {
-      final MabParameters randomAction = returnRandomAction();
       return returnRandomAction();
     }
 

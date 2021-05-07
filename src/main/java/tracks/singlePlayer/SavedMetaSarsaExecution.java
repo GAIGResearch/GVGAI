@@ -95,9 +95,9 @@ public class SavedMetaSarsaExecution {
         final int ticks = (int) doubles[2];
         final MabParameters result = agent.act(score);
 
-        final MabParameters actions = agent.updateAndGetNewMab(won, score);
+        //final MabParameters actions = agent.updateAndGetNewMab(won, score);
 
-        System.out.println("Selected action: \n" + actions);
+        System.out.println("Selected action: \n" + result);
         //gameOptions.act(actions);
       }
 
