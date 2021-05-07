@@ -12,7 +12,7 @@ public class MultiArmedNaiveSampler {
   public Map<EMetaParameters, MabParameters> localMabs = new HashMap<>();
 
   // Known global mabs hash map - values hash is key
-  public Map<Integer, MabParameters> globalMabs = new HashMap<>();
+  public Map<Integer, MabParameters> globalMab = new HashMap<>();
 
   MabParameters emptyMab() {
     MabParameters mabParameters = new MabParameters();
@@ -39,7 +39,7 @@ public class MultiArmedNaiveSampler {
     for (EMetaParameters value : getAllParameters()) {
       globalMab.addParameter(value, random.nextBoolean());
     }
-    globalMabs.put(globalMab.hashCode(), globalMab);
+    this.globalMab.put(globalMab.hashCode(), globalMab);
     return globalMab;
   }
 

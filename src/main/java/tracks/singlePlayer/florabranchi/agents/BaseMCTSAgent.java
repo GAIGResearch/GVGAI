@@ -29,7 +29,7 @@ public class BaseMCTSAgent extends ParametrizedMonteCarloTreeAgent {
 
     gameName = PropertyLoader.GAME_NAME;
 
-    showTree = propertyLoader.SHOW_TREE;
+    showTree = PropertyLoader.SHOW_TREE;
     ROLLOUT_DEPTH = PropertyLoader.ROLLOUT_DEPTH;
 
     final BaseMonteCarloResult baseMonteCarloResult = new BaseMonteCarloResult();
