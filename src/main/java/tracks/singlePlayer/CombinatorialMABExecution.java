@@ -69,7 +69,7 @@ public class CombinatorialMABExecution {
       System.out.println(Arrays.toString(doubles));
     } else {
 
-      List<String> gameList = Arrays.asList("frogs");//,  "frogs", "chase"); //brainmain, plants eggomania
+      List<String> gameList = Arrays.asList("camelRace");//,  "frogs", "chase"); //brainmain, plants eggomania
 
       int episodesPerLevel = 20;
       RunInstructions runInstructions = new RunInstructions();

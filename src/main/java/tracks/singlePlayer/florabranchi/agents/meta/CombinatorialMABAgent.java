@@ -127,11 +127,13 @@ public class CombinatorialMABAgent {
   public MabParameters selectBestPerceivedAction() {
 
     // Exploration parameter
-    int rand = randomGenerator.nextInt(10);
+    int rand = randomGenerator.nextInt(100);
     if (rand <= EXPLORATION_EPSILON) {
+      System.out.println("selecting exploration play");
       return returnRandomAction();
     }
 
+    System.out.println("selecting exploitation play");
     double maxValue = -Double.MAX_VALUE;
     MabParameters bestAction = null;
 
@@ -139,7 +141,8 @@ public class CombinatorialMABAgent {
 
     for (MabParameters action : mabsData.keySet()) {
       final MabData mabData = mabsData.get(action);
-      final double actionExpectedReward = mabData.totalRewards / mabData.timesSelected;
+      final double actionExpectedReward = mabData.timesSelected == 0 ? 0
+          : mabData.totalRewards / mabData.timesSelected;
       if (actionExpectedReward >= maxValue) {
 
         if (actionExpectedReward != maxValue) {
