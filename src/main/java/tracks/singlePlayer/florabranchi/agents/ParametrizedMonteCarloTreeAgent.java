@@ -88,9 +88,6 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   boolean resetAlgorithm = false;
 
   public static void reloadProperties() {
-
-    // gameName = PropertyLoader.GAME_NAME;
-
     showTree = PropertyLoader.SHOW_TREE;
 
     TREE_SEARCH_SIZE = PropertyLoader.TREE_SEARCH_SIZE;
@@ -105,6 +102,9 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     RAW_GAME_SCORE = PropertyLoader.RAW_GAME_SCORE;
     EXPAND_ALL_CHILD_NODES = PropertyLoader.EXPAND_ALL_CHILD_NODES;
     EARLY_INITIALIZATION = PropertyLoader.EARLY_INITIALIZATION;
+
+    System.out.println("Reloading properties.");
+
   }
 
   /**
@@ -118,6 +118,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     super(stateObs, elapsedTimer);
     showTree = PropertyLoader.SHOW_TREE;
 
+    System.out.println("Reloading properties.");
     reloadProperties();
 
     randomGenerator = new Random();

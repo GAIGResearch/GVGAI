@@ -5,7 +5,7 @@ import java.util.TreeMap;
 
 public class MabData {
 
-  public double averageReward;
+  public double totalRewards;
 
   public int timesSelected;
 
@@ -37,7 +37,7 @@ public class MabData {
   @Override
   public String toString() {
     return new StringJoiner(", ", MabData.class.getSimpleName() + "[", "]")
-        .add("averageReward=" + averageReward)
+        .add("averageReward=" + totalRewards)
         .add("timesSelected=" + timesSelected)
         .add("marginalizedAvgScoreForoParameter=" + marginalizedAvgScoreForoParameter)
         .add("timesParameterSelected=" + timesParameterSelected)
