@@ -9,8 +9,6 @@ import java.util.logging.Logger;
 
 import tools.Utils;
 import tracks.ArcadeMachine;
-import tracks.singlePlayer.florabranchi.agents.meta.EMetaParameters;
-import tracks.singlePlayer.florabranchi.agents.meta.GameOptions;
 import tracks.singlePlayer.florabranchi.agents.meta.MabParameters;
 import tracks.singlePlayer.florabranchi.agents.meta.MetaMCTSAgent;
 import tracks.singlePlayer.florabranchi.agents.meta.RunOptions;
@@ -95,9 +93,9 @@ public class SavedMetaSarsaExecution {
         final boolean won = doubles[0] == 1;
         final int score = (int) doubles[1];
         final int ticks = (int) doubles[2];
-        final double result = agent.result(gameOptions, won, score, ticks);
+        final MabParameters result = agent.act(score);
 
-        final MabParameters actions = agent.updateAndGetNewMab(gameOptions, won, result);
+        final MabParameters actions = agent.updateAndGetNewMab(won, score);
 
         System.out.println("Selected action: \n" + actions);
         //gameOptions.act(actions);

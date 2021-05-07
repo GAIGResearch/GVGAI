@@ -16,16 +16,9 @@ public class RunOptions implements Serializable {
 
   public double wr;
 
-  public GameOptions gameOptions;
+  //public GameOptions gameOptions;
 
   public RunOptions() {
   }
 
-  public RunOptions(final String game,
-                    final int level,
-                    final GameOptions gameOptions) {
-    this.game = game;
-    this.level = level;
-    this.gameOptions = gameOptions;
-  }
 }

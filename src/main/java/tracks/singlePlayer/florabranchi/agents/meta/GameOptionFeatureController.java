@@ -56,7 +56,7 @@ public class GameOptionFeatureController {
 
   public TreeMap<String, Double> extractFeatureVector(final int gameId) {
 
-    final GameFeaturesHelper.GameFeatures gameFeatures = GameFeaturesHelper.getGameFeatures(gameId);
+    final GameFeatures gameFeatures = GameFeaturesHelper.getGameFeatures(gameId);
 
     // Add default values in case of unavalable information
     TreeMap<String, Double> propertyMap = new TreeMap<>();
@@ -67,6 +67,12 @@ public class GameOptionFeatureController {
     propertyMap.put(IS_SURVIVAL, gameFeatures.isSurvival ? 1d : 0);
 
     return propertyMap;
+
+  }
+
+  public GameFeatures extractGameOptions(final int gameId) {
+
+    return GameFeaturesHelper.getGameFeatures(gameId);
 
   }
 
