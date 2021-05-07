@@ -127,7 +127,7 @@ public class CombinatorialMABAgent {
   public MabParameters selectBestPerceivedAction() {
 
     // Exploration parameter
-    int rand = randomGenerator.nextInt(100);
+    int rand = randomGenerator.nextInt(10);
     if (rand <= EXPLORATION_EPSILON) {
       return returnRandomAction();
     }

@@ -69,7 +69,7 @@ public class CombinatorialMABExecution {
       System.out.println(Arrays.toString(doubles));
     } else {
 
-      List<String> gameList = Arrays.asList("brainman");//,  "frogs", "chase"); //brainmain, plants eggomania
+      List<String> gameList = Arrays.asList("frogs");//,  "frogs", "chase"); //brainmain, plants eggomania
 
       int episodesPerLevel = 20;
       RunInstructions runInstructions = new RunInstructions();
@@ -92,12 +92,12 @@ public class CombinatorialMABExecution {
         levelFiles = new String[1];
         levelFiles[0] = runInstruction.levelPath;
         episodes = runInstruction.episodes;
-        System.out.printf("Running gameId %s level %s for %s episodes", runInstruction.gamePath, episodes, runInstruction.levelPath);
+        System.out.printf("Running gameId %s level %s for %s episodes", runInstruction.gamePath, runInstruction.levelPath, episodes);
 
         for (int i = 0; i < episodes; i++) {
 
           // Setup Agent parameters
-          final double[] doubles = ArcadeMachine.runOneGame(game, level1, visuals, selectedAgent, recordActionsFile, seed, 0);
+          final double[] doubles = ArcadeMachine.runOneGame(runInstruction.gamePath, runInstruction.levelPath, visuals, selectedAgent, recordActionsFile, seed, 0);
           System.out.println(Arrays.toString(doubles));
 
           final boolean won = doubles[0] == 1;
