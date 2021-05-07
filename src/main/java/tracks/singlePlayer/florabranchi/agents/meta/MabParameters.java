@@ -29,6 +29,10 @@ public class MabParameters {
     values.put(parameter, value);
   }
 
+  public boolean getParameter(final EMetaParameters parameter) {
+    return values.getOrDefault(parameter, false);
+  }
+
   public void turnOn(final EMetaParameters parameter) {
     values.put(parameter, true);
   }

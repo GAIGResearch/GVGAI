@@ -69,6 +69,14 @@ public class PropertyLoader {
       GAME = castGame(prop.getProperty("GAME"));
       GAME_NAME = prop.getProperty("GAME");
       LEVEL = Integer.parseInt(prop.getProperty("LEVEL"));
+
+      TREE_REUSE = Boolean.parseBoolean(prop.getProperty("TREE_REUSE", "false"));
+      MACRO_ACTIONS = Boolean.parseBoolean(prop.getProperty("MACRO_ACTIONS", "false"));
+      LOSS_AVOIDANCE = Boolean.parseBoolean(prop.getProperty("LOSS_AVOIDANCE", "false"));
+      RAW_GAME_SCORE = Boolean.parseBoolean(prop.getProperty("RAW_GAME_SCORE", "false"));
+      EXPAND_ALL_CHILD_NODES = Boolean.parseBoolean(prop.getProperty("EXPAND_ALL_CHILD_NODES", "false"));
+      EARLY_INITIALIZATION = Boolean.parseBoolean(prop.getProperty("EARLY_INITIALIZATION", "false"));
+
     }
 
     EPISODES = Integer.parseInt(prop.getProperty("EPISODES"));
@@ -86,13 +94,6 @@ public class PropertyLoader {
     TIME_LIMITATION_IN_MILLIS = Integer.parseInt(prop.getProperty("TIME_LIMITATION_IN_MILLIS", "40"));
     TREE_SEARCH_SIZE = Integer.parseInt(prop.getProperty("TREE_SEARCH_SIZE", "0"));
     ROLLOUT_DEPTH = Integer.parseInt(prop.getProperty("ROLLOUT_DEPTH", "0"));
-
-    TREE_REUSE = Boolean.parseBoolean(prop.getProperty("TREE_REUSE", "false"));
-    MACRO_ACTIONS = Boolean.parseBoolean(prop.getProperty("MACRO_ACTIONS", "false"));
-    LOSS_AVOIDANCE = Boolean.parseBoolean(prop.getProperty("LOSS_AVOIDANCE", "false"));
-    RAW_GAME_SCORE = Boolean.parseBoolean(prop.getProperty("RAW_GAME_SCORE", "false"));
-    EXPAND_ALL_CHILD_NODES = Boolean.parseBoolean(prop.getProperty("EXPAND_ALL_CHILD_NODES", "false"));
-    EARLY_INITIALIZATION = Boolean.parseBoolean(prop.getProperty("EARLY_INITIALIZATION", "false"));
 
     // Sarsa properties, if required
     SARSA_ALFA = Float.parseFloat(prop.getProperty("SARSA_ALFA", "0"));

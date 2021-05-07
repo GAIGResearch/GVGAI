@@ -13,6 +13,7 @@ public class GameFeatures {
                       final boolean canUse,
                       final boolean canDie,
                       final boolean isSurvival) {
+    this.gameId = gameId;
     this.isDeterministic = isDeterministic;
     this.canUse = canUse;
     this.canDie = canDie;

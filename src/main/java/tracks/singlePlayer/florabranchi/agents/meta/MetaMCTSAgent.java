@@ -96,7 +96,6 @@ public class MetaMCTSAgent {
     previousState = currentState;
     previousData = mabsData;
     return selectedAction;
-
   }
 
   protected boolean displayDebug() {
@@ -144,29 +143,13 @@ public class MetaMCTSAgent {
 
     // Get feature values for previous state (s)
     final TreeMap<String, Double> initialFeatureVector
-        = gameOptionFeatureController.extractFeatureVector(PropertyLoader.GAME);
+        = gameOptionFeatureController.extractFeatureVector(previousState.gameId);
 
     // delta = r + gamma (Qa'(s')) - Qa(s)
     double delta = stateReward + (GAMMA * getQValueForAction(currentState, currentAction)) - getQValueForAction(previousState, previousAction);
 
     // Update weights
     updateWeightVectorForAction(previousAction, initialFeatureVector, delta);
-
-  }
-
-  public void updateAfterLastAction(final double stateReward,
-                                    final MabParameters previousAction,
-                                    final GameFeatures previousState) {
-
-
-    // delta = r - Qa(s)
-    double delta = stateReward - getQValueForAction(previousState, previousAction);
-
-    // Get feature values for previous state (s)
-    // fi(s, a)
-    final TreeMap<String, Double> featureVector = gameOptionFeatureController.extractFeatureVector(previousState.gameId);
-
-    updateWeightVectorForAction(previousAction, featureVector, delta);
   }
 
   public MabParameters returnRandomAction() {
@@ -189,39 +172,6 @@ public class MetaMCTSAgent {
     final MabParameters mabParameters = sampler.addRandomSample();
     mabsData.put(mabParameters, new MabData());
     return mabParameters;
-  }
-
-  public MabParameters updateAndGetNewMab(final boolean won,
-                                          final double reward) {
-
-    // Reward = curr score - previous score
-    double stateScore = won ? 1000 + reward : -1000;
-
-    final GameFeatures gameOptions = gameOptionFeatureController.extractGameOptions(PropertyLoader.GAME);
-
-    // First play
-    if (previousAction == null) {
-      final MabParameters currentAction = selectBestPerceivedAction(gameOptions);
-
-      // a
-      previousAction = currentAction;
-      // s
-      previousState = gameOptions;
-      //previousScore = 0;
-
-      return currentAction;
-    }
-
-    // Select best action given current q values for (s') / exploration play
-    final MabParameters selectedAction = selectBestPerceivedAction(gameOptions);
-
-    // need: s, a r, s', a'
-    updateAndGetNewMab(reward, previousAction, previousState, selectedAction, gameOptions);
-
-    // Update last values
-    previousAction = selectedAction;
-    previousState = gameOptions;
-    return selectedAction;
   }
 
   public double getQValueForAction(final GameFeatures options,

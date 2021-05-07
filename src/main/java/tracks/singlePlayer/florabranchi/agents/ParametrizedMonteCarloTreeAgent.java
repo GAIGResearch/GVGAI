@@ -1,7 +1,5 @@
 package tracks.singlePlayer.florabranchi.agents;
 
-import static tracks.singlePlayer.florabranchi.training.StateEvaluatorHelper.getAverageDistance;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -181,7 +179,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   @Override
   public void result(final StateObservation stateObs,
                      final ElapsedCpuTimer elapsedCpuTimer) {
-
+    reloadProperties();
   }
 
   public ACTIONS monteCarloSearchParametrized(final StateObservation stateObs,
