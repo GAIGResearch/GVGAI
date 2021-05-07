@@ -194,17 +194,17 @@ public class MetaMCTSAgent {
       // a
       previousAction = currentAction;
       // s
-      previousState = gameOptions;
-      previousScore = 0;
+      //previousState = gameOptions;
+      //previousScore = 0;
 
       return currentAction;
     }
 
     // Select best action given current q values for (s') / exploration play
-    final EMetaParameters selectedAction = selectBestPerceivedAction(gameOptions);
+    //final EMetaParameters selectedAction = selectBestPerceivedAction(gameOptions);
 
     // need: s, a r, s', a'
-    updateAndGetNewMab(reward, previousAction, previousState, selectedAction, gameOptions);
+   // updateAndGetNewMab(reward, previousAction, previousState, selectedAction, gameOptions);
 
     final TreeMap<String, Double> featuresForCurrState = gameOptionFeatureController.extractFeatureVector(gameOptions.gameId);
 
