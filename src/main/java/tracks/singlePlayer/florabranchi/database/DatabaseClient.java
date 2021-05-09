@@ -20,8 +20,8 @@ public class DatabaseClient {
   public DatabaseClient() {
   }
 
-  private static final String SQL_SERIALIZE_OBJECT = "INSERT INTO %s(id, serialized_object) VALUES (?, ?)";
-  private static final String SQL_DESERIALIZE_OBJECT = "SELECT * FROM %s WHERE id = ?";
+  private static final String SQL_SERIALIZE_OBJECT = "INSERT INTO %s(serialized_object) VALUES (?)";
+  private static final String SQL_DESERIALIZE_OBJECT = "SELECT * FROM cmab_data WHERE id =1";
 
 
   public static void serializeWeights(Connection connection,
@@ -31,8 +31,7 @@ public class DatabaseClient {
     PreparedStatement pstmt = connection
         .prepareStatement(String.format(SQL_SERIALIZE_OBJECT, table));
 
-    pstmt.setObject(1, objectToSerialize.id);
-    pstmt.setObject(2, objectToSerialize);
+    pstmt.setObject(1, objectToSerialize);
     pstmt.executeUpdate();
     pstmt.close();
     System.out.println("Java object serialized to database. Object: " + objectToSerialize);
@@ -43,8 +42,8 @@ public class DatabaseClient {
                                                  int id) throws SQLException, IOException,
       ClassNotFoundException {
 
-    PreparedStatement pstmt = connection.prepareStatement(String.format(SQL_DESERIALIZE_OBJECT, table));
-    pstmt.setInt(1, id);
+    PreparedStatement pstmt = connection.prepareStatement(SQL_DESERIALIZE_OBJECT);
+    //pstmt.setInt(1, id);
     ResultSet rs = pstmt.executeQuery();
     rs.next();
 
