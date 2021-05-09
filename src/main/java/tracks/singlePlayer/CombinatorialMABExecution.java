@@ -98,7 +98,7 @@ public class CombinatorialMABExecution {
 
           // Setup Agent parameters
           final double[] doubles = ArcadeMachine.runOneGame(runInstruction.gamePath, runInstruction.levelPath, visuals, selectedAgent, recordActionsFile, seed, 0);
-          System.out.println(Arrays.toString(doubles));
+          System.out.println("Game Results" + Arrays.toString(doubles) + " -------------------------------");
 
           final boolean won = doubles[0] == 1;
           final int score = (int) doubles[1];
@@ -109,7 +109,6 @@ public class CombinatorialMABExecution {
           PropertyLoader.MACRO_ACTIONS = result.getParameter(EMetaParameters.MACRO_ACTIONS);
           PropertyLoader.SELECT_HIGHEST_SCORE_CHILD = result.getParameter(EMetaParameters.SELECT_HIGHEST_SCORE_CHILD);
           PropertyLoader.TREE_REUSE = result.getParameter(EMetaParameters.TREE_REUSE);
-          System.out.println("Selected action: \n" + result);
         }
 
       }

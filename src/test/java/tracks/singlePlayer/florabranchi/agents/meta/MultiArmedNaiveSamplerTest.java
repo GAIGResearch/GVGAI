@@ -8,8 +8,12 @@ public class MultiArmedNaiveSamplerTest {
   public void testMabSampler() {
 
     MultiArmedNaiveSampler sampler = new MultiArmedNaiveSampler();
-    sampler.loadMabs();
-    System.out.println(sampler.localMabs);
+
+
+    final MabParameters greedyMabParameters = sampler.addRandomSample();
+    final MabParameters greedyMabParameters2 = sampler.exploitMabs();
+
+    sampler.updateMabData(greedyMabParameters2, 10);
 
 
   }

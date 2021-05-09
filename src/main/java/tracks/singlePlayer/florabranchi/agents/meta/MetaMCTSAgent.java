@@ -66,8 +66,6 @@ public class MetaMCTSAgent {
     mabParameters.addParameter(EMetaParameters.LOSS_AVOIDANCE, PropertyLoader.LOSS_AVOIDANCE);
     mabParameters.addParameter(EMetaParameters.RAW_GAME_SCORE, PropertyLoader.RAW_GAME_SCORE);
     mabsData.put(mabParameters, new MabData());
-
-    sampler.loadMabs();
   }
 
   public MabParameters act(final double reward) {
@@ -154,19 +152,6 @@ public class MetaMCTSAgent {
 
   public MabParameters returnRandomAction() {
 
-    // check for local mabs still unexplored
-    List<MabParameters> unexploredLocalMabs = new ArrayList<>();
-    final Map<EMetaParameters, MabParameters> localMabs = sampler.localMabs;
-    localMabs.values().forEach(localMab -> {
-      if (!mabsData.containsKey(localMab)) {
-        unexploredLocalMabs.add(localMab);
-      }
-    });
-    if (!unexploredLocalMabs.isEmpty()) {
-      final MabParameters mabParameters = unexploredLocalMabs.get(randomGenerator.nextInt(unexploredLocalMabs.size()));
-      mabsData.put(mabParameters, new MabData());
-      return mabParameters;
-    }
 
     // Return random
     final MabParameters mabParameters = sampler.addRandomSample();

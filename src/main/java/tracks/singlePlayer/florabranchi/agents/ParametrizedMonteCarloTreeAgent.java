@@ -118,7 +118,6 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     super(stateObs, elapsedTimer);
     showTree = PropertyLoader.SHOW_TREE;
 
-    System.out.println("Reloading properties.");
     reloadProperties();
 
     randomGenerator = new Random();
