@@ -20,13 +20,13 @@ public class BanditArmsDataDAOTest {
     sampler.updateMabData(randomGlobalMab, 22.3);
     final MabParameters mabParameters = sampler.addRandomSample();
     sampler.updateMabData(mabParameters, 50);
-    dao.saveBandit(new BanditsArmDTO(new BanditArmsData(sampler.localMabs, sampler.globalMab)));
+    //dao.saveBandit(new BanditsArmDTO(new BanditArmsData(sampler.localMabs, sampler.globalMab)));
   }
 
   @Test
   public void testSave() {
     BanditArmsDataDAO dao = new BanditArmsDataDAO();
-    final BanditArmsData banditArmsData = dao.getMetaWeights(1);
+    final BanditArmsData banditArmsData = dao.getBanditArmsData(1);
     System.out.println(banditArmsData.toString());
   }
 

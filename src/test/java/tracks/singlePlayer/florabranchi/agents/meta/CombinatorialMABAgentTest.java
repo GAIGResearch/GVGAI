@@ -8,11 +8,10 @@ class CombinatorialMABAgentTest {
   public void testAgent() {
 
 
-
     CombinatorialMABAgent combinatorialMABAgent = new CombinatorialMABAgent();
     System.out.println(combinatorialMABAgent);
 
-    combinatorialMABAgent.act(50);
+    combinatorialMABAgent.act(50, true);
 
   }
 

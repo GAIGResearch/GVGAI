@@ -16,7 +16,7 @@ public class BanditsArmDTO implements Serializable {
   @GeneratedValue
   public int id;
 
-  @Column(name = "serialized_object")
+  @Column(name = "serialized_object", columnDefinition = "LONGBLOB")
   public BanditArmsData object;
 
   public BanditsArmDTO(final BanditArmsData object) {

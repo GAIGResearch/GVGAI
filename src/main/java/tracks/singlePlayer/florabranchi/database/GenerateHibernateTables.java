@@ -9,7 +9,7 @@ public class GenerateHibernateTables {
 /*    EntityManagerFactory factory = Persistence.
         createEntityManagerFactory("base_mcts_results");*/
     EntityManagerFactory factory2 = Persistence.
-        createEntityManagerFactory("cmab_bandit_data");
+        createEntityManagerFactory("cmab_mcts_results");
     factory2.close();
   }
 }

@@ -35,6 +35,8 @@ public class BanditArmsData implements Serializable {
 
   public void updateArms(Map<EMetaParameters, LocalMabData> localMabs,
                          Map<MabParameters, GlobalMabData> globalMab) {
+    this.localArmData.clear();
+    this.armDataList.clear();
     localMabs.forEach((key, value) -> localArmData.add(new LocalArmData(key, value)));
     globalMab.forEach((key, value) -> armDataList.add(new ArmData(key, value)));
   }
@@ -42,36 +44,6 @@ public class BanditArmsData implements Serializable {
   public BanditArmsData(final List<ArmData> armDataList, final List<LocalArmData> localArmData) {
     this.armDataList = armDataList;
     this.localArmData = localArmData;
-  }
-
-  public BanditArmsData(Map<EMetaParameters, LocalMabData> localMabs,
-                        Map<MabParameters, GlobalMabData> globalMab) {
-    updateArms(localMabs, globalMab);
-
-    for (Map.Entry<EMetaParameters, LocalMabData> localMabsIt : localMabs.entrySet()) {
-
-      /*switch (localMabsIt.getKey()) {
-        case TREE_REUSE:
-          treeReuseArmData = new LocalArmData(localMabsIt.getValue());
-          break;
-        case RAW_GAME_SCORE:
-          rawScoreArmData = new LocalArmData(localMabsIt.getValue());
-          break;
-        case MACRO_ACTIONS:
-          macroActionsArmData = new LocalArmData(localMabsIt.getValue());
-          break;
-        case LOSS_AVOIDANCE:
-          lossAvoidanceArmData = new LocalArmData(localMabsIt.getValue());
-          break;
-        case EARLY_INITIALIZATION:
-          earlyInitArmData = new LocalArmData(localMabsIt.getValue());
-          break;
-        case SELECT_HIGHEST_SCORE_CHILD:
-          highestScoreChildArmData = new LocalArmData(localMabsIt.getValue());
-          break;
-      }*/
-    }
-
   }
 
   public BanditArmsData() {
@@ -104,12 +76,12 @@ public class BanditArmsData implements Serializable {
 
     public MabParameters toMabParameter() {
       MabParameters mabParameters = new MabParameters();
-      mabParameters.addParameter(EMetaParameters.EARLY_INITIALIZATION, treeReuse);
-      mabParameters.addParameter(EMetaParameters.EARLY_INITIALIZATION, rawGameScore);
-      mabParameters.addParameter(EMetaParameters.EARLY_INITIALIZATION, macroActions);
-      mabParameters.addParameter(EMetaParameters.EARLY_INITIALIZATION, lossAvoidance);
+      mabParameters.addParameter(EMetaParameters.TREE_REUSE, treeReuse);
+      mabParameters.addParameter(EMetaParameters.RAW_GAME_SCORE, rawGameScore);
+      mabParameters.addParameter(EMetaParameters.MACRO_ACTIONS, macroActions);
+      mabParameters.addParameter(EMetaParameters.LOSS_AVOIDANCE, lossAvoidance);
       mabParameters.addParameter(EMetaParameters.EARLY_INITIALIZATION, earlyInitialization);
-      mabParameters.addParameter(EMetaParameters.EARLY_INITIALIZATION, selectHighestScoreChild);
+      mabParameters.addParameter(EMetaParameters.SELECT_HIGHEST_SCORE_CHILD, selectHighestScoreChild);
       return mabParameters;
     }
 
@@ -125,7 +97,6 @@ public class BanditArmsData implements Serializable {
     }
   }
 
-  @Embeddable
   static
   class LocalArmData implements Serializable {
 

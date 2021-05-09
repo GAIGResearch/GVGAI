@@ -8,16 +8,9 @@ import java.sql.Statement;
 
 import javax.persistence.EntityManagerFactory;
 
-
 public class BanditArmsDataDAO {
 
-  static EntityManagerFactory entityManagerFactory = null;
-
   public BanditArmsDataDAO() {
-    if (entityManagerFactory == null) {
-      //entityManagerFactory = Persistence.createEntityManagerFactory("cmab_data");
-    }
-
     databaseClient = new DatabaseClient();
   }
 
@@ -28,31 +21,18 @@ public class BanditArmsDataDAO {
   }
 
   public void updateBandit(BanditsArmDTO results) {
-
     Connection conn = null;
-    PreparedStatement pstm = null;
-
     try {
-      //Cria uma conexão com o banco
       conn = databaseClient.getConnection();
       DatabaseClient.update(conn, results);
     } catch (Exception e) {
       e.printStackTrace();
     } finally {
-      //Fecha as conexões
-
       try {
-        if (pstm != null) {
-
-          pstm.close();
-        }
-
         if (conn != null) {
           conn.close();
         }
-
       } catch (Exception e) {
-
         e.printStackTrace();
       }
     }
@@ -60,29 +40,19 @@ public class BanditArmsDataDAO {
 
   public void saveBandit(BanditsArmDTO results) {
 
-
     Connection conn = null;
     PreparedStatement pstm = null;
-
     try {
-      //Cria uma conexão com o banco
       conn = databaseClient.getConnection();
       DatabaseClient.serializeWeights(conn, "cmab_data", results);
     } catch (Exception e) {
       e.printStackTrace();
     } finally {
-      //Fecha as conexões
 
       try {
-        if (pstm != null) {
-
-          pstm.close();
-        }
-
         if (conn != null) {
           conn.close();
         }
-
       } catch (Exception e) {
 
         e.printStackTrace();
@@ -90,16 +60,12 @@ public class BanditArmsDataDAO {
     }
   }
 
-  public BanditArmsData getMetaWeights(final int id) {
+  public BanditArmsData getBanditArmsData(final int id) {
 
-    final Statement stmt;
     Connection conn = null;
     try {
       conn = databaseClient.getConnection();
-
       return DatabaseClient.deSerializeWeights(conn, "cmab_data", id);
-
-
     } catch (SQLException | IOException | ClassNotFoundException throwables) {
       throwables.printStackTrace();
     }
@@ -108,10 +74,7 @@ public class BanditArmsDataDAO {
     } catch (SQLException se) {
       se.printStackTrace();
     }
-
     return null;
-
-
   }
 
   public void createMetaWeightsTable() {
@@ -137,7 +100,6 @@ public class BanditArmsDataDAO {
     } catch (SQLException se) {
       se.printStackTrace();
     }
-
   }
 
 }

@@ -4,16 +4,21 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.logging.Logger;
 
+import ontology.Types;
 import tracks.singlePlayer.florabranchi.database.BanditArmsData;
 import tracks.singlePlayer.florabranchi.database.BanditArmsDataDAO;
 import tracks.singlePlayer.florabranchi.database.BanditsArmDTO;
+import tracks.singlePlayer.florabranchi.database.BaseMonteCarloResult;
+import tracks.singlePlayer.florabranchi.database.CombinatorialMabAgentResult;
+import tracks.singlePlayer.florabranchi.database.CombinatorialMabAgentResultDAO;
 import tracks.singlePlayer.florabranchi.persistence.PropertyLoader;
 
 // This agent considers that the inputs (state) is always the same
 public class CombinatorialMABAgent {
 
-  public static double maxDouble = Math.pow(10, 6);
-  public static double minDouble = Math.pow(10, -6);
+  public static String gameName;
+
+  public static double minDouble = Math.pow(10, -3);
 
   public double ALFA;
   public double GAMMA;
@@ -23,8 +28,6 @@ public class CombinatorialMABAgent {
 
   protected final static Logger LOGGER = Logger.getLogger("MetaMCTSAgent");
 
-  private GameOptionFeatureController gameOptionFeatureController;
-
   protected Random randomGenerator = new Random();
 
   MabParameters previousAction;
@@ -32,6 +35,8 @@ public class CombinatorialMABAgent {
   MultiArmedNaiveSampler sampler;
 
   BanditArmsDataDAO banditArmsDataDAO = new BanditArmsDataDAO();
+
+  CombinatorialMabAgentResultDAO combinatorialMabAgentResultDAO = new CombinatorialMabAgentResultDAO();
 
   public CombinatorialMABAgent() {
 
@@ -46,7 +51,7 @@ public class CombinatorialMABAgent {
     GAMMA = propertyLoader.SARSA_GAMMA;
     EXPLORATION_EPSILON = propertyLoader.SARSA_EPSILON;
 
-    BanditArmsData banditArmsData = banditArmsDataDAO.getMetaWeights(1);
+    BanditArmsData banditArmsData = banditArmsDataDAO.getBanditArmsData(2);
     if (banditArmsData != null) {
       sampler = new MultiArmedNaiveSampler(banditArmsData);
     } else {
@@ -54,12 +59,11 @@ public class CombinatorialMABAgent {
       banditArmsDataDAO.saveBandit(new BanditsArmDTO(sampler.banditArmsData));
     }
 
-    gameOptionFeatureController = new GameOptionFeatureController();
-
     if (previousAction == null) {
       System.out.println("first play");
       final MabParameters currentAction = selectBestPerceivedAction();
 
+      System.out.println("First status:");
       System.out.println(currentAction);
 
       // a
@@ -79,9 +83,29 @@ public class CombinatorialMABAgent {
     System.out.println("Properties set" + result);
   }
 
-  public MabParameters act(final double reward) {
+  public void result(final double score,
+                     final boolean won) {
 
-    // First play
+    gameName = PropertyLoader.GAME_NAME;
+    final CombinatorialMabAgentResult baseMonteCarloResult = new CombinatorialMabAgentResult();
+    baseMonteCarloResult.agent = CombinatorialMabAgentResult.class.getSimpleName();
+    baseMonteCarloResult.gameName = gameName;
+    baseMonteCarloResult.gameLevel = PropertyLoader.LEVEL;
+    baseMonteCarloResult.finalScore = score;
+    baseMonteCarloResult.won = won;
+    baseMonteCarloResult.treeReuse = PropertyLoader.TREE_REUSE;
+    baseMonteCarloResult.rawGameScore = PropertyLoader.RAW_GAME_SCORE;
+    baseMonteCarloResult.macroActions = PropertyLoader.MACRO_ACTIONS;
+    baseMonteCarloResult.lossAvoidance = PropertyLoader.LOSS_AVOIDANCE;
+    baseMonteCarloResult.earlyInitialization = PropertyLoader.EARLY_INITIALIZATION;
+    baseMonteCarloResult.selectHighestScoreChild = PropertyLoader.SELECT_HIGHEST_SCORE_CHILD;
+    combinatorialMabAgentResultDAO.save(baseMonteCarloResult);
+  }
+
+  public MabParameters act(final double reward,
+                           final boolean won) {
+
+/*    // First play
     if (previousAction == null) {
       System.out.println("first play");
       final MabParameters currentAction = selectBestPerceivedAction();
@@ -92,12 +116,15 @@ public class CombinatorialMABAgent {
       previousAction = currentAction;
       // s;
       return currentAction;
+    }*/
+
+    double finalReward = reward;
+    if (!won) {
+      finalReward = minDouble;
     }
 
     // update expected reward
-    sampler.updateMabData(previousAction, reward);
-
-    sampler.updateBanditArms();
+    sampler.updateMabData(previousAction, finalReward);
     banditArmsDataDAO.updateBandit(new BanditsArmDTO(sampler.banditArmsData));
 
     // Select best action given current q values for (s') / exploration play
@@ -106,6 +133,8 @@ public class CombinatorialMABAgent {
     // Update last values
     previousAction = selectedAction;
     System.out.println("next mab:" + selectedAction);
+
+    setProperties(selectedAction);
     return selectedAction;
   }
 

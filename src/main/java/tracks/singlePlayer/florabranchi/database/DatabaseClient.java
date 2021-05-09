@@ -28,6 +28,7 @@ public class DatabaseClient {
   public static void update(Connection connection,
                             BanditsArmDTO objectToSerialize) throws SQLException {
 
+    objectToSerialize.id = 1;
     PreparedStatement pstmt = connection.prepareStatement(SQL_UPDATE_OBJECT);
     pstmt.setObject(1, objectToSerialize.object);
     pstmt.executeUpdate();

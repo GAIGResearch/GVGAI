@@ -93,6 +93,7 @@ public class MultiArmedNaiveSampler {
         localMabData.timesParameterSelected++;
       }
     }
+    updateBanditArms();
   }
 
   MabParameters exploitMabs() {
@@ -101,15 +102,15 @@ public class MultiArmedNaiveSampler {
     MabParameters maxMab = null;
     for (Map.Entry<MabParameters, GlobalMabData> mabParametersGlobalMabDataEntry : globalMab.entrySet()) {
 
-      if (maxMab == null ||  mabParametersGlobalMabDataEntry.getValue().getAverageReward() > maxPerceivedReward) {
+      if (maxMab == null || mabParametersGlobalMabDataEntry.getValue().getAverageReward() > maxPerceivedReward) {
         maxPerceivedReward = mabParametersGlobalMabDataEntry.getValue().getAverageReward();
         maxMab = mabParametersGlobalMabDataEntry.getKey();
       }
     }
 
     // if draw return any
-    if (maxMab == null) {
-      return getRandomGlobalMab();
+    if (maxMab == null || maxPerceivedReward < 10) {
+      return addRandomSample();
     }
 
     return maxMab;

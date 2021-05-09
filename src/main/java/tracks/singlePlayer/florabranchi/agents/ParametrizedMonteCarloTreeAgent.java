@@ -134,12 +134,12 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
     maxDistance = height * width;
 
-    final long startEarlyInit = getStartTime();
+    //final long startEarlyInit = getStartTime();
     if (EARLY_INITIALIZATION) {
       rootNode = buildNode(stateObs, null, null);
       searchWithTimeLimitation(stateObs, 1000, 50);
     }
-    measureTime(startEarlyInit, "early initialization");
+    //measureTime(startEarlyInit, "early initialization");
 
     System.out.println(rootNode);
   }

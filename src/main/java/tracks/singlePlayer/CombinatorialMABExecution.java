@@ -100,22 +100,17 @@ public class CombinatorialMABExecution {
 
           // Setup Agent parameters
           final double[] doubles = ArcadeMachine.runOneGame(runInstruction.gamePath, runInstruction.levelPath, visuals, selectedAgent, recordActionsFile, seed, 0);
-          System.out.println("Game Results" + Arrays.toString(doubles) + " -------------------------------");
+          System.out.println("Game Results " + Arrays.toString(doubles) + " -------------------------------");
 
           final boolean won = doubles[0] == 1;
           if (won) totalWins++;
-          System.out.println("----------------- Win Record : games" + gamecount + " wins: " + totalWins);
+          System.out.println("----------------- Win Record : games " + gamecount + " wins: " + totalWins);
           gamecount++;
-          final int score = (int) doubles[1];
-          final int ticks = (int) doubles[2];
-          final MabParameters result = agent.act(score);
-          PropertyLoader.EARLY_INITIALIZATION = result.getParameter(EMetaParameters.EARLY_INITIALIZATION);
-          PropertyLoader.RAW_GAME_SCORE = result.getParameter(EMetaParameters.RAW_GAME_SCORE);
-          PropertyLoader.MACRO_ACTIONS = result.getParameter(EMetaParameters.MACRO_ACTIONS);
-          PropertyLoader.SELECT_HIGHEST_SCORE_CHILD = result.getParameter(EMetaParameters.SELECT_HIGHEST_SCORE_CHILD);
-          PropertyLoader.TREE_REUSE = result.getParameter(EMetaParameters.TREE_REUSE);
+          final int ticks = (int) doubles[1];
+          final int score = (int) doubles[2];
+          agent.result(score, won);
+          agent.act(score, won);
         }
-
       }
     }
   }
