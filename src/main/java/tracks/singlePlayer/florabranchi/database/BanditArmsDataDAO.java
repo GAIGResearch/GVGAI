@@ -6,9 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 
 
 public class BanditArmsDataDAO {
@@ -27,6 +25,37 @@ public class BanditArmsDataDAO {
 
   public BanditArmsDataDAO(final DatabaseClient databaseClient) {
     this.databaseClient = databaseClient;
+  }
+
+  public void updateBandit(BanditsArmDTO results) {
+
+    Connection conn = null;
+    PreparedStatement pstm = null;
+
+    try {
+      //Cria uma conexão com o banco
+      conn = databaseClient.getConnection();
+      DatabaseClient.update(conn, results);
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      //Fecha as conexões
+
+      try {
+        if (pstm != null) {
+
+          pstm.close();
+        }
+
+        if (conn != null) {
+          conn.close();
+        }
+
+      } catch (Exception e) {
+
+        e.printStackTrace();
+      }
+    }
   }
 
   public void saveBandit(BanditsArmDTO results) {
@@ -61,7 +90,7 @@ public class BanditArmsDataDAO {
     }
   }
 
-  public BanditsArmDTO getMetaWeights(final int id) {
+  public BanditArmsData getMetaWeights(final int id) {
 
     final Statement stmt;
     Connection conn = null;

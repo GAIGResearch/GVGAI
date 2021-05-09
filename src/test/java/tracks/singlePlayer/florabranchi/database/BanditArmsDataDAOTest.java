@@ -6,7 +6,6 @@ import tracks.singlePlayer.florabranchi.agents.meta.MabParameters;
 import tracks.singlePlayer.florabranchi.agents.meta.MultiArmedNaiveSampler;
 
 public class BanditArmsDataDAOTest {
-
   @Test
   public void createTable() {
     BanditArmsDataDAO dao = new BanditArmsDataDAO();
@@ -27,7 +26,7 @@ public class BanditArmsDataDAOTest {
   @Test
   public void testSave() {
     BanditArmsDataDAO dao = new BanditArmsDataDAO();
-    final BanditsArmDTO banditArmsData = dao.getMetaWeights(1);
+    final BanditArmsData banditArmsData = dao.getMetaWeights(1);
     System.out.println(banditArmsData.toString());
   }
 

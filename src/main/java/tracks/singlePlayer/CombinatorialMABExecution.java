@@ -94,6 +94,8 @@ public class CombinatorialMABExecution {
         episodes = runInstruction.episodes;
         System.out.printf("Running gameId %s level %s for %s episodes", runInstruction.gamePath, runInstruction.levelPath, episodes);
 
+        int gamecount = 0;
+        int totalWins = 0;
         for (int i = 0; i < episodes; i++) {
 
           // Setup Agent parameters
@@ -101,6 +103,9 @@ public class CombinatorialMABExecution {
           System.out.println("Game Results" + Arrays.toString(doubles) + " -------------------------------");
 
           final boolean won = doubles[0] == 1;
+          if (won) totalWins++;
+          System.out.println("----------------- Win Record : games" + gamecount + " wins: " + totalWins);
+          gamecount++;
           final int score = (int) doubles[1];
           final int ticks = (int) doubles[2];
           final MabParameters result = agent.act(score);

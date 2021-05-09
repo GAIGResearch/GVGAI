@@ -21,8 +21,19 @@ public class DatabaseClient {
   }
 
   private static final String SQL_SERIALIZE_OBJECT = "INSERT INTO %s(serialized_object) VALUES (?)";
-  private static final String SQL_DESERIALIZE_OBJECT = "SELECT * FROM cmab_data WHERE id =1";
+  private static final String SQL_DESERIALIZE_OBJECT = "SELECT serialized_object FROM cmab_data WHERE id=?";
+  private static final String SQL_UPDATE_OBJECT = "UPDATE cmab_data SET serialized_object = ? WHERE id=1";
 
+
+  public static void update(Connection connection,
+                            BanditsArmDTO objectToSerialize) throws SQLException {
+
+    PreparedStatement pstmt = connection.prepareStatement(SQL_UPDATE_OBJECT);
+    pstmt.setObject(1, objectToSerialize.object);
+    pstmt.executeUpdate();
+    pstmt.close();
+    System.out.println("updated bandit" + objectToSerialize);
+  }
 
   public static void serializeWeights(Connection connection,
                                       final String table,
@@ -31,21 +42,20 @@ public class DatabaseClient {
     PreparedStatement pstmt = connection
         .prepareStatement(String.format(SQL_SERIALIZE_OBJECT, table));
 
-    pstmt.setObject(1, objectToSerialize);
+    pstmt.setObject(1, objectToSerialize.object);
     pstmt.executeUpdate();
     pstmt.close();
     System.out.println("Java object serialized to database. Object: " + objectToSerialize);
   }
 
-  public static BanditsArmDTO deSerializeWeights(Connection connection,
-                                                 final String table,
-                                                 int id) throws SQLException, IOException,
+  public static BanditArmsData deSerializeWeights(Connection connection,
+                                                  final String table,
+                                                  int id) throws SQLException, IOException,
       ClassNotFoundException {
 
     PreparedStatement pstmt = connection.prepareStatement(SQL_DESERIALIZE_OBJECT);
-    //pstmt.setInt(1, id);
+    pstmt.setInt(1, id);
     ResultSet rs = pstmt.executeQuery();
-    rs.next();
 
     if (rs.next()) {
 
@@ -61,7 +71,7 @@ public class DatabaseClient {
       System.out.println("Java object de-serialized from database. Object: "
           + deSerializedObject + " Classname: "
           + deSerializedObject.getClass().getName());
-      return (BanditsArmDTO) deSerializedObject;
+      return (BanditArmsData) deSerializedObject;
     }
 
 

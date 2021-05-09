@@ -46,13 +46,12 @@ public class CombinatorialMABAgent {
     GAMMA = propertyLoader.SARSA_GAMMA;
     EXPLORATION_EPSILON = propertyLoader.SARSA_EPSILON;
 
-    BanditsArmDTO banditArmsData = banditArmsDataDAO.getMetaWeights(1);
-    BanditArmsData newData = new BanditArmsData(banditArmsData.object.armDataList, banditArmsData.object.localArmData);
+    BanditArmsData banditArmsData = banditArmsDataDAO.getMetaWeights(1);
     if (banditArmsData != null) {
-      sampler = new MultiArmedNaiveSampler(newData);
+      sampler = new MultiArmedNaiveSampler(banditArmsData);
     } else {
       sampler = new MultiArmedNaiveSampler();
-      banditArmsDataDAO.saveBandit(new BanditsArmDTO(newData));
+      banditArmsDataDAO.saveBandit(new BanditsArmDTO(sampler.banditArmsData));
     }
 
     gameOptionFeatureController = new GameOptionFeatureController();
@@ -99,7 +98,7 @@ public class CombinatorialMABAgent {
     sampler.updateMabData(previousAction, reward);
 
     sampler.updateBanditArms();
-    banditArmsDataDAO.saveBandit(new BanditsArmDTO(sampler.banditArmsData));
+    banditArmsDataDAO.updateBandit(new BanditsArmDTO(sampler.banditArmsData));
 
     // Select best action given current q values for (s') / exploration play
     final MabParameters selectedAction = selectBestPerceivedAction();

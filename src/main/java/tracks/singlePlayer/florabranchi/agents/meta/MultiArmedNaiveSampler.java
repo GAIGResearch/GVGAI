@@ -101,7 +101,7 @@ public class MultiArmedNaiveSampler {
     MabParameters maxMab = null;
     for (Map.Entry<MabParameters, GlobalMabData> mabParametersGlobalMabDataEntry : globalMab.entrySet()) {
 
-      if (mabParametersGlobalMabDataEntry.getValue().getAverageReward() > maxPerceivedReward) {
+      if (maxMab == null ||  mabParametersGlobalMabDataEntry.getValue().getAverageReward() > maxPerceivedReward) {
         maxPerceivedReward = mabParametersGlobalMabDataEntry.getValue().getAverageReward();
         maxMab = mabParametersGlobalMabDataEntry.getKey();
       }
