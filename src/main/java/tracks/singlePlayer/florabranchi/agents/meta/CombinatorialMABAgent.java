@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import tracks.singlePlayer.florabranchi.database.BanditArmsData;
 import tracks.singlePlayer.florabranchi.database.BanditArmsDataDAO;
+import tracks.singlePlayer.florabranchi.database.BanditsArmDTO;
 import tracks.singlePlayer.florabranchi.persistence.PropertyLoader;
 
 // This agent considers that the inputs (state) is always the same
@@ -45,12 +46,13 @@ public class CombinatorialMABAgent {
     GAMMA = propertyLoader.SARSA_GAMMA;
     EXPLORATION_EPSILON = propertyLoader.SARSA_EPSILON;
 
-    BanditArmsData banditArmsData = banditArmsDataDAO.get(1460);
+    BanditsArmDTO banditArmsData = banditArmsDataDAO.getMetaWeights(1);
+    BanditArmsData newData = new BanditArmsData(banditArmsData.object.armDataList, banditArmsData.object.localArmData);
     if (banditArmsData != null) {
-      sampler = new MultiArmedNaiveSampler(banditArmsData);
+      sampler = new MultiArmedNaiveSampler(newData);
     } else {
       sampler = new MultiArmedNaiveSampler();
-      banditArmsDataDAO.save(sampler.banditArmsData);
+      banditArmsDataDAO.saveBandit(new BanditsArmDTO(newData));
     }
 
     gameOptionFeatureController = new GameOptionFeatureController();
@@ -97,7 +99,7 @@ public class CombinatorialMABAgent {
     sampler.updateMabData(previousAction, reward);
 
     sampler.updateBanditArms();
-    banditArmsDataDAO.update(sampler.banditArmsData);
+    banditArmsDataDAO.saveBandit(new BanditsArmDTO(sampler.banditArmsData));
 
     // Select best action given current q values for (s') / exploration play
     final MabParameters selectedAction = selectBestPerceivedAction();

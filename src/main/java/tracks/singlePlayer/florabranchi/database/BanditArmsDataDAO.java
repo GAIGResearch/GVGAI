@@ -1,5 +1,11 @@
 package tracks.singlePlayer.florabranchi.database;
 
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -11,39 +17,98 @@ public class BanditArmsDataDAO {
 
   public BanditArmsDataDAO() {
     if (entityManagerFactory == null) {
-      entityManagerFactory = Persistence.createEntityManagerFactory("cmab_bandit_data");
+      //entityManagerFactory = Persistence.createEntityManagerFactory("cmab_data");
+    }
+
+    databaseClient = new DatabaseClient();
+  }
+
+  DatabaseClient databaseClient;
+
+  public BanditArmsDataDAO(final DatabaseClient databaseClient) {
+    this.databaseClient = databaseClient;
+  }
+
+  public void saveBandit(BanditsArmDTO results) {
+
+
+    Connection conn = null;
+    PreparedStatement pstm = null;
+
+    try {
+      //Cria uma conexão com o banco
+      conn = databaseClient.getConnection();
+      DatabaseClient.serializeWeights(conn, "cmab_data", results);
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      //Fecha as conexões
+
+      try {
+        if (pstm != null) {
+
+          pstm.close();
+        }
+
+        if (conn != null) {
+          conn.close();
+        }
+
+      } catch (Exception e) {
+
+        e.printStackTrace();
+      }
     }
   }
 
-  public void save(BanditArmsData banditArmsData) {
-    EntityManager manager = entityManagerFactory.createEntityManager();
-    manager.getTransaction().begin();
-    manager.persist(banditArmsData);
-    manager.getTransaction().commit();
-    manager.close();
-  }
+  public BanditsArmDTO getMetaWeights(final int id) {
 
-  public void update(BanditArmsData banditArmsData) {
-    EntityManager manager = entityManagerFactory.createEntityManager();
-    BanditArmsData banditArmsData1 = (BanditArmsData) manager.find(BanditArmsData.class, banditArmsData.id);
-    banditArmsData1.localArmData = banditArmsData.localArmData;
-    banditArmsData1.armDataList = banditArmsData.armDataList;
-    manager.getTransaction().begin();
-    manager.getTransaction().commit();
-    manager.close();
-  }
+    final Statement stmt;
+    Connection conn = null;
+    try {
+      conn = databaseClient.getConnection();
 
-  public BanditArmsData get(int id) {
-    EntityManager manager = entityManagerFactory.createEntityManager();
-    final BanditArmsData banditArmsData1 = (BanditArmsData) manager.find(BanditArmsData.class, id);
-    if (banditArmsData1 != null) {
-      banditArmsData1.armDataList.size();
-      banditArmsData1.localArmData.size();
+      return DatabaseClient.deSerializeWeights(conn, "cmab_data", id);
+
+
+    } catch (SQLException | IOException | ClassNotFoundException throwables) {
+      throwables.printStackTrace();
+    }
+    try {
+      conn.close();
+    } catch (SQLException se) {
+      se.printStackTrace();
     }
 
-    manager.close();
-    return banditArmsData1;
+    return null;
 
 
   }
+
+  public void createMetaWeightsTable() {
+
+    final Statement stmt;
+    Connection conn = null;
+    try {
+      conn = databaseClient.getConnection();
+      stmt = conn.createStatement();
+
+      String sql = "CREATE TABLE cmab_data " +
+          "(id INTEGER not NULL AUTO_INCREMENT, " +
+          " serialized_object BLOB, " +
+          " PRIMARY KEY ( id ))";
+
+      stmt.executeUpdate(sql);
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    }
+    try {
+      conn.close();
+    } catch (SQLException se) {
+      se.printStackTrace();
+    }
+
+  }
+
 }

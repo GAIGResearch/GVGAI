@@ -1,36 +1,22 @@
 package tracks.singlePlayer.florabranchi.database;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.ElementCollection;
 import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
 
 import tracks.singlePlayer.florabranchi.agents.meta.EMetaParameters;
 import tracks.singlePlayer.florabranchi.agents.meta.GlobalMabData;
 import tracks.singlePlayer.florabranchi.agents.meta.LocalMabData;
 import tracks.singlePlayer.florabranchi.agents.meta.MabParameters;
 
-@Entity
-@Table(name = "cmab_bandit_data")
-public class BanditArmsData {
+public class BanditArmsData implements Serializable {
 
-  @Id
-  @GeneratedValue
-  public int id;
-
-  public int version = 1;
-
-  @ElementCollection
   public List<ArmData> armDataList = new ArrayList<>();
 
-  @ElementCollection
   public List<LocalArmData> localArmData = new ArrayList<>();
 
   public Map<EMetaParameters, LocalMabData> getLocalMabs() {
@@ -53,6 +39,10 @@ public class BanditArmsData {
     globalMab.forEach((key, value) -> armDataList.add(new ArmData(key, value)));
   }
 
+  public BanditArmsData(final List<ArmData> armDataList, final List<LocalArmData> localArmData) {
+    this.armDataList = armDataList;
+    this.localArmData = localArmData;
+  }
 
   public BanditArmsData(Map<EMetaParameters, LocalMabData> localMabs,
                         Map<MabParameters, GlobalMabData> globalMab) {
@@ -89,7 +79,7 @@ public class BanditArmsData {
 
   @Embeddable
   static
-  class ArmData {
+  class ArmData implements Serializable {
 
     public boolean treeReuse;
     public boolean rawGameScore;
@@ -137,7 +127,7 @@ public class BanditArmsData {
 
   @Embeddable
   static
-  class LocalArmData {
+  class LocalArmData implements Serializable {
 
     public double marginalizedAvgScoreForParameter;
     public double timesParameterSelected;

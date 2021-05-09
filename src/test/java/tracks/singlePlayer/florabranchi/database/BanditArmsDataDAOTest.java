@@ -8,6 +8,12 @@ import tracks.singlePlayer.florabranchi.agents.meta.MultiArmedNaiveSampler;
 public class BanditArmsDataDAOTest {
 
   @Test
+  public void createTable() {
+    BanditArmsDataDAO dao = new BanditArmsDataDAO();
+    dao.createMetaWeightsTable();
+  }
+
+  @Test
   public void testCreate() {
     BanditArmsDataDAO dao = new BanditArmsDataDAO();
     MultiArmedNaiveSampler sampler = new MultiArmedNaiveSampler();
@@ -15,13 +21,13 @@ public class BanditArmsDataDAOTest {
     sampler.updateMabData(randomGlobalMab, 22.3);
     final MabParameters mabParameters = sampler.addRandomSample();
     sampler.updateMabData(mabParameters, 50);
-    dao.save(new BanditArmsData(sampler.localMabs, sampler.globalMab));
+    dao.saveBandit(new BanditsArmDTO(new BanditArmsData(sampler.localMabs, sampler.globalMab)));
   }
 
   @Test
   public void testSave() {
     BanditArmsDataDAO dao = new BanditArmsDataDAO();
-    final BanditArmsData banditArmsData = dao.get(1455);
+    final BanditsArmDTO banditArmsData = dao.getMetaWeights(1);
     System.out.println(banditArmsData.toString());
   }
 
