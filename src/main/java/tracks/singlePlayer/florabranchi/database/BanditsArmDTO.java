@@ -16,10 +16,16 @@ public class BanditsArmDTO implements Serializable {
   @GeneratedValue
   public int id;
 
+  public int iterations;
+
   @Column(name = "serialized_object", columnDefinition = "LONGBLOB")
   public BanditArmsData object;
 
   public BanditsArmDTO(final BanditArmsData object) {
     this.object = object;
+  }
+
+  public BanditsArmDTO() {
+
   }
 }

@@ -20,17 +20,19 @@ public class DatabaseClient {
   public DatabaseClient() {
   }
 
-  private static final String SQL_SERIALIZE_OBJECT = "INSERT INTO %s(serialized_object) VALUES (?)";
-  private static final String SQL_DESERIALIZE_OBJECT = "SELECT serialized_object FROM cmab_data WHERE id=?";
-  private static final String SQL_UPDATE_OBJECT = "UPDATE cmab_data SET serialized_object = ? WHERE id=1";
+  private static final String SQL_SERIALIZE_OBJECT = "INSERT INTO %s(serialized_object, iterations) VALUES (?, ?)";
+  private static final String SQL_DESERIALIZE_OBJECT = "SELECT serialized_object,iterations FROM cmab_data WHERE id=?";
+  private static final String SQL_UPDATE_OBJECT = "UPDATE cmab_data SET serialized_object = ?, iterations = ? WHERE id=1";
 
 
   public static void update(Connection connection,
                             BanditsArmDTO objectToSerialize) throws SQLException {
 
     objectToSerialize.id = 1;
+    objectToSerialize.iterations++;
     PreparedStatement pstmt = connection.prepareStatement(SQL_UPDATE_OBJECT);
     pstmt.setObject(1, objectToSerialize.object);
+    pstmt.setObject(2, objectToSerialize.iterations);
     pstmt.executeUpdate();
     pstmt.close();
     System.out.println("updated bandit" + objectToSerialize);
@@ -43,43 +45,49 @@ public class DatabaseClient {
     PreparedStatement pstmt = connection
         .prepareStatement(String.format(SQL_SERIALIZE_OBJECT, table));
 
+    objectToSerialize.iterations = 1;
     pstmt.setObject(1, objectToSerialize.object);
+    pstmt.setObject(2, objectToSerialize.iterations);
     pstmt.executeUpdate();
     pstmt.close();
     System.out.println("Java object serialized to database. Object: " + objectToSerialize);
   }
 
-  public static BanditArmsData deSerializeWeights(Connection connection,
-                                                  final String table,
-                                                  int id) throws SQLException, IOException,
+  public static BanditsArmDTO deSerializeWeights(Connection connection,
+                                                 final String table,
+                                                 int id) throws SQLException, IOException,
       ClassNotFoundException {
 
     PreparedStatement pstmt = connection.prepareStatement(SQL_DESERIALIZE_OBJECT);
     pstmt.setInt(1, id);
     ResultSet rs = pstmt.executeQuery();
 
-    if (rs.next()) {
+    BanditsArmDTO banditsArmDTO = null;
+    Object deSerializedObject = null;
+    while (rs.next()) {
 
       Object object = rs.getObject(1);
+      Object iterations = rs.getInt(2);
 
       byte[] buf = rs.getBytes(1);
       ObjectInputStream objectIn = null;
       if (buf != null)
         objectIn = new ObjectInputStream(new ByteArrayInputStream(buf));
 
-      Object deSerializedObject = objectIn.readObject();
+      deSerializedObject = objectIn.readObject();
+
+      banditsArmDTO = new BanditsArmDTO();
+      banditsArmDTO.iterations = (int) iterations;
+      banditsArmDTO.object = (BanditArmsData) deSerializedObject;
 
       System.out.println("Java object de-serialized from database. Object: "
           + deSerializedObject + " Classname: "
           + deSerializedObject.getClass().getName());
-      return (BanditArmsData) deSerializedObject;
     }
-
 
     rs.close();
     pstmt.close();
-
-    return null;
+    return banditsArmDTO;
   }
 
 

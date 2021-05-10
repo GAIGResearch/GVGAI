@@ -4,11 +4,8 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.logging.Logger;
 
-import ontology.Types;
-import tracks.singlePlayer.florabranchi.database.BanditArmsData;
 import tracks.singlePlayer.florabranchi.database.BanditArmsDataDAO;
 import tracks.singlePlayer.florabranchi.database.BanditsArmDTO;
-import tracks.singlePlayer.florabranchi.database.BaseMonteCarloResult;
 import tracks.singlePlayer.florabranchi.database.CombinatorialMabAgentResult;
 import tracks.singlePlayer.florabranchi.database.CombinatorialMabAgentResultDAO;
 import tracks.singlePlayer.florabranchi.persistence.PropertyLoader;
@@ -38,6 +35,12 @@ public class CombinatorialMABAgent {
 
   CombinatorialMabAgentResultDAO combinatorialMabAgentResultDAO = new CombinatorialMabAgentResultDAO();
 
+  BanditsArmDTO banditsArmDTO;
+
+  protected String getPropertyPath() {
+    return "sarsa.properties";
+  }
+
   public CombinatorialMABAgent() {
 
     try {
@@ -51,12 +54,13 @@ public class CombinatorialMABAgent {
     GAMMA = propertyLoader.SARSA_GAMMA;
     EXPLORATION_EPSILON = propertyLoader.SARSA_EPSILON;
 
-    BanditArmsData banditArmsData = banditArmsDataDAO.getBanditArmsData(2);
-    if (banditArmsData != null) {
-      sampler = new MultiArmedNaiveSampler(banditArmsData);
+    banditsArmDTO = banditArmsDataDAO.getBanditArmsData(1);
+    if (banditsArmDTO != null) {
+      sampler = new MultiArmedNaiveSampler(banditsArmDTO.object);
     } else {
+      banditsArmDTO = new BanditsArmDTO();
       sampler = new MultiArmedNaiveSampler();
-      banditArmsDataDAO.saveBandit(new BanditsArmDTO(sampler.banditArmsData));
+      banditArmsDataDAO.saveBandit(banditsArmDTO);
     }
 
     if (previousAction == null) {
@@ -68,19 +72,19 @@ public class CombinatorialMABAgent {
 
       // a
       previousAction = currentAction;
-      setProperties(currentAction);
+      updateGlobalProperties(currentAction);
     }
 
   }
 
-  private void setProperties(MabParameters result) {
+  private void updateGlobalProperties(MabParameters result) {
     PropertyLoader.EARLY_INITIALIZATION = result.getParameter(EMetaParameters.EARLY_INITIALIZATION);
     PropertyLoader.RAW_GAME_SCORE = result.getParameter(EMetaParameters.RAW_GAME_SCORE);
     PropertyLoader.MACRO_ACTIONS = result.getParameter(EMetaParameters.MACRO_ACTIONS);
     PropertyLoader.SELECT_HIGHEST_SCORE_CHILD = result.getParameter(EMetaParameters.SELECT_HIGHEST_SCORE_CHILD);
     PropertyLoader.TREE_REUSE = result.getParameter(EMetaParameters.TREE_REUSE);
 
-    System.out.println("Properties set" + result);
+    System.out.println("Properties set " + result);
   }
 
   public void result(final double score,
@@ -105,19 +109,6 @@ public class CombinatorialMABAgent {
   public MabParameters act(final double reward,
                            final boolean won) {
 
-/*    // First play
-    if (previousAction == null) {
-      System.out.println("first play");
-      final MabParameters currentAction = selectBestPerceivedAction();
-
-      System.out.println(currentAction);
-
-      // a
-      previousAction = currentAction;
-      // s;
-      return currentAction;
-    }*/
-
     double finalReward = reward;
     if (!won) {
       finalReward = minDouble;
@@ -125,7 +116,8 @@ public class CombinatorialMABAgent {
 
     // update expected reward
     sampler.updateMabData(previousAction, finalReward);
-    banditArmsDataDAO.updateBandit(new BanditsArmDTO(sampler.banditArmsData));
+    banditsArmDTO.object = sampler.banditArmsData;
+    banditArmsDataDAO.updateBandit(banditsArmDTO);
 
     // Select best action given current q values for (s') / exploration play
     final MabParameters selectedAction = selectBestPerceivedAction();
@@ -134,21 +126,12 @@ public class CombinatorialMABAgent {
     previousAction = selectedAction;
     System.out.println("next mab:" + selectedAction);
 
-    setProperties(selectedAction);
+    updateGlobalProperties(selectedAction);
     return selectedAction;
   }
 
-  protected boolean displayDebug() {
-    return true;
-  }
-
-  protected String getPropertyPath() {
-    return "sarsa.properties";
-  }
-
   public MabParameters returnRandomAction() {
-    final MabParameters mabParameters = sampler.addRandomSample();
-    return mabParameters;
+    return sampler.addRandomSample();
   }
 
   public MabParameters selectBestPerceivedAction() {

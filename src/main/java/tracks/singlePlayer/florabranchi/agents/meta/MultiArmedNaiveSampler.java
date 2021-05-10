@@ -20,12 +20,6 @@ public class MultiArmedNaiveSampler {
   // Known global mabs hash map - values hash is key
   public Map<MabParameters, GlobalMabData> globalMab = new HashMap<>();
 
-  public MultiArmedNaiveSampler(final Map<EMetaParameters, LocalMabData> localMabs,
-                                final Map<MabParameters, GlobalMabData> globalMab) {
-    this.localMabs = localMabs;
-    this.globalMab = globalMab;
-  }
-
   public void updateBanditArms() {
     banditArmsData.updateArms(localMabs, globalMab);
   }
@@ -110,6 +104,7 @@ public class MultiArmedNaiveSampler {
 
     // if draw return any
     if (maxMab == null || maxPerceivedReward < 10) {
+      System.out.println("Using Random MAB since exploitaition would yield bad resuls");
       return addRandomSample();
     }
 

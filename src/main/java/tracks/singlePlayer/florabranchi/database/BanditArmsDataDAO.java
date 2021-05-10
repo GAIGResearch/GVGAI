@@ -60,7 +60,7 @@ public class BanditArmsDataDAO {
     }
   }
 
-  public BanditArmsData getBanditArmsData(final int id) {
+  public BanditsArmDTO getBanditArmsData(final int id) {
 
     Connection conn = null;
     try {
@@ -88,6 +88,7 @@ public class BanditArmsDataDAO {
       String sql = "CREATE TABLE cmab_data " +
           "(id INTEGER not NULL AUTO_INCREMENT, " +
           " serialized_object BLOB, " +
+          " iterations INTEGER, " +
           " PRIMARY KEY ( id ))";
 
       stmt.executeUpdate(sql);

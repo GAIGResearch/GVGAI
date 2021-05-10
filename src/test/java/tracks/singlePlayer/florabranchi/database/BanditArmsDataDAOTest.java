@@ -26,7 +26,7 @@ public class BanditArmsDataDAOTest {
   @Test
   public void testSave() {
     BanditArmsDataDAO dao = new BanditArmsDataDAO();
-    final BanditArmsData banditArmsData = dao.getBanditArmsData(1);
+    final BanditsArmDTO banditArmsData = dao.getBanditArmsData(1);
     System.out.println(banditArmsData.toString());
   }
 
