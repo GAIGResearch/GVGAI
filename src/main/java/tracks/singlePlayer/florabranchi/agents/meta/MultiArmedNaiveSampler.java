@@ -4,15 +4,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
 
 import tracks.singlePlayer.florabranchi.database.BanditArmsData;
+import tracks.singlePlayer.florabranchi.persistence.PropertyLoader;
 
 public class MultiArmedNaiveSampler {
 
   public BanditArmsData banditArmsData;
 
   Random random = new Random();
+
+  int EXPLORATION_EPSILON = 10;
 
   // local mabs
   public Map<EMetaParameters, LocalMabData> localMabs = new HashMap<>();
@@ -60,9 +64,45 @@ public class MultiArmedNaiveSampler {
     for (EMetaParameters value : getAllParameters()) {
       globalMab.addParameter(value, random.nextBoolean());
     }
+    addToGlobalMab(globalMab);
+    return globalMab;
+  }
+
+  private void addToGlobalMab(final MabParameters globalMab) {
     GlobalMabData globalMabData = new GlobalMabData();
     this.globalMab.put(globalMab, globalMabData);
-    return globalMab;
+  }
+
+  public MabParameters mabExploration() {
+
+    // e-greedy for exploration
+    int rand = random.nextInt(100);
+    if (rand <= EXPLORATION_EPSILON) {
+      System.out.println("selecting exploration play - add random mab --------------------------------");
+      return addRandomSample();
+    }
+
+    System.out.println("selecting exploitation play for exploration - add best mab --------------------------------");
+
+    // mab exploitation
+    // select best expected rewards
+    List<EMetaParameters> explorationBestParameters = new ArrayList<>();
+    for (Map.Entry<EMetaParameters, LocalMabData> entry : localMabs.entrySet()) {
+      if (entry.getValue().getAverageReward() > 1) {
+        explorationBestParameters.add(entry.getKey());
+      }
+    }
+
+    final MabParameters mabParameters = emptyMab();
+    explorationBestParameters.forEach(metaParameter -> mabParameters.addParameter(metaParameter, true));
+
+    // Try selecting a different version if the most optimized one exists
+    int tries = 2;
+    while (globalMab.containsKey(mabParameters) && tries > 0) {
+      mabParameters.randomMutation(random);
+      tries--;
+    }
+    return mabParameters;
   }
 
 
@@ -103,7 +143,7 @@ public class MultiArmedNaiveSampler {
     }
 
     // if draw return any
-    if (maxMab == null || maxPerceivedReward < 10) {
+    if (maxMab == null || maxPerceivedReward < 1) {
       System.out.println("Using Random MAB since exploitaition would yield bad resuls");
       return addRandomSample();
     }

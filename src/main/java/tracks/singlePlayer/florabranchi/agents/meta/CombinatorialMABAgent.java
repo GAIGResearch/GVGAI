@@ -132,7 +132,7 @@ public class CombinatorialMABAgent {
     return selectedAction;
   }
 
-  public MabParameters returnRandomAction() {
+  public MabParameters exploreMabs() {
     return sampler.addRandomSample();
   }
 
@@ -142,14 +142,12 @@ public class CombinatorialMABAgent {
     int rand = randomGenerator.nextInt(100);
     if (rand <= EXPLORATION_EPSILON) {
       System.out.println("selecting exploration play --------------------------------");
-      return returnRandomAction();
+      return exploreMabs();
     }
 
     System.out.println("selecting exploitation play -------------------------------");
-    double maxValue = -Double.MAX_VALUE;
 
-    final MabParameters mabParameters = sampler.exploitMabs();
-    return mabParameters;
+    return sampler.exploitMabs();
   }
 
 

@@ -12,4 +12,8 @@ public class LocalMabData {
 
   public LocalMabData() {
   }
+
+  public double getAverageReward() {
+    return timesParameterSelected == 0 ? 0 : marginalizedAvgScoreForParameter / timesParameterSelected;
+  }
 }

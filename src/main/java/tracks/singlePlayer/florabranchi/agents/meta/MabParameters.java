@@ -1,8 +1,12 @@
 package tracks.singlePlayer.florabranchi.agents.meta;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
 import java.util.StringJoiner;
 
 // slots
@@ -42,5 +46,12 @@ public class MabParameters {
     return new StringJoiner(", ", MabParameters.class.getSimpleName() + "[", "]")
         .add("values=" + values)
         .toString();
+  }
+
+  public void randomMutation(final Random random) {
+    final List<EMetaParameters> eMetaParameters = new ArrayList<>(values.keySet());
+    final EMetaParameters param = eMetaParameters.get(random.nextInt(eMetaParameters.size()));
+    boolean value = values.get(param);
+    values.put(param, !value);
   }
 }
