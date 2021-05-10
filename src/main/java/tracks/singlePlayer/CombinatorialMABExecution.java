@@ -75,6 +75,7 @@ public class CombinatorialMABExecution {
           runInstructions.addInstruction(new RunInstructions.RunInstruction(gamePath, gameInList, levelPath, levelIt, episodesPerLevel));
         }
       }
+      CombinatorialMABAgent combinatorialMABAgent = null;
 
       for (RunInstructions.RunInstruction runInstruction : runInstructions.runInstructionList) {
 
@@ -82,7 +83,9 @@ public class CombinatorialMABExecution {
         PropertyLoader.GAME = gameIdx;
         PropertyLoader.LEVEL = runInstruction.levelId;
 
-        CombinatorialMABAgent agent = new CombinatorialMABAgent();
+        if (combinatorialMABAgent == null) {
+          combinatorialMABAgent = new CombinatorialMABAgent();
+        }
 
         String[] levelFiles;
         levelFiles = new String[1];
@@ -104,8 +107,8 @@ public class CombinatorialMABExecution {
           gamecount++;
           final int ticks = (int) doubles[1];
           final int score = (int) doubles[2];
-          agent.result(score, won);
-          agent.act(score, won);
+          combinatorialMABAgent.result(score, won);
+          combinatorialMABAgent.act(score, won);
         }
       }
     }
