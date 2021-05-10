@@ -3,9 +3,13 @@ package tracks.singlePlayer.florabranchi.agents;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -76,8 +80,8 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
   private final Random rand = new Random();
 
-  private static final double WINNER_SCORE = Math.pow(10, 6);
-  private static final double LOSS_SCORE = Math.pow(10, -6);
+  private static final double WINNER_SCORE = +500_000;
+  private static final double LOSS_SCORE = -500_000;
 
   private final int[][] visitCount;
 
@@ -213,7 +217,8 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
       search(stateObs);
     }
 
-    return nextMove();
+    final ACTIONS nextMove = nextMove();
+    return nextMove;
   }
 
   private ACTIONS executeMacroActions(final StateObservation stateObs) {
@@ -452,7 +457,6 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     final int avatarX = (int) copyState.getAvatarPosition().x;
     final int avatarY = (int) copyState.getAvatarPosition().y;
 
-    final StateEvaluatorHelper.ObservableData npcData = StateEvaluatorHelper.getNpcData(copyState);
     final StateEvaluatorHelper.ObservableData portalsData = StateEvaluatorHelper.getPortalsData(copyState);
     final StateEvaluatorHelper.ObservableData movablesData = StateEvaluatorHelper.getMovablesData(copyState);
     final StateEvaluatorHelper.ObservableData resourcesData = StateEvaluatorHelper.getResourcesData(copyState);
@@ -460,8 +464,6 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     final double distClosestResource = distanceToClosestObservable(avatarX, avatarY, resourcesData);
     final double distClosestPortal = distanceToClosestObservable(avatarX, avatarY, portalsData);
     final double distClosestMovable = distanceToClosestObservable(avatarX, avatarY, movablesData);
-    final double distClosestNpc = distanceToClosestObservable(avatarX, avatarY, npcData);
-
 
     visitCount[avatarX][avatarY] = visitCount[avatarX][avatarY] + 1;
 
@@ -511,17 +513,75 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   public Double rollout(final Node node,
                         final double initialScore) {
 
-    final StateObservation currentState = node.currentGameState.copy();
+    StateObservation currentState = node.currentGameState.copy();
     int advancementsInRollout = ROLLOUT_DEPTH;
 
-    //Node currentNode = node;
-    while (!currentState.isGameOver() && advancementsInRollout > 0) {
+    if (!LOSS_AVOIDANCE) {
+      while (!currentState.isGameOver() && advancementsInRollout > 0) {
 
-      final ArrayList<Types.ACTIONS> availableActions = currentState.getAvailableActions();
-      final Types.ACTIONS takeAction = availableActions.get(rand.nextInt(availableActions.size()));
-      currentState.advance(takeAction);
-      advancementsInRollout--;
+        final ArrayList<Types.ACTIONS> availableActions = currentState.getAvailableActions();
+        final Types.ACTIONS takeAction = availableActions.get(rand.nextInt(availableActions.size()));
+        currentState.advance(takeAction);
+        advancementsInRollout--;
+      }
+    } else {
+      // Loss avoidance mechanism
+      final StateObservation originalInitialState = currentState.copy();
+      final StateObservation tempGameState = currentState.copy();
+      final List<ACTIONS> rolloutActions = new ArrayList<>();
+
+      while (!tempGameState.isGameOver() && advancementsInRollout > 0) {
+
+        final ArrayList<Types.ACTIONS> availableActions = tempGameState.getAvailableActions();
+        final Types.ACTIONS takeAction = availableActions.get(rand.nextInt(availableActions.size()));
+        rolloutActions.add(takeAction);
+        tempGameState.advance(takeAction);
+        advancementsInRollout--;
+      }
+
+      // If no loss, stop algorithm and propagate results
+      if (tempGameState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
+
+        // if no actions available, game was finished in the first action. result must be returned immediately
+        if (tempGameState.getAvailableActions().isEmpty()) {
+          return LOSS_SCORE;
+        }
+
+        boolean terminatedGame = false;
+
+        // repeat result until t-1 and simulate siblings
+        final ACTIONS lastAction = rolloutActions.get(rolloutActions.size() - 1);
+        // advance initialGameState to t-1
+        for (int index = 0; index < rolloutActions.size() - 2; index++) {
+
+          // if a terminal state is found during advancements for LA, result must be propagated immediately
+          if (originalInitialState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
+            terminatedGame = true;
+            break;
+          }
+
+          final Types.ACTIONS takeAction = rolloutActions.get(index);
+          tempGameState.advance(takeAction);
+          advancementsInRollout--;
+        }
+
+        if (!terminatedGame) {
+          // Check results for sibling actions in t
+          final Set<ACTIONS> availableActions = new HashSet<>(originalInitialState.getAvailableActions());
+          availableActions.remove(lastAction);
+          Map<ACTIONS, Double> siblingsResults = new HashMap<>();
+          for (ACTIONS siblingActions : availableActions) {
+            final StateObservation siblingState = originalInitialState.copy();
+            siblingState.advance(siblingActions);
+            siblingsResults.put(siblingActions, getStateReward(initialScore, siblingState));
+          }
+
+          return Collections.max(siblingsResults.entrySet(), Map.Entry.comparingByValue()).getValue();
+        }
+      }
+      currentState = tempGameState;
     }
+
 
     double reward = 0;
     // Selected node is game over
@@ -530,12 +590,18 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     } else if (currentState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
       return LOSS_SCORE;
     } else {
+      reward = getStateReward(initialScore, currentState);
+    }
+    return reward;
+  }
 
-      if (RAW_GAME_SCORE) {
-        reward = getRawGameStateScore(currentState, initialScore);
-      } else {
-        reward = getStateScore(currentState, initialScore);
-      }
+  private double getStateReward(final double initialScore,
+                                final StateObservation currentState) {
+    double reward;
+    if (RAW_GAME_SCORE) {
+      reward = getRawGameStateScore(currentState, initialScore);
+    } else {
+      reward = getStateScore(currentState, initialScore);
     }
     return reward;
   }
@@ -555,7 +621,14 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
       return node.children.get(rand.nextInt(node.children.size()));
     }
 
-    return Collections.max(node.children, Comparator.comparing(c -> c.totalValue));
+    for (Node child : node.children) {
+
+      double nodeReward = getNodeUpperConfidenceBound(child, node.visits);
+      System.out.println("Reward for node " + child.previousAction + " = " + nodeReward);
+    }
+
+    final Node max = Collections.max(node.children, Comparator.comparing(c -> getNodeUpperConfidenceBound(c, node.visits)));
+    return max;
   }
 
   public boolean allValuesEqual(final Node node) {
@@ -568,10 +641,10 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
     Double value = null;
     for (Node child : node.children) {
-      if (value != null && child.totalValue != value) {
+      if (value != null && child.currentValue != value) {
         return false;
       } else if (value == null) {
-        value = child.totalValue;
+        value = child.currentValue;
       }
     }
     //System.out.print("All values equal \n");
@@ -582,6 +655,12 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
     if (allValuesEqual(node)) {
       return node.children.get(rand.nextInt(node.children.size()));
+    }
+
+    for (Node child : node.children) {
+
+      double nodeReward = getNodeUpperConfidenceBound(child, node.visits);
+      System.out.println("Reward for node " + child.id + " = " + nodeReward);
     }
 
 

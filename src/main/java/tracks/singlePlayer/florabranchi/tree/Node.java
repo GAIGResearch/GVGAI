@@ -9,6 +9,9 @@ import ontology.Types;
 
 public class Node {
 
+  private Double UPPER_BOUND = Double.MAX_VALUE;
+  private Double LOWER_BOUND = -Double.MAX_VALUE;
+
   static int nodeId = 0;
 
   public int id;
@@ -59,8 +62,18 @@ public class Node {
 
   public void updateNodeReward(final double reward) {
     this.visits++;
-    this.totalValue = this.totalValue + reward;
-    this.currentValue = this.totalValue / this.visits;
+
+    double finalReward = this.totalValue + reward;
+    if (finalReward >= UPPER_BOUND) {
+      finalReward = UPPER_BOUND;
+      currentValue = LOWER_BOUND;
+    } else if (finalReward <= LOWER_BOUND) {
+      finalReward = LOWER_BOUND;
+      currentValue = LOWER_BOUND;
+    } else {
+      this.currentValue = finalReward / this.visits;
+    }
+    this.totalValue = finalReward;
   }
 
   @Override
