@@ -15,7 +15,7 @@ public class MultiArmedNaiveSamplerTest {
 
     sampler.updateMabData(greedyMabParameters2, 10);
 
-    final MabParameters mabParameters = sampler.mabExploration();
+    final MabParameters mabParameters = sampler.exploreMabs();
     System.out.println(mabParameters);
 
 

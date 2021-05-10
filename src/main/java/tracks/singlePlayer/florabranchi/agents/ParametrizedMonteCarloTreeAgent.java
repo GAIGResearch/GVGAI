@@ -56,7 +56,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   public static boolean SELECT_HIGHEST_SCORE_CHILD;
 
   // Enhancements
-  public static boolean TREE_REUSE;
+  public static boolean TREE_REUSE = true;
   public static boolean SHALLOW_ROLLOUT;
   public static boolean LOSS_AVOIDANCE;
   public static boolean RAW_GAME_SCORE;
@@ -93,14 +93,8 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   boolean resetAlgorithm = false;
 
   public static void reloadProperties() {
-
-
     showTree = PropertyLoader.SHOW_TREE;
-
     TREE_SEARCH_SIZE = PropertyLoader.TREE_SEARCH_SIZE;
-
-
-    TREE_REUSE = PropertyLoader.TREE_REUSE;
     SHALLOW_ROLLOUT = PropertyLoader.SHALLOW_ROLLOUT;
     ROLLOUT_DEPTH = SHALLOW_ROLLOUT ? 1 : 10;
     MACRO_ACTIONS = PropertyLoader.MACRO_ACTIONS;
@@ -188,7 +182,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   @Override
   public void result(final StateObservation stateObs,
                      final ElapsedCpuTimer elapsedCpuTimer) {
-    reloadProperties();
+    //reloadProperties();
   }
 
   public ACTIONS monteCarloSearchParametrized(final StateObservation stateObs,

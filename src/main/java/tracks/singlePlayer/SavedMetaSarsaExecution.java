@@ -109,8 +109,6 @@ public class SavedMetaSarsaExecution {
           PropertyLoader.RAW_GAME_SCORE = result.getParameter(EMetaParameters.RAW_GAME_SCORE);
           PropertyLoader.MACRO_ACTIONS = result.getParameter(EMetaParameters.MACRO_ACTIONS);
           PropertyLoader.SELECT_HIGHEST_SCORE_CHILD = result.getParameter(EMetaParameters.SELECT_HIGHEST_SCORE_CHILD);
-          PropertyLoader.TREE_REUSE = result.getParameter(EMetaParameters.TREE_REUSE);
-
 
           System.out.println("Selected action: \n" + result);
           //gameOptions.act(actions);

@@ -2,13 +2,14 @@ package tracks.singlePlayer.florabranchi.agents.meta;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import tracks.singlePlayer.florabranchi.database.BanditArmsData;
-import tracks.singlePlayer.florabranchi.persistence.PropertyLoader;
 
 public class MultiArmedNaiveSampler {
 
@@ -24,6 +25,9 @@ public class MultiArmedNaiveSampler {
   // Known global mabs hash map - values hash is key
   public Map<MabParameters, GlobalMabData> globalMab = new HashMap<>();
 
+  public Set<Integer> sampledGlobalMabs = new HashSet<>();
+
+
   public void updateBanditArms() {
     banditArmsData.updateArms(localMabs, globalMab);
   }
@@ -32,6 +36,7 @@ public class MultiArmedNaiveSampler {
     this.banditArmsData = banditArmsData;
     this.localMabs = banditArmsData.getLocalMabs();
     this.globalMab = banditArmsData.getGlobalMabs();
+    this.sampledGlobalMabs = globalMab.keySet().stream().map(MabParameters::hashCode).collect(Collectors.toSet());
   }
 
   public MultiArmedNaiveSampler() {
@@ -60,26 +65,61 @@ public class MultiArmedNaiveSampler {
   }
 
   public MabParameters addRandomSample() {
-    final MabParameters globalMab = emptyMab();
+    final MabParameters newMab = emptyMab();
     for (EMetaParameters value : getAllParameters()) {
-      globalMab.addParameter(value, random.nextBoolean());
+      newMab.addParameter(value, random.nextBoolean());
     }
-    addToGlobalMab(globalMab);
-    return globalMab;
+
+    int tries = 10;
+    while (sampledGlobalMabs.contains(newMab.hashCode()) && tries > 0) {
+      newMab.randomMutation(random);
+      tries--;
+    }
+
+    if (sampledGlobalMabs.contains(newMab.hashCode())) {
+      // could not get original mab. proceed with random
+      return getRandomGlobalMab();
+    }
+
+    addToGlobalMab(newMab);
+    return newMab;
   }
 
   private void addToGlobalMab(final MabParameters globalMab) {
     GlobalMabData globalMabData = new GlobalMabData();
     this.globalMab.put(globalMab, globalMabData);
+    this.sampledGlobalMabs.add(globalMab.hashCode());
   }
 
-  public MabParameters mabExploration() {
+
+  MabParameters exploitMabs() {
+
+    double maxPerceivedReward = 0;
+    MabParameters maxMab = null;
+    for (Map.Entry<MabParameters, GlobalMabData> mabParametersGlobalMabDataEntry : globalMab.entrySet()) {
+
+      if (maxMab == null || mabParametersGlobalMabDataEntry.getValue().getAverageReward() > maxPerceivedReward) {
+        maxPerceivedReward = mabParametersGlobalMabDataEntry.getValue().getAverageReward();
+        maxMab = mabParametersGlobalMabDataEntry.getKey();
+      }
+    }
+
+    // if draw return any
+    if (maxMab == null || maxPerceivedReward < 1) {
+      System.out.println("Using Random MAB since exploitaition would yield bad resuls");
+      return addRandomSample();
+    }
+
+    return maxMab;
+  }
+
+  public MabParameters exploreMabs() {
 
     // e-greedy for exploration
     int rand = random.nextInt(100);
     if (rand <= EXPLORATION_EPSILON) {
-      System.out.println("selecting exploration play - add random mab --------------------------------");
-      return addRandomSample();
+      System.out.println("selecting exploration play - return random existing mab --------------------------------");
+      return getRandomGlobalMab();
     }
 
     System.out.println("selecting exploitation play for exploration - add best mab --------------------------------");
@@ -128,27 +168,6 @@ public class MultiArmedNaiveSampler {
       }
     }
     updateBanditArms();
-  }
-
-  MabParameters exploitMabs() {
-
-    double maxPerceivedReward = 0;
-    MabParameters maxMab = null;
-    for (Map.Entry<MabParameters, GlobalMabData> mabParametersGlobalMabDataEntry : globalMab.entrySet()) {
-
-      if (maxMab == null || mabParametersGlobalMabDataEntry.getValue().getAverageReward() > maxPerceivedReward) {
-        maxPerceivedReward = mabParametersGlobalMabDataEntry.getValue().getAverageReward();
-        maxMab = mabParametersGlobalMabDataEntry.getKey();
-      }
-    }
-
-    // if draw return any
-    if (maxMab == null || maxPerceivedReward < 1) {
-      System.out.println("Using Random MAB since exploitaition would yield bad resuls");
-      return addRandomSample();
-    }
-
-    return maxMab;
   }
 
 

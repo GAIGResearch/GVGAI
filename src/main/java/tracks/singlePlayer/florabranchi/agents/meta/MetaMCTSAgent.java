@@ -56,7 +56,6 @@ public class MetaMCTSAgent {
     previousData = new HashMap<>();
 
     MabParameters mabParameters = new MabParameters();
-    mabParameters.addParameter(EMetaParameters.TREE_REUSE, PropertyLoader.TREE_REUSE);
     mabParameters.addParameter(EMetaParameters.SHALLOW_ROLLOUT, PropertyLoader.SHALLOW_ROLLOUT);
     mabParameters.addParameter(EMetaParameters.SELECT_HIGHEST_SCORE_CHILD, PropertyLoader.SELECT_HIGHEST_SCORE_CHILD);
     mabParameters.addParameter(EMetaParameters.EARLY_INITIALIZATION, PropertyLoader.EARLY_INITIALIZATION);

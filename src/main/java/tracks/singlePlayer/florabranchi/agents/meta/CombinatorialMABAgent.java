@@ -48,7 +48,8 @@ public class CombinatorialMABAgent {
       sampler = new MultiArmedNaiveSampler(banditsArmDTO.object);
     } else {
       banditsArmDTO = new BanditsArmDTO();
-      banditsArmDTO.game = PropertyLoader.GAME_NAME;;
+      banditsArmDTO.game = PropertyLoader.GAME_NAME;
+      ;
       sampler = new MultiArmedNaiveSampler();
       banditArmsDataDAO.saveBandit(banditsArmDTO);
     }
@@ -71,7 +72,6 @@ public class CombinatorialMABAgent {
     PropertyLoader.RAW_GAME_SCORE = result.getParameter(EMetaParameters.RAW_GAME_SCORE);
     PropertyLoader.MACRO_ACTIONS = result.getParameter(EMetaParameters.MACRO_ACTIONS);
     PropertyLoader.SELECT_HIGHEST_SCORE_CHILD = result.getParameter(EMetaParameters.SELECT_HIGHEST_SCORE_CHILD);
-    PropertyLoader.TREE_REUSE = result.getParameter(EMetaParameters.TREE_REUSE);
     PropertyLoader.SHALLOW_ROLLOUT = result.getParameter(EMetaParameters.SHALLOW_ROLLOUT);
     PropertyLoader.LOSS_AVOIDANCE = result.getParameter(EMetaParameters.LOSS_AVOIDANCE);
 
@@ -88,7 +88,6 @@ public class CombinatorialMABAgent {
     baseMonteCarloResult.gameLevel = PropertyLoader.LEVEL;
     baseMonteCarloResult.finalScore = score;
     baseMonteCarloResult.won = won;
-    baseMonteCarloResult.treeReuse = PropertyLoader.TREE_REUSE;
     baseMonteCarloResult.rawGameScore = PropertyLoader.RAW_GAME_SCORE;
     baseMonteCarloResult.macroActions = PropertyLoader.MACRO_ACTIONS;
     baseMonteCarloResult.lossAvoidance = PropertyLoader.LOSS_AVOIDANCE;
@@ -124,17 +123,13 @@ public class CombinatorialMABAgent {
     return selectedAction;
   }
 
-  public MabParameters exploreMabs() {
-    return sampler.addRandomSample();
-  }
-
   public MabParameters selectBestPerceivedAction() {
 
     // Exploration parameter
     int rand = randomGenerator.nextInt(100);
     if (rand <= EXPLORATION_EPSILON) {
       System.out.println("selecting exploration play --------------------------------");
-      return exploreMabs();
+      return sampler.exploreMabs();
     }
 
     System.out.println("selecting exploitation play -------------------------------");

@@ -53,7 +53,6 @@ public class BanditArmsData implements Serializable {
   static
   class ArmData implements Serializable {
 
-    public boolean treeReuse;
     public boolean rawGameScore;
     public boolean macroActions;
     public boolean lossAvoidance;
@@ -64,7 +63,6 @@ public class BanditArmsData implements Serializable {
 
     public ArmData(final MabParameters mabParameters,
                    final GlobalMabData globalMabData) {
-      treeReuse = mabParameters.getParameter(EMetaParameters.EARLY_INITIALIZATION);
       rawGameScore = mabParameters.getParameter(EMetaParameters.RAW_GAME_SCORE);
       macroActions = mabParameters.getParameter(EMetaParameters.MACRO_ACTIONS);
       lossAvoidance = mabParameters.getParameter(EMetaParameters.LOSS_AVOIDANCE);
@@ -76,7 +74,6 @@ public class BanditArmsData implements Serializable {
 
     public MabParameters toMabParameter() {
       MabParameters mabParameters = new MabParameters();
-      mabParameters.addParameter(EMetaParameters.TREE_REUSE, treeReuse);
       mabParameters.addParameter(EMetaParameters.RAW_GAME_SCORE, rawGameScore);
       mabParameters.addParameter(EMetaParameters.MACRO_ACTIONS, macroActions);
       mabParameters.addParameter(EMetaParameters.LOSS_AVOIDANCE, lossAvoidance);
