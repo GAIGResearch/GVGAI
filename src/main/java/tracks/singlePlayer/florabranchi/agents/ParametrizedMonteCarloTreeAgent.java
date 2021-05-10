@@ -57,6 +57,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
   // Enhancements
   public static boolean TREE_REUSE;
+  public static boolean SHALLOW_ROLLOUT;
   public static boolean LOSS_AVOIDANCE;
   public static boolean RAW_GAME_SCORE;
   public static boolean MACRO_ACTIONS;
@@ -97,9 +98,11 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     showTree = PropertyLoader.SHOW_TREE;
 
     TREE_SEARCH_SIZE = PropertyLoader.TREE_SEARCH_SIZE;
-    ROLLOUT_DEPTH = PropertyLoader.ROLLOUT_DEPTH;
+
 
     TREE_REUSE = PropertyLoader.TREE_REUSE;
+    SHALLOW_ROLLOUT = PropertyLoader.SHALLOW_ROLLOUT;
+    ROLLOUT_DEPTH = SHALLOW_ROLLOUT ? 1 : 10;
     MACRO_ACTIONS = PropertyLoader.MACRO_ACTIONS;
     TIME_LIMITATION_IN_MILLIS = PropertyLoader.TIME_LIMITATION_IN_MILLIS;
     TIME_LIMITATION = PropertyLoader.TIME_LIMITATION;

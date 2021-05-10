@@ -52,9 +52,6 @@ public class SarsaAgent extends AbstractAgent {
   public SarsaAgent(final StateObservation stateObs,
                     final ElapsedCpuTimer elapsedTimer) {
     super(stateObs, elapsedTimer);
-    ALFA = propertyLoader.SARSA_ALFA;
-    GAMMA = propertyLoader.SARSA_GAMMA;
-    EXPLORATION_EPSILON = propertyLoader.SARSA_EPSILON;
     featureVectorController = new FeatureVectorController();
     initializeTrainingWeightVector(featureVectorController.getSize());
 

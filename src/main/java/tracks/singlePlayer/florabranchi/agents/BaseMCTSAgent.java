@@ -30,7 +30,8 @@ public class BaseMCTSAgent extends ParametrizedMonteCarloTreeAgent {
     gameName = PropertyLoader.GAME_NAME;
 
     showTree = PropertyLoader.SHOW_TREE;
-    ROLLOUT_DEPTH = PropertyLoader.ROLLOUT_DEPTH;
+    SHALLOW_ROLLOUT = PropertyLoader.SHALLOW_ROLLOUT;
+    ROLLOUT_DEPTH = SHALLOW_ROLLOUT ? 1 : 10;
 
     final BaseMonteCarloResult baseMonteCarloResult = new BaseMonteCarloResult();
     baseMonteCarloResult.agent = PropertyLoader.AGENT;
@@ -42,6 +43,7 @@ public class BaseMCTSAgent extends ParametrizedMonteCarloTreeAgent {
     baseMonteCarloResult.avgNodesExplored = (int) totalNodes.stream().mapToInt(val -> val).average().orElse(0);
     baseMonteCarloResult.rawGameScore = PropertyLoader.RAW_GAME_SCORE;
     baseMonteCarloResult.macroActions = PropertyLoader.MACRO_ACTIONS;
+    baseMonteCarloResult.lossAvoidance = PropertyLoader.LOSS_AVOIDANCE;
     baseMonteCarloResult.lossAvoidance = PropertyLoader.LOSS_AVOIDANCE;
     baseMonteCarloResult.earlyInitialization = PropertyLoader.EARLY_INITIALIZATION;
     baseMonteCarloResult.selectHighestScoreChild = PropertyLoader.SELECT_HIGHEST_SCORE_CHILD;

@@ -67,7 +67,7 @@ public class CombinatorialMABExecution {
       for (String gameInList : gameList) {
         gameIdx = Objects.requireNonNull(AvailableGames.fromName(gameInList)).getId();
         // Play given game 5 times each level
-        for (int levelIt = 1; levelIt < 5; levelIt++) {
+        for (int levelIt = 0; levelIt < 1; levelIt++) {
           String gamePath = games[gameIdx][0];
           String levelPath = gamePath.replace(gameInList, gameInList + "_lvl" + levelIt);
           runInstructions.addInstruction(new RunInstructions.RunInstruction(gamePath, gameInList, levelPath, levelIt, episodesPerLevel));
@@ -76,6 +76,11 @@ public class CombinatorialMABExecution {
       CombinatorialMABAgent combinatorialMABAgent = null;
 
       for (RunInstructions.RunInstruction runInstruction : runInstructions.runInstructionList) {
+
+        PropertyLoader.GAME_NAME = runInstruction.gameName;
+        PropertyLoader.LOAD_RUN_INSTRUCTIONS = true;
+        PropertyLoader.GAME = gameIdx;
+        PropertyLoader.LEVEL = runInstruction.levelId;
 
         if (combinatorialMABAgent == null) {
           combinatorialMABAgent = new CombinatorialMABAgent();
@@ -91,10 +96,6 @@ public class CombinatorialMABExecution {
         int totalWins = 0;
         for (int i = 0; i < episodes; i++) {
 
-          PropertyLoader.GAME_NAME = runInstruction.gameName;
-          PropertyLoader.LOAD_RUN_INSTRUCTIONS = true;
-          PropertyLoader.GAME = gameIdx;
-          PropertyLoader.LEVEL = runInstruction.levelId;
 
           // Setup Agent parameters
           final double[] doubles = ArcadeMachine.runOneGame(runInstruction.gamePath, runInstruction.levelPath, visuals, selectedAgent, recordActionsFile, seed, 0);

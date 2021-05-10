@@ -21,15 +21,10 @@ public class PropertyLoader {
   public static String AGENT;
   public static Level LOGGER_LEVEL;
 
-  public boolean DEBUG_VIEWER;
   public static boolean LOAD_RUN_INSTRUCTIONS;
   public boolean SAVE_RESULTS;
   public static boolean VISUALS;
   public static boolean SHOW_TREE;
-
-  public float SARSA_ALFA;
-  public float SARSA_GAMMA;
-  public float SARSA_EPSILON;
 
   // MCTS
   public static boolean TIME_LIMITATION;
@@ -37,6 +32,7 @@ public class PropertyLoader {
   public static int TREE_SEARCH_SIZE;
   public static int TIME_LIMITATION_IN_MILLIS;
   public static int ROLLOUT_DEPTH;
+  public static boolean SHALLOW_ROLLOUT;
 
   // Enhancements
   public static boolean TREE_REUSE;
@@ -77,19 +73,18 @@ public class PropertyLoader {
       LEVEL = Integer.parseInt(prop.getProperty("LEVEL"));
 
       TREE_REUSE = Boolean.parseBoolean(prop.getProperty("TREE_REUSE", "false"));
+      SHALLOW_ROLLOUT = Boolean.parseBoolean(prop.getProperty("SHALLOW_ROLLOUT", "false"));
       MACRO_ACTIONS = Boolean.parseBoolean(prop.getProperty("MACRO_ACTIONS", "false"));
       LOSS_AVOIDANCE = Boolean.parseBoolean(prop.getProperty("LOSS_AVOIDANCE", "false"));
       RAW_GAME_SCORE = Boolean.parseBoolean(prop.getProperty("RAW_GAME_SCORE", "false"));
       EXPAND_ALL_CHILD_NODES = Boolean.parseBoolean(prop.getProperty("EXPAND_ALL_CHILD_NODES", "false"));
       EARLY_INITIALIZATION = Boolean.parseBoolean(prop.getProperty("EARLY_INITIALIZATION", "false"));
-
     }
 
     EPISODES = Integer.parseInt(prop.getProperty("EPISODES"));
 
     // Agent
     AGENT = castAgentPath(prop.getProperty("AGENT"));
-    DEBUG_VIEWER = Boolean.parseBoolean(prop.getProperty("DEBUG_VIEWER"));
     VISUALS = Boolean.parseBoolean(prop.getProperty("VISUALS"));
     SHOW_TREE = Boolean.parseBoolean(prop.getProperty("SHOW_TREE"));
 
@@ -99,11 +94,6 @@ public class PropertyLoader {
     TIME_LIMITATION_IN_MILLIS = Integer.parseInt(prop.getProperty("TIME_LIMITATION_IN_MILLIS", "40"));
     TREE_SEARCH_SIZE = Integer.parseInt(prop.getProperty("TREE_SEARCH_SIZE", "0"));
     ROLLOUT_DEPTH = Integer.parseInt(prop.getProperty("ROLLOUT_DEPTH", "0"));
-
-    // Sarsa properties, if required
-    SARSA_ALFA = Float.parseFloat(prop.getProperty("SARSA_ALFA", "0"));
-    SARSA_GAMMA = Float.parseFloat(prop.getProperty("SARSA_GAMMA", "0"));
-    SARSA_EPSILON = Float.parseFloat(prop.getProperty("SARSA_EPSILON", "0"));
 
     initialized = true;
   }
@@ -148,13 +138,6 @@ public class PropertyLoader {
     this.LOGGER_LEVEL = LOGGER_LEVEL;
   }
 
-  public boolean isDEBUG_VIEWER() {
-    return DEBUG_VIEWER;
-  }
-
-  public void setDEBUG_VIEWER(final boolean DEBUG_VIEWER) {
-    this.DEBUG_VIEWER = DEBUG_VIEWER;
-  }
 
   public boolean isSAVE_RESULTS() {
     return SAVE_RESULTS;
@@ -178,30 +161,6 @@ public class PropertyLoader {
 
   public void setSHOW_TREE(final boolean SHOW_TREE) {
     this.SHOW_TREE = SHOW_TREE;
-  }
-
-  public float getSARSA_ALFA() {
-    return SARSA_ALFA;
-  }
-
-  public void setSARSA_ALFA(final float SARSA_ALFA) {
-    this.SARSA_ALFA = SARSA_ALFA;
-  }
-
-  public float getSARSA_GAMMA() {
-    return SARSA_GAMMA;
-  }
-
-  public void setSARSA_GAMMA(final float SARSA_GAMMA) {
-    this.SARSA_GAMMA = SARSA_GAMMA;
-  }
-
-  public float getSARSA_EPSILON() {
-    return SARSA_EPSILON;
-  }
-
-  public void setSARSA_EPSILON(final float SARSA_EPSILON) {
-    this.SARSA_EPSILON = SARSA_EPSILON;
   }
 
   public boolean isTIME_LIMITATION() {

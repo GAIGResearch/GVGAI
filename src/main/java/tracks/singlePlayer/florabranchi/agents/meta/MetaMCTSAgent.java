@@ -48,10 +48,6 @@ public class MetaMCTSAgent {
       LOGGER.severe("Error loading properties");
     }
 
-    ALFA = propertyLoader.SARSA_ALFA;
-    GAMMA = propertyLoader.SARSA_GAMMA;
-    EXPLORATION_EPSILON = propertyLoader.SARSA_EPSILON;
-
     gameOptionFeatureController = new GameOptionFeatureController();
     initializeTrainingWeightVector();
 
@@ -61,6 +57,7 @@ public class MetaMCTSAgent {
 
     MabParameters mabParameters = new MabParameters();
     mabParameters.addParameter(EMetaParameters.TREE_REUSE, PropertyLoader.TREE_REUSE);
+    mabParameters.addParameter(EMetaParameters.SHALLOW_ROLLOUT, PropertyLoader.SHALLOW_ROLLOUT);
     mabParameters.addParameter(EMetaParameters.SELECT_HIGHEST_SCORE_CHILD, PropertyLoader.SELECT_HIGHEST_SCORE_CHILD);
     mabParameters.addParameter(EMetaParameters.EARLY_INITIALIZATION, PropertyLoader.EARLY_INITIALIZATION);
     mabParameters.addParameter(EMetaParameters.LOSS_AVOIDANCE, PropertyLoader.LOSS_AVOIDANCE);

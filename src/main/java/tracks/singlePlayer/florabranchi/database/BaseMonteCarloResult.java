@@ -35,6 +35,7 @@ public class BaseMonteCarloResult implements Serializable {
   public boolean lossAvoidance;
   public boolean earlyInitialization;
   public boolean selectHighestScoreChild;
+  public boolean shallowRollout;
 
   private final String timestamp;
 

@@ -17,9 +17,9 @@ public class CombinatorialMABAgent {
 
   public static double minDouble = Math.pow(10, -3);
 
-  public double ALFA;
-  public double GAMMA;
-  public double EXPLORATION_EPSILON;
+  public double ALFA = 0.3;
+  public double GAMMA = 0.9;
+  public double EXPLORATION_EPSILON = 10;
 
   public PropertyLoader propertyLoader;
 
@@ -43,23 +43,12 @@ public class CombinatorialMABAgent {
 
   public CombinatorialMABAgent() {
 
-    try {
-      propertyLoader = new PropertyLoader(getPropertyPath());
-
-    } catch (IOException ex) {
-      LOGGER.severe("Error loading properties");
-    }
-
-    ALFA = propertyLoader.SARSA_ALFA;
-    GAMMA = propertyLoader.SARSA_GAMMA;
-    EXPLORATION_EPSILON = propertyLoader.SARSA_EPSILON;
-
     banditsArmDTO = banditArmsDataDAO.getBanditArmsDataForGame(PropertyLoader.GAME_NAME);
     if (banditsArmDTO != null) {
       sampler = new MultiArmedNaiveSampler(banditsArmDTO.object);
     } else {
       banditsArmDTO = new BanditsArmDTO();
-      banditsArmDTO.game = PropertyLoader.GAME_NAME;
+      banditsArmDTO.game = PropertyLoader.GAME_NAME;;
       sampler = new MultiArmedNaiveSampler();
       banditArmsDataDAO.saveBandit(banditsArmDTO);
     }
@@ -75,7 +64,6 @@ public class CombinatorialMABAgent {
       previousAction = currentAction;
       updateGlobalProperties(currentAction);
     }
-
   }
 
   private void updateGlobalProperties(MabParameters result) {
@@ -84,6 +72,7 @@ public class CombinatorialMABAgent {
     PropertyLoader.MACRO_ACTIONS = result.getParameter(EMetaParameters.MACRO_ACTIONS);
     PropertyLoader.SELECT_HIGHEST_SCORE_CHILD = result.getParameter(EMetaParameters.SELECT_HIGHEST_SCORE_CHILD);
     PropertyLoader.TREE_REUSE = result.getParameter(EMetaParameters.TREE_REUSE);
+    PropertyLoader.SHALLOW_ROLLOUT = result.getParameter(EMetaParameters.SHALLOW_ROLLOUT);
     PropertyLoader.LOSS_AVOIDANCE = result.getParameter(EMetaParameters.LOSS_AVOIDANCE);
 
     System.out.println("Properties set " + result);
@@ -105,6 +94,7 @@ public class CombinatorialMABAgent {
     baseMonteCarloResult.lossAvoidance = PropertyLoader.LOSS_AVOIDANCE;
     baseMonteCarloResult.earlyInitialization = PropertyLoader.EARLY_INITIALIZATION;
     baseMonteCarloResult.selectHighestScoreChild = PropertyLoader.SELECT_HIGHEST_SCORE_CHILD;
+    baseMonteCarloResult.shallowRollout = PropertyLoader.SHALLOW_ROLLOUT;
     combinatorialMabAgentResultDAO.save(baseMonteCarloResult);
   }
 
