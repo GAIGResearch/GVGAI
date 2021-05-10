@@ -62,9 +62,9 @@ public class CombinatorialMABExecution {
       System.out.println(Arrays.toString(doubles));
     } else {
 
-      List<String> gameList = Arrays.asList("camelRace");//,  "frogs", "chase"); //brainmain, plants eggomania
+      List<String> gameList = Arrays.asList("brainman");//,  "frogs", "chase"); //brainmain, plants eggomania
 
-      int episodesPerLevel = 100;
+      int episodesPerLevel = 20;
       RunInstructions runInstructions = new RunInstructions();
       for (String gameInList : gameList) {
         gameIdx = Objects.requireNonNull(AvailableGames.fromName(gameInList)).getId();
@@ -105,8 +105,8 @@ public class CombinatorialMABExecution {
           if (won) totalWins++;
           System.out.println("----------------- Win Record : games " + gamecount + " wins: " + totalWins);
           gamecount++;
-          final int ticks = (int) doubles[1];
-          final int score = (int) doubles[2];
+          final int ticks = (int) doubles[2];
+          final int score = (int) doubles[1];
           combinatorialMABAgent.result(score, won);
           combinatorialMABAgent.act(score, won);
         }
