@@ -92,6 +92,8 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   boolean resetAlgorithm = false;
 
   public static void reloadProperties() {
+
+
     showTree = PropertyLoader.SHOW_TREE;
 
     TREE_SEARCH_SIZE = PropertyLoader.TREE_SEARCH_SIZE;

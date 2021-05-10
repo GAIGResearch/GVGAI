@@ -12,8 +12,6 @@ import java.util.logging.Logger;
 import tools.Utils;
 import tracks.ArcadeMachine;
 import tracks.singlePlayer.florabranchi.agents.meta.CombinatorialMABAgent;
-import tracks.singlePlayer.florabranchi.agents.meta.EMetaParameters;
-import tracks.singlePlayer.florabranchi.agents.meta.MabParameters;
 import tracks.singlePlayer.florabranchi.persistence.AvailableGames;
 import tracks.singlePlayer.florabranchi.persistence.PropertyLoader;
 
@@ -62,14 +60,14 @@ public class CombinatorialMABExecution {
       System.out.println(Arrays.toString(doubles));
     } else {
 
-      List<String> gameList = Arrays.asList("brainman");//,  "frogs", "chase"); //brainmain, plants eggomania
+      List<String> gameList = Arrays.asList("frogs");//,  "frogs", "chase"); //brainmain, plants eggomania
 
       int episodesPerLevel = 20;
       RunInstructions runInstructions = new RunInstructions();
       for (String gameInList : gameList) {
         gameIdx = Objects.requireNonNull(AvailableGames.fromName(gameInList)).getId();
         // Play given game 5 times each level
-        for (int levelIt = 0; levelIt < 5; levelIt++) {
+        for (int levelIt = 1; levelIt < 5; levelIt++) {
           String gamePath = games[gameIdx][0];
           String levelPath = gamePath.replace(gameInList, gameInList + "_lvl" + levelIt);
           runInstructions.addInstruction(new RunInstructions.RunInstruction(gamePath, gameInList, levelPath, levelIt, episodesPerLevel));
@@ -78,10 +76,6 @@ public class CombinatorialMABExecution {
       CombinatorialMABAgent combinatorialMABAgent = null;
 
       for (RunInstructions.RunInstruction runInstruction : runInstructions.runInstructionList) {
-
-        PropertyLoader.GAME_NAME = runInstruction.gameName;
-        PropertyLoader.GAME = gameIdx;
-        PropertyLoader.LEVEL = runInstruction.levelId;
 
         if (combinatorialMABAgent == null) {
           combinatorialMABAgent = new CombinatorialMABAgent();
@@ -93,9 +87,14 @@ public class CombinatorialMABExecution {
         episodes = runInstruction.episodes;
         System.out.printf("Running gameId %s level %s for %s episodes", runInstruction.gamePath, runInstruction.levelPath, episodes);
 
-        int gamecount = 0;
+        int gamecount = 1;
         int totalWins = 0;
         for (int i = 0; i < episodes; i++) {
+
+          PropertyLoader.GAME_NAME = runInstruction.gameName;
+          PropertyLoader.LOAD_RUN_INSTRUCTIONS = true;
+          PropertyLoader.GAME = gameIdx;
+          PropertyLoader.LEVEL = runInstruction.levelId;
 
           // Setup Agent parameters
           final double[] doubles = ArcadeMachine.runOneGame(runInstruction.gamePath, runInstruction.levelPath, visuals, selectedAgent, recordActionsFile, seed, 0);

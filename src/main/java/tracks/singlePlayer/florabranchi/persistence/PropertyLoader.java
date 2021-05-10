@@ -11,6 +11,8 @@ import java.util.logging.Level;
 
 public class PropertyLoader {
 
+  public static boolean initialized;
+
   public static int GAME;
   public static String GAME_NAME;
   public static int EPISODES;
@@ -20,7 +22,7 @@ public class PropertyLoader {
   public static Level LOGGER_LEVEL;
 
   public boolean DEBUG_VIEWER;
-  public boolean LOAD_RUN_INSTRUCTIONS;
+  public static boolean LOAD_RUN_INSTRUCTIONS;
   public boolean SAVE_RESULTS;
   public static boolean VISUALS;
   public static boolean SHOW_TREE;
@@ -56,6 +58,10 @@ public class PropertyLoader {
       prop.load(inputStream);
     } else {
       throw new FileNotFoundException("property file '" + configFile + "' not found in the classpath");
+    }
+
+    if (initialized) {
+      return;
     }
 
 
@@ -98,6 +104,8 @@ public class PropertyLoader {
     SARSA_ALFA = Float.parseFloat(prop.getProperty("SARSA_ALFA", "0"));
     SARSA_GAMMA = Float.parseFloat(prop.getProperty("SARSA_GAMMA", "0"));
     SARSA_EPSILON = Float.parseFloat(prop.getProperty("SARSA_EPSILON", "0"));
+
+    initialized = true;
   }
 
   public int getGAME() {
@@ -113,7 +121,7 @@ public class PropertyLoader {
   }
 
   public void setEPISODES(final int EPISODES) {
-    this.EPISODES = EPISODES;
+    PropertyLoader.EPISODES = EPISODES;
   }
 
   public int getLEVEL() {
@@ -121,7 +129,7 @@ public class PropertyLoader {
   }
 
   public void setLEVEL(final int LEVEL) {
-    this.LEVEL = LEVEL;
+    PropertyLoader.LEVEL = LEVEL;
   }
 
   public String getAGENT() {
