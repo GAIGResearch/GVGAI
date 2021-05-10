@@ -21,6 +21,8 @@ public class BanditsArmDTO implements Serializable {
   @Column(name = "serialized_object", columnDefinition = "LONGBLOB")
   public BanditArmsData object;
 
+  public String game;
+
   public BanditsArmDTO(final BanditArmsData object) {
     this.object = object;
   }

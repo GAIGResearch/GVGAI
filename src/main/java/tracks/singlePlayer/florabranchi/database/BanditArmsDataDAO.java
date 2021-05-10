@@ -60,12 +60,12 @@ public class BanditArmsDataDAO {
     }
   }
 
-  public BanditsArmDTO getBanditArmsData(final int id) {
+  public BanditsArmDTO getBanditArmsDataForGame(final String game) {
 
     Connection conn = null;
     try {
       conn = databaseClient.getConnection();
-      return DatabaseClient.deSerializeWeights(conn, "cmab_data", id);
+      return DatabaseClient.deSerializeWeights(conn, game);
     } catch (SQLException | IOException | ClassNotFoundException throwables) {
       throwables.printStackTrace();
     }
@@ -89,6 +89,7 @@ public class BanditArmsDataDAO {
           "(id INTEGER not NULL AUTO_INCREMENT, " +
           " serialized_object BLOB, " +
           " iterations INTEGER, " +
+          " game VARCHAR(255), " +
           " PRIMARY KEY ( id ))";
 
       stmt.executeUpdate(sql);

@@ -53,14 +53,7 @@ public class CombinatorialMABExecution {
     String game = games[gameIdx][0];
     String level1 = game.replace(gameName, gameName + "_lvl" + levelIdx);
 
-    // where to record the actions
-    // executed. null if not to save.
     String recordActionsFile = null;
-    if (saveActions) {
-      recordActionsFile = "botLogs/actions_" + gameName + "_lvl" + levelIdx + "_" + seed + ".txt";
-    }
-
-    CombinatorialMABAgent agent = new CombinatorialMABAgent();
 
     if (visuals) {
       final double[] doubles = ArcadeMachine.runOneGame(game, level1, visuals, selectedAgent,
@@ -88,6 +81,9 @@ public class CombinatorialMABExecution {
         PropertyLoader.GAME_NAME = runInstruction.gameName;
         PropertyLoader.GAME = gameIdx;
         PropertyLoader.LEVEL = runInstruction.levelId;
+
+        CombinatorialMABAgent agent = new CombinatorialMABAgent();
+
         String[] levelFiles;
         levelFiles = new String[1];
         levelFiles[0] = runInstruction.levelPath;

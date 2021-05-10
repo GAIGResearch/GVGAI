@@ -87,7 +87,6 @@ public class PropertyLoader {
     VISUALS = Boolean.parseBoolean(prop.getProperty("VISUALS"));
     SHOW_TREE = Boolean.parseBoolean(prop.getProperty("SHOW_TREE"));
 
-
     // Monte Carlo properties, if required
     TIME_LIMITATION = Boolean.parseBoolean(prop.getProperty("TIME_LIMITATION", "false"));
     SELECT_HIGHEST_SCORE_CHILD = Boolean.parseBoolean(prop.getProperty("SELECT_HIGHEST_SCORE_CHILD", "true"));

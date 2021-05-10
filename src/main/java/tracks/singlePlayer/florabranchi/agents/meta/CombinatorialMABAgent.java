@@ -54,11 +54,12 @@ public class CombinatorialMABAgent {
     GAMMA = propertyLoader.SARSA_GAMMA;
     EXPLORATION_EPSILON = propertyLoader.SARSA_EPSILON;
 
-    banditsArmDTO = banditArmsDataDAO.getBanditArmsData(1);
+    banditsArmDTO = banditArmsDataDAO.getBanditArmsDataForGame(PropertyLoader.GAME_NAME);
     if (banditsArmDTO != null) {
       sampler = new MultiArmedNaiveSampler(banditsArmDTO.object);
     } else {
       banditsArmDTO = new BanditsArmDTO();
+      banditsArmDTO.game = PropertyLoader.GAME_NAME;
       sampler = new MultiArmedNaiveSampler();
       banditArmsDataDAO.saveBandit(banditsArmDTO);
     }
@@ -83,6 +84,7 @@ public class CombinatorialMABAgent {
     PropertyLoader.MACRO_ACTIONS = result.getParameter(EMetaParameters.MACRO_ACTIONS);
     PropertyLoader.SELECT_HIGHEST_SCORE_CHILD = result.getParameter(EMetaParameters.SELECT_HIGHEST_SCORE_CHILD);
     PropertyLoader.TREE_REUSE = result.getParameter(EMetaParameters.TREE_REUSE);
+    PropertyLoader.LOSS_AVOIDANCE = result.getParameter(EMetaParameters.LOSS_AVOIDANCE);
 
     System.out.println("Properties set " + result);
   }
