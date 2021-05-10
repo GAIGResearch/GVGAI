@@ -71,7 +71,7 @@ public class CombinatorialMABExecution {
 
       List<String> gameList = Arrays.asList("camelRace");//,  "frogs", "chase"); //brainmain, plants eggomania
 
-      int episodesPerLevel = 25;
+      int episodesPerLevel = 100;
       RunInstructions runInstructions = new RunInstructions();
       for (String gameInList : gameList) {
         gameIdx = Objects.requireNonNull(AvailableGames.fromName(gameInList)).getId();

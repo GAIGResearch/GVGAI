@@ -112,6 +112,8 @@ public class CombinatorialMABAgent {
     double finalReward = reward;
     if (!won) {
       finalReward = minDouble;
+    } else {
+      finalReward += 1000;
     }
 
     // update expected reward
