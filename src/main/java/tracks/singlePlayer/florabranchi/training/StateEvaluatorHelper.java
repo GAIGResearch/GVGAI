@@ -39,6 +39,12 @@ public class StateEvaluatorHelper {
     return getObservableData(npcPositions, avatarPosition);
   }
 
+  public static StateEvaluatorHelper.ObservableData getImmovableData(final StateObservation stateObservation) {
+    final Vector2d avatarPosition = stateObservation.getAvatarPosition();
+    final ArrayList<Observation>[] immovablePositions = stateObservation.getImmovablePositions();
+    return getObservableData(immovablePositions, avatarPosition);
+  }
+
   public static StateEvaluatorHelper.ObservableData getMovablesData(final StateObservation stateObservation) {
     final Vector2d avatarPosition = stateObservation.getAvatarPosition();
     final ArrayList<Observation>[] npcPositions = stateObservation.getMovablePositions();

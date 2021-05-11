@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import core.game.StateObservation;
 import ontology.Types;
@@ -80,8 +79,9 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
   private final Random rand = new Random();
 
-  private static final double WINNER_SCORE = +500_000;
-  private static final double LOSS_SCORE = -500_000;
+  private static final double WINNER_SCORE = 100;
+  private static final double LOSS_SCORE = 0;
+ // private static final double LOSS_SCORE = -500_000;
 
   private final int[][] visitCount;
 
@@ -444,28 +444,32 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
       return LOSS_SCORE;
     }
 
-    final int avatarX = (int) copyState.getAvatarPosition().x;
+    int avatarX = (int) copyState.getAvatarPosition().x;
     final int avatarY = (int) copyState.getAvatarPosition().y;
 
     final StateEvaluatorHelper.ObservableData portalsData = StateEvaluatorHelper.getPortalsData(copyState);
     final StateEvaluatorHelper.ObservableData movablesData = StateEvaluatorHelper.getMovablesData(copyState);
     final StateEvaluatorHelper.ObservableData resourcesData = StateEvaluatorHelper.getResourcesData(copyState);
+    final StateEvaluatorHelper.ObservableData immovableData = StateEvaluatorHelper.getImmovableData(copyState);
 
     final double distClosestResource = distanceToClosestObservable(avatarX, avatarY, resourcesData);
     final double distClosestPortal = distanceToClosestObservable(avatarX, avatarY, portalsData);
     final double distClosestMovable = distanceToClosestObservable(avatarX, avatarY, movablesData);
+    final double distClosestImmovable = distanceToClosestObservable(avatarX, avatarY, immovableData);
 
-    // in ending states, avatar can be outside of screen? happening in frogs
-    if (avatarX > 0 && avatarY > 0) {
-      visitCount[avatarX][avatarY] = visitCount[avatarX][avatarY] + 1;
+    // in ending states, avatar can be outside of screen - happening in frogs
+    if (avatarX < 0) {
+      avatarX = 0;
     }
+
+    visitCount[avatarX][avatarY] = visitCount[avatarX][avatarY] + 1;
 
     double finalScore = copyState.getGameScore();
     double scoreDelta = finalScore - initialScore;
 
-    double exporationScore = ((double) 1 - visitCount[avatarX][avatarY]) / maxDistance;
+    double exporationScore =  1 - (double) visitCount[avatarX][avatarY] / maxDistance;
     double resourceScore = distClosestResource == 0 ? 0 : (1 - distClosestResource) / maxDistance;
-    double movableScore = distClosestMovable / maxDistance;
+    double movableScore = distClosestMovable == 0 ? 0 : (distClosestMovable) / maxDistance;
     double portalScore = distClosestPortal == 0 ? 0 : (1 - distClosestPortal) / maxDistance;
 
     final int resources = copyState.getAvatarResources().size();
@@ -508,6 +512,10 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
     StateObservation currentState = node.currentGameState.copy();
     int advancementsInRollout = ROLLOUT_DEPTH;
+
+    if (node.depth < 3) {
+      advancementsInRollout = 1;
+    }
 
     if (!LOSS_AVOIDANCE) {
       while (!currentState.isGameOver() && advancementsInRollout > 0) {
@@ -555,7 +563,6 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
           final Types.ACTIONS takeAction = rolloutActions.get(index);
           tempGameState.advance(takeAction);
-          advancementsInRollout--;
         }
 
         if (!terminatedGame) {
