@@ -40,6 +40,7 @@ public class BaseMonteCarloExecution {
     String[][] games = Utils.readGames(spGamesCollection);
 
     int gameIdx = PropertyLoader.GAME;
+    String gameNameParam = PropertyLoader.GAME_NAME;
     int levelIdx = PropertyLoader.LEVEL;
     int episodes = PropertyLoader.EPISODES;
 
@@ -55,12 +56,13 @@ public class BaseMonteCarloExecution {
     // group 4 - brainmain, plants eggomania
     //List<String> gameList = Arrays.asList("frogs");//,  "frogs", "chase"); //brainmain, plants eggomania
     List<String> gameList = Arrays.asList(
-        "brainman");//,  "frogs", "chase");
+        "aliens");//,  "frogs", "chase");
 
     if (visuals) {
-      String game = games[gameIdx][0];
-      String level1 = game.replace(game, game + "_lvl" + levelIdx);
-      final double[] doubles = ArcadeMachine.runOneGame(game, level1, visuals, selectedAgent,
+      String gamePath = games[gameIdx][0];
+      String levelPath = gamePath.replace(gameNameParam, gameNameParam + "_lvl" + levelIdx);
+
+      final double[] doubles = ArcadeMachine.runOneGame(gamePath, levelPath, visuals, selectedAgent,
           null, seed, 0);
 
       System.out.println(Arrays.toString(doubles));
@@ -72,9 +74,9 @@ public class BaseMonteCarloExecution {
         gameIdx = Objects.requireNonNull(AvailableGames.fromName(gameName)).getId();
         // Play given game 5 times each level
         for (int levelIt = 0; levelIt < 5; levelIt++) {
-          String game = games[gameIdx][0];
-          String levelPath = game.replace(gameName, gameName + "_lvl" + levelIt);
-          runInstructions.addInstruction(new RunInstructions.RunInstruction(game, gameName, levelPath, levelIt, episodesPerLevel));
+          String gamePath = games[gameIdx][0];
+          String levelPath = gamePath.replace(gameName, gameName + "_lvl" + levelIt);
+          runInstructions.addInstruction(new RunInstructions.RunInstruction(gamePath, gameName, levelPath, levelIt, episodesPerLevel));
         }
       }
 
@@ -91,7 +93,6 @@ public class BaseMonteCarloExecution {
         PropertyLoader.LOSS_AVOIDANCE = false;
         PropertyLoader.EARLY_INITIALIZATION = false;
         PropertyLoader.SELECT_HIGHEST_SCORE_CHILD = true;
-        PropertyLoader.SHALLOW_ROLLOUT = false;
         String[] levelFiles;
         levelFiles = new String[1];
         levelFiles[0] = runInstruction.levelPath;

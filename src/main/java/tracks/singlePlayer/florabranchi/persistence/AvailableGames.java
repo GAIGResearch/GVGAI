@@ -61,7 +61,9 @@ public enum AvailableGames {
   G_60(60, "lasers"),
   G_70(70, "painter"),
   G_77(77, "seaquest"),
-  G_84(84, "surviving_zombies"),
+  G_91(91, "surviving_zombies"),
+  G_108(108, "zelda"),
+  G_68(68, "pacman"),
   G_61(61, "plants");
 
   private Integer id;
