@@ -55,7 +55,6 @@ public class BaseMonteCarloExecution {
     // group 4 - brainmain, plants eggomania
     //List<String> gameList = Arrays.asList("frogs");//,  "frogs", "chase"); //brainmain, plants eggomania
     List<String> gameList = Arrays.asList(
-        "camelRace", "frogs", "chase", "seaquest",
         "brainman");//,  "frogs", "chase");
 
     if (visuals) {
