@@ -22,6 +22,7 @@ public class PropertyLoader {
   public static Level LOGGER_LEVEL;
 
   public static boolean LOAD_RUN_INSTRUCTIONS;
+
   public boolean SAVE_RESULTS;
   public static boolean VISUALS;
   public static boolean SHOW_TREE;
@@ -33,6 +34,8 @@ public class PropertyLoader {
   public static int TIME_LIMITATION_IN_MILLIS;
   public static int ROLLOUT_DEPTH;
   public static boolean SHALLOW_ROLLOUT;
+  // global to save node exploration
+  public static int AVERAGE_NODES = 0;
 
   // Enhancements
   public static boolean TREE_REUSE;

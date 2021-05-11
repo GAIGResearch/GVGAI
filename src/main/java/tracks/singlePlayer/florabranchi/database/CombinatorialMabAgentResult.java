@@ -28,6 +28,8 @@ public class CombinatorialMabAgentResult implements Serializable {
 
   public boolean won;
 
+  public int avgNodesExplored;
+
   public boolean rawGameScore;
   public boolean macroActions;
   public boolean lossAvoidance;

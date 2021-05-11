@@ -47,16 +47,7 @@ public class BaseMonteCarloExecution {
     String selectedAgent = PropertyLoader.AGENT;
     boolean visuals = PropertyLoader.VISUALS;
 
-    //String gameName = games[gameIdx][1];
-
-    //camelRace //aliens", "butterflies", "painter // brainman
-    // group 1 - aliens butterfly, painter
-    // group 2 - camelRace frogs chase
-    // group 3 - jaws seaquest, surviving_zombies
-    // group 4 - brainmain, plants eggomania
-    //List<String> gameList = Arrays.asList("frogs");//,  "frogs", "chase"); //brainmain, plants eggomania
-    List<String> gameList = Arrays.asList(
-        "aliens");//,  "frogs", "chase");
+    List<String> gameList = Arrays.asList("camelRace", "crossfire", "brainman");
 
     if (visuals) {
       String gamePath = games[gameIdx][0];

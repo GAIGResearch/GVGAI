@@ -20,6 +20,8 @@ public class BanditArmsDataDAOTest {
     sampler.updateMabData(randomGlobalMab, 22.3);
     final MabParameters mabParameters = sampler.addRandomSample();
     sampler.updateMabData(mabParameters, 50);
+
+    sampler.exploreMabs();
     //dao.saveBandit(new BanditsArmDTO(new BanditArmsData(sampler.localMabs, sampler.globalMab)));
   }
 

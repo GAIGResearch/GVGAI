@@ -182,6 +182,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   public void result(final StateObservation stateObs,
                      final ElapsedCpuTimer elapsedCpuTimer) {
     //reloadProperties();
+    PropertyLoader.AVERAGE_NODES = (int) totalNodes.stream().mapToInt(val -> val).average().orElse(0);
   }
 
   public ACTIONS monteCarloSearchParametrized(final StateObservation stateObs,

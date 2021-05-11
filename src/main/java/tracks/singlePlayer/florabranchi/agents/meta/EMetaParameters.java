@@ -3,7 +3,6 @@ package tracks.singlePlayer.florabranchi.agents.meta;
 import java.io.Serializable;
 
 public enum EMetaParameters implements Serializable {
-  SHALLOW_ROLLOUT,
   RAW_GAME_SCORE,
   MACRO_ACTIONS,
   LOSS_AVOIDANCE,

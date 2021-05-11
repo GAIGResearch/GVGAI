@@ -72,7 +72,6 @@ public class CombinatorialMABAgent {
     PropertyLoader.RAW_GAME_SCORE = result.getParameter(EMetaParameters.RAW_GAME_SCORE);
     PropertyLoader.MACRO_ACTIONS = result.getParameter(EMetaParameters.MACRO_ACTIONS);
     PropertyLoader.SELECT_HIGHEST_SCORE_CHILD = result.getParameter(EMetaParameters.SELECT_HIGHEST_SCORE_CHILD);
-    PropertyLoader.SHALLOW_ROLLOUT = result.getParameter(EMetaParameters.SHALLOW_ROLLOUT);
     PropertyLoader.LOSS_AVOIDANCE = result.getParameter(EMetaParameters.LOSS_AVOIDANCE);
 
     System.out.println("Properties set " + result);
@@ -89,6 +88,7 @@ public class CombinatorialMABAgent {
     baseMonteCarloResult.finalScore = score;
     baseMonteCarloResult.won = won;
     baseMonteCarloResult.rawGameScore = PropertyLoader.RAW_GAME_SCORE;
+    baseMonteCarloResult.avgNodesExplored = PropertyLoader.AVERAGE_NODES;
     baseMonteCarloResult.macroActions = PropertyLoader.MACRO_ACTIONS;
     baseMonteCarloResult.lossAvoidance = PropertyLoader.LOSS_AVOIDANCE;
     baseMonteCarloResult.earlyInitialization = PropertyLoader.EARLY_INITIALIZATION;
