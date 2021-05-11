@@ -44,7 +44,6 @@ public class BaseMCTSAgent extends ParametrizedMonteCarloTreeAgent {
     baseMonteCarloResult.rawGameScore = PropertyLoader.RAW_GAME_SCORE;
     baseMonteCarloResult.macroActions = PropertyLoader.MACRO_ACTIONS;
     baseMonteCarloResult.lossAvoidance = PropertyLoader.LOSS_AVOIDANCE;
-    baseMonteCarloResult.lossAvoidance = PropertyLoader.LOSS_AVOIDANCE;
     baseMonteCarloResult.earlyInitialization = PropertyLoader.EARLY_INITIALIZATION;
     baseMonteCarloResult.selectHighestScoreChild = PropertyLoader.SELECT_HIGHEST_SCORE_CHILD;
     dao.save(baseMonteCarloResult);

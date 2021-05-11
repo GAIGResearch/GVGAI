@@ -137,11 +137,15 @@ public class MultiArmedNaiveSampler {
     explorationBestParameters.forEach(metaParameter -> mabParameters.addParameter(metaParameter, true));
 
     // Try selecting a different version if the most optimized one exists
-    int tries = 2;
-    while (globalMab.containsKey(mabParameters) && tries > 0) {
+    int tries = 10;
+    while (sampledGlobalMabs.contains(mabParameters.hashCode()) && tries > 0) {
       mabParameters.randomMutation(random);
       tries--;
     }
+    if (!sampledGlobalMabs.contains(mabParameters.hashCode())) {
+      addToGlobalMab(mabParameters);
+    }
+
     return mabParameters;
   }
 

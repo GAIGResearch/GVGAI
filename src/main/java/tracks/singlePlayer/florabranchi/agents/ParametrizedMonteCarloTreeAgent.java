@@ -52,7 +52,6 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   public static int ROLLOUT_DEPTH;
 
   // Implementation Options
-  public static boolean EXPAND_ALL_CHILD_NODES;
   public static boolean SELECT_HIGHEST_SCORE_CHILD;
 
   // Enhancements
@@ -103,7 +102,6 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     SELECT_HIGHEST_SCORE_CHILD = PropertyLoader.SELECT_HIGHEST_SCORE_CHILD;
     LOSS_AVOIDANCE = PropertyLoader.LOSS_AVOIDANCE;
     RAW_GAME_SCORE = PropertyLoader.RAW_GAME_SCORE;
-    EXPAND_ALL_CHILD_NODES = PropertyLoader.EXPAND_ALL_CHILD_NODES;
     EARLY_INITIALIZATION = PropertyLoader.EARLY_INITIALIZATION;
 
     System.out.println("Reloading properties.");
@@ -168,6 +166,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     totalNodes.add(rootNode.visits);
     //System.out.println(rootNode.visits);
     // System.out.println(totalNodes.stream().mapToInt(val -> val).average().orElse(0));
+    System.out.println(rootNode.visits);
     return selectedAction;
   }
 
@@ -409,15 +408,8 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
                         final ArrayList<Types.ACTIONS> actions) {
     logMessage(String.format("Expanding children of node %s", parentNode.id));
 
-    if (EXPAND_ALL_CHILD_NODES) {
-      for (Types.ACTIONS action : actions) {
-        parentNode.children.add(buildChildNode(parentNode, action));
-      }
-    } else {
-      final ArrayList<ACTIONS> remainingActions = new ArrayList<>(actions);
-      remainingActions.removeAll(parentNode.children.stream().map(node -> node.previousAction).collect(Collectors.toList()));
-      final ACTIONS selectedAction = remainingActions.get(rand.nextInt(remainingActions.size()));
-      parentNode.children.add(buildChildNode(parentNode, selectedAction));
+    for (Types.ACTIONS action : actions) {
+      parentNode.children.add(buildChildNode(parentNode, action));
     }
   }
 
