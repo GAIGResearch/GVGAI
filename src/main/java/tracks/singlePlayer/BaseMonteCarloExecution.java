@@ -53,7 +53,10 @@ public class BaseMonteCarloExecution {
     // group 2 - camelRace frogs chase
     // group 3 - jaws seaquest, surviving_zombies
     // group 4 - brainmain, plants eggomania
-    List<String> gameList = Arrays.asList("brainman");//,  "frogs", "chase"); //brainmain, plants eggomania
+    //List<String> gameList = Arrays.asList("frogs");//,  "frogs", "chase"); //brainmain, plants eggomania
+    List<String> gameList = Arrays.asList(
+        "camelRace", "frogs", "chase", "seaquest",
+        "brainman");//,  "frogs", "chase");
 
     if (visuals) {
       String game = games[gameIdx][0];
@@ -80,13 +83,21 @@ public class BaseMonteCarloExecution {
       for (RunInstructions.RunInstruction runInstruction : runInstructions.runInstructionList) {
 
         PropertyLoader.GAME_NAME = runInstruction.gameName;
+        PropertyLoader.LOAD_RUN_INSTRUCTIONS = true;
         PropertyLoader.GAME = gameIdx;
         PropertyLoader.LEVEL = runInstruction.levelId;
+        //Base MCTS vars
+        PropertyLoader.RAW_GAME_SCORE = true;
+        PropertyLoader.MACRO_ACTIONS = false;
+        PropertyLoader.LOSS_AVOIDANCE = false;
+        PropertyLoader.EARLY_INITIALIZATION = false;
+        PropertyLoader.SELECT_HIGHEST_SCORE_CHILD = true;
+        PropertyLoader.SHALLOW_ROLLOUT = false;
         String[] levelFiles;
         levelFiles = new String[1];
         levelFiles[0] = runInstruction.levelPath;
         episodes = runInstruction.episodes;
-        System.out.printf("Running gameId %s level %s for %s episodes", runInstruction.gamePath, episodes, runInstruction.levelPath);
+        System.out.printf("Running gameId %s level %s for %s episodes ", runInstruction.gamePath, episodes, runInstruction.levelPath);
         ArcadeMachine.runGames(runInstruction.gamePath, levelFiles, episodes, selectedAgent, null);
       }
 

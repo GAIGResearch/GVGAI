@@ -166,7 +166,6 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     totalNodes.add(rootNode.visits);
     //System.out.println(rootNode.visits);
     // System.out.println(totalNodes.stream().mapToInt(val -> val).average().orElse(0));
-    System.out.println(rootNode.visits);
     return selectedAction;
   }
 
@@ -456,7 +455,10 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     final double distClosestPortal = distanceToClosestObservable(avatarX, avatarY, portalsData);
     final double distClosestMovable = distanceToClosestObservable(avatarX, avatarY, movablesData);
 
-    visitCount[avatarX][avatarY] = visitCount[avatarX][avatarY] + 1;
+    // in ending states, avatar can be outside of screen? happening in frogs
+    if (avatarX > 0 && avatarY > 0) {
+      visitCount[avatarX][avatarY] = visitCount[avatarX][avatarY] + 1;
+    }
 
     double finalScore = copyState.getGameScore();
     double scoreDelta = finalScore - initialScore;

@@ -39,7 +39,6 @@ public class BaseMCTSAgent extends ParametrizedMonteCarloTreeAgent {
     baseMonteCarloResult.gameLevel = PropertyLoader.LEVEL;
     baseMonteCarloResult.finalScore = stateObs.getGameScore();
     baseMonteCarloResult.won = stateObs.getGameWinner().equals(Types.WINNER.PLAYER_WINS);
-    baseMonteCarloResult.treeReuse = PropertyLoader.TREE_REUSE;
     baseMonteCarloResult.avgNodesExplored = (int) totalNodes.stream().mapToInt(val -> val).average().orElse(0);
     baseMonteCarloResult.rawGameScore = PropertyLoader.RAW_GAME_SCORE;
     baseMonteCarloResult.macroActions = PropertyLoader.MACRO_ACTIONS;

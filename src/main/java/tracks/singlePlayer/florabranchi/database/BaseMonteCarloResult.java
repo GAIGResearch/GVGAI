@@ -27,6 +27,7 @@ public class BaseMonteCarloResult implements Serializable {
   public double finalScore;
 
   public boolean won;
+
   public int avgNodesExplored;
 
   public boolean treeReuse;
