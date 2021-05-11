@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import core.game.StateObservation;
 import ontology.Types;
@@ -29,8 +30,8 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   private final static Logger logger = Logger.getLogger(TreeController.class.getName());
 
   //UCB1
-  //private final static double C = 1 / Math.sqrt(2);
-  private final static double C = 0.6;
+  private final static double C = 1 / Math.sqrt(2);
+  //private final static double C = 0.6;
 
   /**
    * Random generator for the agent.
@@ -169,11 +170,9 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     return selectedAction;
   }
 
-  public ArrayList<ACTIONS> getAvailableActions(final StateObservation stateObservation) {
-    final ArrayList<ACTIONS> availableActions = stateObservation.getAvailableActions();
-    if (!availableActions.contains(ACTIONS.ACTION_NIL)) {
-      availableActions.add(ACTIONS.ACTION_NIL);
-    }
+  public Set<ACTIONS> getAvailableActions(final StateObservation stateObservation) {
+    final Set<ACTIONS> availableActions = new HashSet<>(stateObservation.getAvailableActions());
+    availableActions.add(ACTIONS.ACTION_NIL);
     return availableActions;
   }
 
@@ -358,8 +357,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     while (!selectedNode.currentGameState.isGameOver()) {
 
       if (isExpandable(selectedNode)) {
-        expansion(selectedNode, getAvailableActions(selectedNode.currentGameState));
-        return selectedNode.children.get(rand.nextInt(selectedNode.children.size()));
+        return expansion(selectedNode);
       } else {
         selectedNode = getBestChild(selectedNode);
       }
@@ -373,7 +371,8 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   }
 
   private boolean isExpandable(final Node node) {
-    return node.children.size() < node.currentGameState.getAvailableActions().size();
+    // -1 since nil is considered
+    return node.children.size() < getAvailableActions(node.currentGameState).size();
   }
 
   public void backup(final Node selectedNode,
@@ -404,13 +403,16 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     return listOfNodes;
   }
 
-  public void expansion(final Node parentNode,
-                        final ArrayList<Types.ACTIONS> actions) {
-    logMessage(String.format("Expanding children of node %s", parentNode.id));
+  public Node expansion(final Node node) {
+    logMessage(String.format("Expanding children of node %s", node.id));
 
-    for (Types.ACTIONS action : actions) {
-      parentNode.children.add(buildChildNode(parentNode, action));
-    }
+    final ArrayList<Types.ACTIONS> actions = new ArrayList<>(getAvailableActions(node.currentGameState));
+    final List<ACTIONS> usedActions = node.children.stream().map(child -> child.previousAction).collect(Collectors.toList());
+    actions.removeAll(usedActions);
+    final ACTIONS selectedAction = actions.get(rand.nextInt(actions.size()));
+    final Node newChild = buildChildNode(node, selectedAction);
+    node.children.add(newChild);
+    return newChild;
   }
 
   public Node buildChildNode(final Node parent,
@@ -518,6 +520,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
       // Loss avoidance mechanism
       final StateObservation originalInitialState = currentState.copy();
+
       final StateObservation tempGameState = currentState.copy();
       final List<ACTIONS> rolloutActions = new ArrayList<>();
 
