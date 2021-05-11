@@ -620,8 +620,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
       return node.children.get(rand.nextInt(node.children.size()));
     }
 
-    final Node max = Collections.max(node.children, Comparator.comparing(c -> getNodeUpperConfidenceBound(c, node.visits)));
-    return max;
+    return Collections.max(node.children, Comparator.comparing(c -> c.currentValue));
   }
 
   public boolean allValuesEqual(final Node node) {
@@ -660,6 +659,8 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     if (node.visits == 0) {
       return Double.MAX_VALUE;
     }
-    return node.currentValue + 2 * C * Math.sqrt((2 * (Math.log(parentVisits)) / node.visits));
+    final double v = node.currentValue + 2 * C * Math.sqrt((2 * (Math.log(parentVisits)) / node.visits));
+    //System.out.println("UCB for " + node.previousAction + " - " + v);
+    return v;
   }
 }
