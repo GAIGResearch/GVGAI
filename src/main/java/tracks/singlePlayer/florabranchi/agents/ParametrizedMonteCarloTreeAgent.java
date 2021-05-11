@@ -79,9 +79,9 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
   private final Random rand = new Random();
 
-  private static final double WINNER_SCORE = 100;
+  private static final double WINNER_SCORE = 1000;
   private static final double LOSS_SCORE = 0;
- // private static final double LOSS_SCORE = -500_000;
+  // private static final double LOSS_SCORE = -500_000;
 
   private final int[][] visitCount;
 
@@ -359,7 +359,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
       if (isExpandable(selectedNode)) {
         expansion(selectedNode, getAvailableActions(selectedNode.currentGameState));
-        return selectedNode;
+        return selectedNode.children.get(rand.nextInt(selectedNode.children.size()));
       }
       selectedNode = getBestChild(selectedNode);
     }
@@ -467,7 +467,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     double finalScore = copyState.getGameScore();
     double scoreDelta = finalScore - initialScore;
 
-    double exporationScore =  1 - (double) visitCount[avatarX][avatarY] / maxDistance;
+    double exporationScore = 1 - (double) visitCount[avatarX][avatarY] / maxDistance;
     double resourceScore = distClosestResource == 0 ? 0 : (1 - distClosestResource) / maxDistance;
     double movableScore = distClosestMovable == 0 ? 0 : (distClosestMovable) / maxDistance;
     double portalScore = distClosestPortal == 0 ? 0 : (1 - distClosestPortal) / maxDistance;
@@ -513,9 +513,9 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
     StateObservation currentState = node.currentGameState.copy();
     int advancementsInRollout = ROLLOUT_DEPTH;
 
-    if (node.depth < 3) {
+/*    if (node.depth < 3) {
       advancementsInRollout = 1;
-    }
+    }*/
 
     if (!LOSS_AVOIDANCE) {
       while (!currentState.isGameOver() && advancementsInRollout > 0) {
@@ -634,7 +634,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
     Double value = null;
     for (Node child : node.children) {
-      if (value != null && child.currentValue != value) {
+      if (value != null && child.currentValue != value || child.visits == 0) {
         return false;
       } else if (value == null) {
         value = child.currentValue;

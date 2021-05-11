@@ -39,8 +39,6 @@ public class PropertyLoader {
   public static boolean MACRO_ACTIONS;
   public static boolean LOSS_AVOIDANCE;
   public static boolean RAW_GAME_SCORE;
-  public static boolean EXPAND_ALL_CHILD_NODES;
-  public static boolean SAFETY_PREPRUNNING;
   public static boolean EARLY_INITIALIZATION;
 
   public PropertyLoader(final String configFile) throws IOException {
@@ -216,22 +214,6 @@ public class PropertyLoader {
 
   public void setRAW_GAME_SCORE(final boolean RAW_GAME_SCORE) {
     PropertyLoader.RAW_GAME_SCORE = RAW_GAME_SCORE;
-  }
-
-  public boolean isEXPAND_ALL_CHILD_NODES() {
-    return EXPAND_ALL_CHILD_NODES;
-  }
-
-  public void setEXPAND_ALL_CHILD_NODES(final boolean EXPAND_ALL_CHILD_NODES) {
-    PropertyLoader.EXPAND_ALL_CHILD_NODES = EXPAND_ALL_CHILD_NODES;
-  }
-
-  public boolean isSAFETY_PREPRUNNING() {
-    return SAFETY_PREPRUNNING;
-  }
-
-  public void setSAFETY_PREPRUNNING(final boolean SAFETY_PREPRUNNING) {
-    PropertyLoader.SAFETY_PREPRUNNING = SAFETY_PREPRUNNING;
   }
 
   public boolean isEARLY_INITIALIZATION() {
