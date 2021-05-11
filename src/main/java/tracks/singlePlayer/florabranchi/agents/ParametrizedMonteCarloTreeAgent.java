@@ -67,7 +67,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   public int TOTAL_RESOURCES_SCORE_WEIGHT = 1;
   public int RESOURCE_SCORE_WEIGHT = 2;
   public int EXPLORATION_SCORE_WEIGHT = 5;
-  public int MOVABLES_SCORE_WEIGHT = 1;
+  public int MOVABLES_SCORE_WEIGHT = 0;
   public int PORTALS_SCORE_WEIGHT = 1;
 
   protected List<Integer> totalNodes = new ArrayList<>();
@@ -513,10 +513,10 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
 
     if (LOSS_AVOIDANCE) {
 
-      // First layer of nodes should do shallow rollout
+/*      // First layer of nodes should do shallow rollout
       if (node.depth < 3) {
         advancementsInRollout = 0;
-      }
+      }*/
 
       // Loss avoidance mechanism
       final StateObservation originalInitialState = currentState.copy();
@@ -537,7 +537,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
       if (tempGameState.getGameWinner().equals(Types.WINNER.PLAYER_LOSES)) {
 
         // if no actions available, game was finished in the first action. result must be returned immediately
-        if (tempGameState.getAvailableActions().isEmpty()) {
+        if (rolloutActions.isEmpty()) {
           return LOSS_SCORE;
         }
 
@@ -555,7 +555,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
           }
 
           final ACTIONS takeAction = rolloutActions.get(index);
-          tempGameState.advance(takeAction);
+          originalInitialState.advance(takeAction);
         }
 
         if (!terminatedGame) {
@@ -664,7 +664,7 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
       return Double.MAX_VALUE;
     }
     final double v = node.currentValue + 2 * C * Math.sqrt((2 * (Math.log(parentVisits)) / node.visits));
-    //System.out.println("UCB for " + node.previousAction + " - " + v);
+    System.out.println("UCB for " + node.previousAction + " - " + v);
     return v;
   }
 }
