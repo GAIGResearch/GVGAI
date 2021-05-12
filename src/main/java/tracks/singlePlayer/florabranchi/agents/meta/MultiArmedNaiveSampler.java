@@ -43,7 +43,7 @@ public class MultiArmedNaiveSampler {
     banditArmsData = new BanditArmsData();
     addLocalMabs();
     // add initial random mab
-    addRandomSample();
+    //addRandomSample();
     updateBanditArms();
   }
 
@@ -96,21 +96,39 @@ public class MultiArmedNaiveSampler {
 
     double maxPerceivedReward = 0;
     MabParameters maxMab = null;
+    List<MabParameters> drawResults = new ArrayList<>();
     for (Map.Entry<MabParameters, GlobalMabData> mabParametersGlobalMabDataEntry : globalMab.entrySet()) {
 
-      if (maxMab == null || mabParametersGlobalMabDataEntry.getValue().getAverageReward() > maxPerceivedReward) {
-        maxPerceivedReward = mabParametersGlobalMabDataEntry.getValue().getAverageReward();
+      final double entryReward = mabParametersGlobalMabDataEntry.getValue().getAverageReward();
+
+      if (maxMab == null || entryReward > maxPerceivedReward) {
         maxMab = mabParametersGlobalMabDataEntry.getKey();
+        drawResults.clear();
+        drawResults.add(maxMab);
+        maxPerceivedReward = entryReward;
+      } else if (entryReward == maxPerceivedReward) {
+        maxMab = mabParametersGlobalMabDataEntry.getKey();
+        drawResults.add(maxMab);
       }
     }
 
-    // if draw return any
-    if (maxMab == null || maxPerceivedReward < 1) {
-      System.out.println("Using Random MAB since exploitaition would yield bad resuls");
-      return addRandomSample();
+    if (drawResults.size() > 1) {
+      System.out.println("Using Random maximized mab - draw between mabs");
+      return drawResults.get(random.nextInt(drawResults.size()));
+
+
+    } else {
+      // if draw return any
+      maxMab = drawResults.get(0);
+      if (maxPerceivedReward < 1) {
+        System.out.println("Using Random MAB since exploitaition would yield bad resuls");
+        return addRandomSample();
+      }
+
+      return maxMab;
     }
 
-    return maxMab;
+
   }
 
   public MabParameters exploreMabs() {
@@ -160,8 +178,14 @@ public class MultiArmedNaiveSampler {
   public void updateMabData(final MabParameters mabParameters,
                             final double reward) {
 
-    globalMab.get(mabParameters).timesSelected++;
-    globalMab.get(mabParameters).totalRewards += reward;
+    if (globalMab.containsKey(mabParameters)) {
+      globalMab.get(mabParameters).timesSelected++;
+      globalMab.get(mabParameters).totalRewards += reward;
+    } else {
+      System.out.println("Could not find mab in global mabs. hash code: " + mabParameters.hashCode());
+      System.out.println("Existing mabs hashes:" + sampledGlobalMabs);
+    }
+
 
     final Map<EMetaParameters, Boolean> values = mabParameters.values;
     for (Map.Entry<EMetaParameters, Boolean> eMetaParametersBooleanEntry : values.entrySet()) {

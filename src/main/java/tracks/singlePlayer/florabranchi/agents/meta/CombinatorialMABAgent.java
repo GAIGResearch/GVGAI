@@ -15,8 +15,6 @@ public class CombinatorialMABAgent {
 
   public static String gameName;
 
-  public static double minDouble = Math.pow(10, -3);
-
   public double ALFA = 0.3;
   public double GAMMA = 0.9;
   public double EXPLORATION_EPSILON = 10;
@@ -102,9 +100,9 @@ public class CombinatorialMABAgent {
 
     double finalReward = reward;
     if (!won) {
-      finalReward = minDouble;
+      finalReward = 0;
     } else {
-      finalReward += 1000;
+      finalReward += 100;
     }
 
     // update expected reward
