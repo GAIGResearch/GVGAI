@@ -47,7 +47,7 @@ public class CombinatorialMABAgent {
     } else {
       banditsArmDTO = new BanditsArmDTO();
       banditsArmDTO.game = PropertyLoader.GAME_NAME;
-      ;
+
       sampler = new MultiArmedNaiveSampler();
       banditArmsDataDAO.saveBandit(banditsArmDTO);
     }
