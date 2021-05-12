@@ -252,6 +252,12 @@ public class ParametrizedMonteCarloTreeAgent extends AbstractAgent {
   }
 
   private ACTIONS nextMove() {
+
+    // if no children, return nil
+    if (rootNode.children.isEmpty()) {
+      return ACTIONS.ACTION_NIL;
+    }
+
     if (SELECT_HIGHEST_SCORE_CHILD) {
       return getChildWithHighestScore(rootNode).previousAction;
     } else {
