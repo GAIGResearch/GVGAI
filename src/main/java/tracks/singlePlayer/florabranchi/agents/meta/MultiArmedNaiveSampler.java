@@ -117,6 +117,9 @@ public class MultiArmedNaiveSampler {
       return drawResults.get(random.nextInt(drawResults.size()));
 
 
+    } else if (drawResults.isEmpty()) {
+      System.out.println("No Exploit MABs available - adding random sample");
+      return addRandomSample();
     } else {
       // if draw return any
       maxMab = drawResults.get(0);
