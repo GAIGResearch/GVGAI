@@ -61,7 +61,7 @@ public class CombinatorialMABExecution {
     } else {
 
       ///List<String> gameList = Arrays.asList("camelRace", "crossfire", "brainman");
-      List<String> gameList = Arrays.asList("camelRace");
+      List<String> gameList = Arrays.asList("brainman");
 
       int episodesPerLevel = 100;
       RunInstructions runInstructions = new RunInstructions();
