@@ -30,13 +30,11 @@ public class BaseMonteCarloResult implements Serializable {
 
   public int avgNodesExplored;
 
-  public boolean treeReuse;
   public boolean rawGameScore;
   public boolean macroActions;
   public boolean lossAvoidance;
   public boolean earlyInitialization;
   public boolean selectHighestScoreChild;
-  public boolean shallowRollout;
 
   private final String timestamp;
 

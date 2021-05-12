@@ -17,7 +17,7 @@ public class CombinatorialMABAgent {
 
   public double ALFA = 0.3;
   public double GAMMA = 0.9;
-  public double EXPLORATION_EPSILON = 10;
+  public double EXPLORATION_EPSILON = 20;
 
   public PropertyLoader propertyLoader;
 
@@ -85,13 +85,13 @@ public class CombinatorialMABAgent {
     baseMonteCarloResult.gameLevel = PropertyLoader.LEVEL;
     baseMonteCarloResult.finalScore = score;
     baseMonteCarloResult.won = won;
-    baseMonteCarloResult.rawGameScore = PropertyLoader.RAW_GAME_SCORE;
+
     baseMonteCarloResult.avgNodesExplored = PropertyLoader.AVERAGE_NODES;
+    baseMonteCarloResult.rawGameScore = PropertyLoader.RAW_GAME_SCORE;
     baseMonteCarloResult.macroActions = PropertyLoader.MACRO_ACTIONS;
     baseMonteCarloResult.lossAvoidance = PropertyLoader.LOSS_AVOIDANCE;
     baseMonteCarloResult.earlyInitialization = PropertyLoader.EARLY_INITIALIZATION;
     baseMonteCarloResult.selectHighestScoreChild = PropertyLoader.SELECT_HIGHEST_SCORE_CHILD;
-    baseMonteCarloResult.shallowRollout = PropertyLoader.SHALLOW_ROLLOUT;
     combinatorialMabAgentResultDAO.save(baseMonteCarloResult);
   }
 

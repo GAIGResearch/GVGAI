@@ -17,7 +17,11 @@ public class MultiArmedNaiveSampler {
 
   Random random = new Random();
 
-  int EXPLORATION_EPSILON = 10;
+  // pi l
+  int EXPLORATION_POLICY_EPSILON = 50;
+
+  // pi g
+  int EXPLOITATION_EPSILON = 0;
 
   // local mabs
   public Map<EMetaParameters, LocalMabData> localMabs = new HashMap<>();
@@ -26,6 +30,8 @@ public class MultiArmedNaiveSampler {
   public Map<MabParameters, GlobalMabData> globalMab = new HashMap<>();
 
   public Set<Integer> sampledGlobalMabs = new HashSet<>();
+
+  // episilon l e g
 
 
   public void updateBanditArms() {
@@ -94,6 +100,12 @@ public class MultiArmedNaiveSampler {
 
   MabParameters exploitMabs() {
 
+    // Either try again with existing globals or use best global
+    int rand = random.nextInt(100);
+    if (rand <= EXPLOITATION_EPSILON) {
+      return getRandomGlobalMab();
+    }
+
     double maxPerceivedReward = 0;
     MabParameters maxMab = null;
     List<MabParameters> drawResults = new ArrayList<>();
@@ -119,50 +131,38 @@ public class MultiArmedNaiveSampler {
 
     } else if (drawResults.isEmpty()) {
       System.out.println("No Exploit MABs available - adding random sample");
-      return addRandomSample();
+      return exploreMabs();
     } else {
+
+
       // if draw return any
       maxMab = drawResults.get(0);
       if (maxPerceivedReward < 1) {
-        System.out.println("Using Random MAB since exploitaition would yield bad resuls");
-        return addRandomSample();
+        System.out.println("Using existing GlobalMab");
+        return getRandomGlobalMab();
       }
-
       return maxMab;
     }
-
-
   }
 
   public MabParameters exploreMabs() {
 
-    // e-greedy for exploration
-    int rand = random.nextInt(100);
-    if (rand <= EXPLORATION_EPSILON) {
-      System.out.println("selecting exploration play - return random existing mab --------------------------------");
-      return getRandomGlobalMab();
-    }
-
-    System.out.println("selecting exploitation play for exploration - add best mab --------------------------------");
-
-    // mab exploitation
-    // select best expected rewards
-    List<EMetaParameters> explorationBestParameters = new ArrayList<>();
+    final MabParameters mabParameters = emptyMab();
     for (Map.Entry<EMetaParameters, LocalMabData> entry : localMabs.entrySet()) {
-      if (entry.getValue().getAverageReward() > 1) {
-        explorationBestParameters.add(entry.getKey());
+      int rand = random.nextInt(100);
+      if (rand <= EXPLORATION_POLICY_EPSILON) {
+        // Random value
+        mabParameters.addParameter(entry.getKey(), random.nextBoolean());
+      } else {
+        // Use LocalMabs evaluation to select true or false
+        boolean bestValue = false;
+        if (entry.getValue().marginalizedAvgScoreForParameter > 1) {
+          bestValue = true;
+        }
+        mabParameters.addParameter(entry.getKey(), bestValue);
       }
     }
 
-    final MabParameters mabParameters = emptyMab();
-    explorationBestParameters.forEach(metaParameter -> mabParameters.addParameter(metaParameter, true));
-
-    // Try selecting a different version if the most optimized one exists
-    int tries = 10;
-    while (sampledGlobalMabs.contains(mabParameters.hashCode()) && tries > 0) {
-      mabParameters.randomMutation(random);
-      tries--;
-    }
     if (!sampledGlobalMabs.contains(mabParameters.hashCode())) {
       addToGlobalMab(mabParameters);
     }
