@@ -22,8 +22,9 @@ public class BanditArmsData implements Serializable {
   public Map<EMetaParameters, LocalMabData> getLocalMabs() {
 
     Map<EMetaParameters, LocalMabData> map = new HashMap<>();
-    localArmData.forEach(entry -> map.put(entry.metaParameters,
-        new LocalMabData(entry.marginalizedAvgScoreForParameter, entry.timesParameterSelected)));
+    localArmData.forEach(entry -> {
+      map.put(entry.metaParameters, new LocalMabData(entry.localMabData));
+    });
     return map;
   }
 
@@ -97,18 +98,27 @@ public class BanditArmsData implements Serializable {
   static
   class LocalArmData implements Serializable {
 
-    public double marginalizedAvgScoreForParameter;
-    public double timesParameterSelected;
+    Map<Boolean, LocalMabData.LocalMabInfo> localMabData = new HashMap<>();
+
+    class LocalArmInfo {
+      public double marginalizedAvgScoreForParameter;
+      public double timesParameterSelected;
+    }
+
+
     public EMetaParameters metaParameters;
     public String metaParameterString;
 
     public LocalArmData(final EMetaParameters metaParameters,
-                        final LocalMabData localArmData) {
-
-      marginalizedAvgScoreForParameter = localArmData.marginalizedAvgScoreForParameter;
-      timesParameterSelected = localArmData.timesParameterSelected;
+                        final LocalMabData localMabData) {
       this.metaParameters = metaParameters;
       this.metaParameterString = metaParameters.toString();
+
+      localMabData.localMabData.forEach(
+          (key, value) -> {
+            this.localMabData.put(key, value);
+          }
+      );
     }
 
     public LocalArmData() {

@@ -29,7 +29,8 @@ public class MabParameters {
     return values != null ? values.hashCode() : 0;
   }
 
-  public void addParameter(final EMetaParameters parameter, final boolean value) {
+  public void addParameter(final EMetaParameters parameter,
+                           final boolean value) {
     values.put(parameter, value);
   }
 

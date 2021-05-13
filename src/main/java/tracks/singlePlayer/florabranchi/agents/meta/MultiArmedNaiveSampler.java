@@ -155,10 +155,12 @@ public class MultiArmedNaiveSampler {
         mabParameters.addParameter(entry.getKey(), random.nextBoolean());
       } else {
         // Use LocalMabs evaluation to select true or false
-        boolean bestValue = false;
-        if (entry.getValue().marginalizedAvgScoreForParameter > 1) {
-          bestValue = true;
-        }
+        final LocalMabData.LocalMabInfo onInfo = entry.getValue().localMabData.get(true);
+        final LocalMabData.LocalMabInfo offInfo = entry.getValue().localMabData.get(false);
+        final double onAvgRwd = onInfo.getAverageReward();
+        final double offAvgRwd = offInfo.getAverageReward();
+        final boolean bestValue = onAvgRwd > offAvgRwd;
+
         mabParameters.addParameter(entry.getKey(), bestValue);
       }
     }
@@ -192,11 +194,10 @@ public class MultiArmedNaiveSampler {
 
     final Map<EMetaParameters, Boolean> values = mabParameters.values;
     for (Map.Entry<EMetaParameters, Boolean> eMetaParametersBooleanEntry : values.entrySet()) {
-      if (eMetaParametersBooleanEntry.getValue()) {
-        final LocalMabData localMabData = localMabs.get(eMetaParametersBooleanEntry.getKey());
-        localMabData.marginalizedAvgScoreForParameter += reward;
-        localMabData.timesParameterSelected++;
-      }
+      final LocalMabData localMabData = localMabs.get(eMetaParametersBooleanEntry.getKey());
+      final LocalMabData.LocalMabInfo localMabInfo = localMabData.localMabData.get(eMetaParametersBooleanEntry.getValue());
+      localMabInfo.marginalizedAvgScoreForParameter += reward;
+      localMabInfo.timesParameterSelected++;
     }
     updateBanditArms();
   }

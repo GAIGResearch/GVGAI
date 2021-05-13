@@ -68,7 +68,7 @@ public class CombinatorialMABExecution {
       for (String gameInList : gameList) {
         gameIdx = Objects.requireNonNull(AvailableGames.fromName(gameInList)).getId();
         // Play given game 5 times each level
-        for (int levelIt = 0; levelIt < 5; levelIt++) {
+        for (int levelIt = 2; levelIt < 5; levelIt++) {
           String gamePath = games[gameIdx][0];
           String levelPath = gamePath.replace(gameInList, gameInList + "_lvl" + levelIt);
           runInstructions.addInstruction(new RunInstructions.RunInstruction(gamePath, gameInList, levelPath, levelIt, episodesPerLevel));

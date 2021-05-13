@@ -17,7 +17,7 @@ public class CombinatorialMABAgent {
 
   public double ALFA = 0.3;
   public double GAMMA = 0.9;
-  public double EXPLORATION_EPSILON = 5;
+  public double EXPLORATION_EPSILON = 20;
 
   public PropertyLoader propertyLoader;
 

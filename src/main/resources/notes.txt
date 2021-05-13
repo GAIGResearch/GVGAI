@@ -1,3 +1,8 @@
 
 
 -- when running trained, psmcts LOAD_RUN_INSTRUCTIONS = true
+
+
+
+- training: episilon = 20
+- run: episilon = 10
