@@ -1,5 +1,6 @@
 package tracks.singlePlayer.florabranchi.agents.meta;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,7 +8,7 @@ public class LocalMabData {
 
   public Map<Boolean, LocalMabInfo> localMabData = new HashMap<>();
 
-  public class LocalMabInfo {
+  public static class LocalMabInfo implements Serializable {
     public double marginalizedAvgScoreForParameter;
 
     public double timesParameterSelected;

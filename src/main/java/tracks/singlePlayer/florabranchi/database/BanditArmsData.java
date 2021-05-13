@@ -100,12 +100,6 @@ public class BanditArmsData implements Serializable {
 
     Map<Boolean, LocalMabData.LocalMabInfo> localMabData = new HashMap<>();
 
-    class LocalArmInfo {
-      public double marginalizedAvgScoreForParameter;
-      public double timesParameterSelected;
-    }
-
-
     public EMetaParameters metaParameters;
     public String metaParameterString;
 

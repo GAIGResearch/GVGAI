@@ -159,7 +159,7 @@ public class MultiArmedNaiveSampler {
         final LocalMabData.LocalMabInfo offInfo = entry.getValue().localMabData.get(false);
         final double onAvgRwd = onInfo.getAverageReward();
         final double offAvgRwd = offInfo.getAverageReward();
-        final boolean bestValue = onAvgRwd > offAvgRwd;
+        final boolean bestValue = onAvgRwd >= offAvgRwd;
 
         mabParameters.addParameter(entry.getKey(), bestValue);
       }
@@ -183,7 +183,7 @@ public class MultiArmedNaiveSampler {
   public void updateMabData(final MabParameters mabParameters,
                             final double reward) {
 
-    if (globalMab.containsKey(mabParameters)) {
+     if (globalMab.containsKey(mabParameters)) {
       globalMab.get(mabParameters).timesSelected++;
       globalMab.get(mabParameters).totalRewards += reward;
     } else {
