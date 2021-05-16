@@ -98,7 +98,7 @@ public class MultiArmedNaiveSampler {
   }
 
 
-  MabParameters exploitMabs() {
+  public MabParameters exploitMabs() {
 
     // Either try again with existing globals or use best global
     int rand = random.nextInt(100);

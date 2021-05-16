@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 
 import tools.Utils;
 import tracks.ArcadeMachine;
-import tracks.singlePlayer.florabranchi.agents.meta.CombinatorialMABAgent;
+import tracks.singlePlayer.florabranchi.agents.CombinatorialMABAgent;
 import tracks.singlePlayer.florabranchi.persistence.AvailableGames;
 import tracks.singlePlayer.florabranchi.persistence.PropertyLoader;
 

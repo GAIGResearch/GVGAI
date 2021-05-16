@@ -2,6 +2,8 @@ package tracks.singlePlayer.florabranchi.agents.meta;
 
 import org.junit.jupiter.api.Test;
 
+import tracks.singlePlayer.florabranchi.agents.CombinatorialMABAgent;
+
 class CombinatorialMABAgentTest {
 
   @Test

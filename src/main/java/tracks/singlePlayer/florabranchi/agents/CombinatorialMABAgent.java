@@ -1,9 +1,12 @@
-package tracks.singlePlayer.florabranchi.agents.meta;
+package tracks.singlePlayer.florabranchi.agents;
 
 import java.io.IOException;
 import java.util.Random;
 import java.util.logging.Logger;
 
+import tracks.singlePlayer.florabranchi.agents.meta.EMetaParameters;
+import tracks.singlePlayer.florabranchi.agents.meta.MabParameters;
+import tracks.singlePlayer.florabranchi.agents.meta.MultiArmedNaiveSampler;
 import tracks.singlePlayer.florabranchi.database.BanditArmsDataDAO;
 import tracks.singlePlayer.florabranchi.database.BanditsArmDTO;
 import tracks.singlePlayer.florabranchi.database.CombinatorialMabAgentResult;

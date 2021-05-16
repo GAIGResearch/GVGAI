@@ -13,7 +13,7 @@ import tracks.singlePlayer.florabranchi.persistence.PropertyLoader;
 /**
  * author: Flora Branchi (florabranchi@gmail.com)
  */
-public class BasicRunner {
+public class ParametrizedExecution {
 
 
   private final static Logger LOGGER = Logger.getLogger("GVGAI_BOT");
