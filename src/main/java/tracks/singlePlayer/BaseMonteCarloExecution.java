@@ -47,7 +47,7 @@ public class BaseMonteCarloExecution {
     String selectedAgent = PropertyLoader.AGENT;
     boolean visuals = PropertyLoader.VISUALS;
 
-    List<String> gameList = Arrays.asList("camelRace", "crossfire", "brainman");
+    List<String> gameList = Arrays.asList("jaws");
 
     if (visuals) {
       String gamePath = games[gameIdx][0];
