@@ -27,6 +27,7 @@ public class Agent extends AbstractMultiPlayer {
      * Public constructor with state observation and time due.
      * @param so state observation of the current game.
      * @param elapsedTimer Timer for the controller creation.
+     * @param playerID the id of the player this agent plays as.
      */
     public Agent(StateObservationMulti so, ElapsedCpuTimer elapsedTimer, int playerID)
     {

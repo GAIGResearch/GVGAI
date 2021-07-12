@@ -37,8 +37,8 @@ public class ForwardModel extends Game
 
 
     /**
-     * Boolean map of sprite types that are NPCs.
-     * npcList[spriteType]==true : spriteType is NPC.
+     * Boolean map of sprite types that are players.
+     * playerList[spriteType]==true : spriteType is player.
      */
     private boolean playerList[];
 
@@ -73,7 +73,7 @@ public class ForwardModel extends Game
     private boolean portalList[];
 
     /**
-     * Boolean map of sprite types that created by the avatar.
+     * Boolean map of sprite types that are created by the avatar.
      * fromAvatar[spriteType]==true : spriteType is created by the avatar.
      */
     private boolean fromAvatar[];
@@ -101,7 +101,7 @@ public class ForwardModel extends Game
     private ArrayList<Observation>[][] observationGrid;
 
     /**
-     * Constructor for StateObservation. Initializes everything
+     * Constructor for ForwardModel. Initializes everything
      * @param a_gameState
      */
     public ForwardModel(Game a_gameState, int playerID)
@@ -227,7 +227,7 @@ public class ForwardModel extends Game
     }
 
     /**
-     * Removes an sprite observation.
+     * Removes a sprite observation.
      * @param sprite sprite to remove.
      */
     public final void removeSpriteObservation(VGDLSprite sprite)
@@ -349,7 +349,7 @@ public class ForwardModel extends Game
     }
 
     /**
-     * Gets the sprite observation of a given sprite. Creates it if id didn't exist.
+     * Gets the sprite observation of a given sprite. Creates it if it didn't exist.
      * @param sprite sprite to get/create the observation from.
      * @return the observation object.
      */
@@ -942,8 +942,9 @@ public class ForwardModel extends Game
     /**
      * Gets position from the sprites corresponding to the boolean map passed by parameter.
      * @param groupArray boolean map that indicates which sprite types must be considered.
+     * @param refPosition the reference position (origin of the coordinate system)
      * @return List of arrays with Observations. Each entry in the array corresponds to a different
-     * sprite type.
+     * sprite type. Orders the observations in each array according to ascending distance to the reference position.
      */
     @SuppressWarnings("unchecked")
     private ArrayList<Observation>[] getPositionsFrom(boolean[] groupArray, Vector2d refPosition)
@@ -1036,7 +1037,7 @@ public class ForwardModel extends Game
      * Observations of static objects in the game.
      * @param refPosition Reference position to use when sorting this array,
      *                    by ascending distance to this point.
-     * @return a list with the observations of static objects in the game..
+     * @return a list with the observations of static objects in the game.
      */
     public ArrayList<Observation>[] getImmovablePositions(Vector2d refPosition) {
         return getPositionsFrom(immList, refPosition);
@@ -1052,17 +1053,17 @@ public class ForwardModel extends Game
         return getPositionsFrom(movList, refPosition);
     }
 
-    /*
-    * Returns a list with observations of resources.
+    /**
+     * Returns a list with observations of resources.
      * @param refPosition Reference position to use when sorting this array,
      *                    by ascending distance to this point.
-    * @return a list with observations of resources.
-    */
+     * @return a list with observations of resources.
+     */
     public ArrayList<Observation>[] getResourcesPositions(Vector2d refPosition) {
         return getPositionsFrom(resList, refPosition);
     }
 
-    /*
+    /**
      * Returns a list with observations of portals.
      * @param refPosition Reference position to use when sorting this array,
      *                    by ascending distance to this point.

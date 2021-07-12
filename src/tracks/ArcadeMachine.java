@@ -453,7 +453,7 @@ public class ArcadeMachine {
 		    if (no_players > 1) {
 			// multi player
 			players[j] = ArcadeMachine.createMultiPlayer(agentNames[j], filename,
-				toPlay.getObservationMulti(i), randomSeed, j, false);
+				toPlay.getObservationMulti(j), randomSeed, j, false);
 		    } else {
 			// single player
 			players[j] = ArcadeMachine.createPlayer(agentNames[j], filename, toPlay.getObservation(),
@@ -883,34 +883,33 @@ public class ArcadeMachine {
             players[0].teardown(toPlay);
         }
 
+	    boolean noTeardownTimeout = true;
         for (Player p : players) {
             // Determine the time due for the controller close up.
             ElapsedCpuTimer ect = new ElapsedCpuTimer();
             ect.setMaxTimeMillis(CompetitionParameters.TEAR_DOWN_TIME);
 
             // Inform about the result and the final game state.
-            // Inform about the result and the final game state.
             if (toPlay.no_players > 1)
-            p.resultMulti(toPlay.getObservationMulti(p.getPlayerID()).copy(), ect);
+                p.resultMulti(toPlay.getObservationMulti(p.getPlayerID()).copy(), ect);
             else
-            p.result(toPlay.getObservation(), ect);
+                p.result(toPlay.getObservation(), ect);
 
             // Check if we returned on time, and act in consequence.
             long timeTaken = ect.elapsedMillis();
             if (ect.exceededMaxTime()) {
-            long exceeded = -ect.remainingTimeMillis();
-            System.out.println("Controller tear down time out (" + exceeded + ").");
+	            long exceeded = -ect.remainingTimeMillis();
+	            System.out.println("Controller tear down time out (" + exceeded + ").");
 
-            toPlay.disqualify(p.getPlayerID());
-            return false;
+	            toPlay.disqualify(p.getPlayerID());
+	            noTeardownTimeout = false;
             }
 
             if (VERBOSE)
-            System.out.println("Controller tear down time: " + timeTaken + " ms.");
-            return true;
+                System.out.println("Controller tear down time: " + timeTaken + " ms.");
         }
 
-        return true;
+        return noTeardownTimeout;
     }
 
     public static final boolean isHuman(String agentName) {
