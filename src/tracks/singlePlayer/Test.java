@@ -34,14 +34,17 @@ public class Test {
 		int seed = new Random().nextInt();
 
 		// Game and level to play
-		int gameIdx = 0;
+		int gameIdx = 108; // Use Zelda for testing
 		int levelIdx = 0; // level names from 0 to 4 (game_lvlN.txt).
 		String gameName = games[gameIdx][1];
 		String game = games[gameIdx][0];
 		String level1 = game.replace(gameName, gameName + "_lvl" + levelIdx);
-
-		String recordActionsFile = null;// "actions_" + games[gameIdx] + "_lvl"
-						// + levelIdx + "_" + seed + ".txt";
+		
+		
+		// Record actions file + recordings directory
+		String recordActionsDirectory = "recordings/";
+		String recordActionsFile = recordActionsDirectory + "actions_" + gameName + "_lvl"
+						 + levelIdx + "_" + seed + ".txt";
 						// where to record the actions
 						// executed. null if not to save.
 
@@ -49,12 +52,12 @@ public class Test {
 		ArcadeMachine.playOneGame(game, level1, recordActionsFile, seed);
 
 		// 2. This plays a game in a level by the controller.
-//		ArcadeMachine.runOneGame(game, level1, visuals, sampleRHEAController, recordActionsFile, seed, 0);
+		//ArcadeMachine.runOneGame(game, level1, visuals, sampleOLETSController, recordActionsFile, seed, 0);
 
 
 		// 3. This replays a game from an action file previously recorded
-	//	 String readActionsFile = recordActionsFile;
-	//	 ArcadeMachine.replayGame(game, level1, visuals, readActionsFile);
+		 //String readActionsFile = recordActionsFile;
+		 //ArcadeMachine.replayGame(game, level1, visuals, readActionsFile);
 
 		// 4. This plays a single game, in N levels, M times :
 //		String level2 = new String(game).replace(gameName, gameName + "_lvl" + 1);
