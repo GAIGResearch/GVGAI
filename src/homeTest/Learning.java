@@ -35,7 +35,7 @@ public class Learning {
 		int seed = new Random().nextInt();
 
 		// Game and level to play
-		int gameIdx = 0;
+		int gameIdx = 108;
 		int levelIdx = 0; // level names from 0 to 4 (game_lvlN.txt).
 		String gameName = games[gameIdx][1];
 		String game = games[gameIdx][0];
@@ -48,7 +48,8 @@ public class Learning {
 		
 		int iter = 0;
 		String dir = "homeTest/";
-		String homeTest = dir + "actions_" + games[gameIdx] + "_" + iter + "_" + seed +".txt"; 
+		//String homeTest = dir + "actions_" + games[gameIdx] + "_" + iter + "_" + seed +".txt";
+		String homeTest = null; 
 		System.out.println(game);
 		
 		Feature test = new Feature(0.5f, false, "Avatar", "Wall", 6.0f, "Nil", false);
@@ -60,7 +61,7 @@ public class Learning {
 		//ArcadeMachine.runOneGame(game, level1, visuals, sampleRHEAController, recordActionsFile, seed, 0);
 		
 		ArcadeMachine.runOneGame(game, level1, visuals, testController, homeTest, seed, 0);
-		
+		//ArcadeMachine.playOneGame(game, level1, recordActionsFile, seed);
 		//ArcadeMachine.replayGame(game, level1, visuals, recordActionsFile);
 		//System.out.println(recordActionsFile);
 
